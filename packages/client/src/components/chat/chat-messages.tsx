@@ -10,7 +10,7 @@ export function ChatMessages() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
       {messages.map((message) => (
         <MessageBubble
           key={message.id}
@@ -20,9 +20,7 @@ export function ChatMessages() {
       ))}
       {isLoading && (
         <div className="flex justify-start">
-          <div className="bg-gray-100 rounded-lg px-4 py-2">
-            <p className="text-gray-500">AI 正在思考...</p>
-          </div>
+          <div className="text-gray-500">AI 正在思考...</div>
         </div>
       )}
     </div>
