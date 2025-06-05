@@ -67,7 +67,7 @@ export function ChatPage() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             <div className="h-full overflow-y-auto">
-              <ChatMessages />
+      <ChatMessages />
             </div>
           </motion.div>
 
@@ -102,7 +102,7 @@ export function ChatPage() {
               }}
               className="w-full max-w-2xl px-4 py-4"
             >
-              <ChatInput />
+      <ChatInput />
             </motion.div>
           </div>
         </div>

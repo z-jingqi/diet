@@ -1,4 +1,5 @@
 import type { Message } from "@/types/chat";
+import { Markdown } from "@/components/ui/markdown";
 
 interface MessageBubbleProps {
   message: Message;
@@ -31,9 +32,11 @@ export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
             {message.content}
           </button>
         ) : (
-          <p className="text-gray-900">{message.content}</p>
+          <div className="bg-white rounded-lg p-2">
+            <Markdown content={message.content} className="prose dark:prose-invert max-w-none" />
+          </div>
         )}
       </div>
     </div>
   );
-}
+} 

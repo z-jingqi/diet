@@ -1,40 +1,27 @@
-export type FoodCategory = 'vegetable' | 'fruit' | 'meat' | 'seafood' | 'beverage' | 'grain' | 'dairy' | 'other';
-export type AllowedStatus = 'yes' | 'no' | 'limited';
-
+/**
+ * 食物营养成分
+ */
 export interface Nutrition {
-  protein?: number;      // g/100g
-  potassium?: number;    // mg/100g
-  phosphorus?: number;   // mg/100g
-  sodium?: number;       // mg/100g
-  calories?: number;     // kcal/100g
+  /** 蛋白质含量（克） */
+  protein: number;      // g
+  /** 钾含量（毫克） */
+  potassium: number;    // mg
+  /** 磷含量（毫克） */
+  phosphorus: number;   // mg
+  /** 钠含量（毫克） */
+  sodium: number;       // mg
+  /** 卡路里（千卡） */
+  calories: number;     // kcal
 }
 
-export interface Season {
-  spring?: boolean;
-  summer?: boolean;
-  autumn?: boolean;
-  winter?: boolean;
-}
-
-export interface Storage {
-  method: string;
-  duration: string;
-}
-
-export interface Cooking {
-  methods: string[];
-  tips?: string;
-}
-
+/**
+ * 食物基本信息（用于菜谱中的食材）
+ */
 export interface Food {
-  id: string;
+  /** 食物名称 */
   name: string;
-  category: FoodCategory;
-  allowed: AllowedStatus;
-  reason?: string;
-  altNames?: string[];
-  nutrition?: Nutrition;
-  season?: Season;
-  storage?: Storage;
-  cooking?: Cooking;
+  /** 食物用量，例如："100g"、"2个" */
+  amount: string;
+  /** 食物营养成分（每100克） */
+  nutrition: Nutrition;
 } 

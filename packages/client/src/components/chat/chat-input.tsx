@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useChatStore } from '../../store/chat';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import type { Message } from '../../types/chat';
+import CHAT_PROMPT from '../../prompts/chat-prompt';
 
 export function ChatInput() {
   const [input, setInput] = useState('');
@@ -12,28 +14,33 @@ export function ChatInput() {
     if (!input.trim()) return;
 
     // 添加用户消息
-    addMessage({
+    const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'text',
       content: input,
-      timestamp: new Date().toISOString(),
-      isUser: true
-    });
+      type: 'chat',
+      isUser: true,
+      createdAt: new Date()
+    };
 
+    addMessage(userMessage);
     setInput('');
     setLoading(true);
 
     try {
-      // TODO: 调用 AI 接口
+      // 使用模板格式化用户输入
+      const prompt = CHAT_PROMPT.replace('{user_input}', input);
+      
+      // TODO: 调用 AI 接口，发送 prompt
       // 模拟 AI 响应
       setTimeout(() => {
-        addMessage({
+        const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
-          type: 'text',
           content: '这是一个模拟的 AI 响应。',
-          timestamp: new Date().toISOString(),
-          isUser: false
-        });
+          type: 'chat',
+          isUser: false,
+          createdAt: new Date()
+        };
+        addMessage(aiMessage);
         setLoading(false);
       }, 1000);
     } catch (error) {
