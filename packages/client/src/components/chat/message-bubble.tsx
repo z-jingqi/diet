@@ -30,13 +30,13 @@ export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
             />
             <div className="flex flex-wrap gap-2">
               {JSON.parse(message.content).recipes.map((recipe: any) => (
-                <button
+          <button
                   key={recipe.id}
                   onClick={() => onRecipeClick?.(recipe.id)}
-                  className="text-left underline underline-offset-2 hover:text-blue-600"
-                >
+            className="text-left underline underline-offset-2 hover:text-blue-600"
+          >
                   {recipe.name}
-                </button>
+          </button>
               ))}
             </div>
           </div>

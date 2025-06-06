@@ -1,7 +1,7 @@
 ---
 description: 
-globs: 
-alwaysApply: true
+globs: *.tsx,*.ts
+alwaysApply: false
 ---
 ---
 description: React functional components, arrow functions, Tailwind, shadcn/ui, and Radix

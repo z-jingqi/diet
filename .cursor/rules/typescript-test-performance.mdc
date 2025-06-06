@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.tsx,*.ts
 alwaysApply: false
 ---
 ---
@@ -9,14 +9,40 @@ globs: ["src/**/*.{ts,tsx}"]
 alwaysApply: false
 ---
 
-# 🧭 Typescript, Testing, and Optimization
+# 🧭 TypeScript, Testing & Performance
 
-- Ensure `tsconfig.json` has **strict** enabled.
-- Prefer **interfaces** and `satisfies`, avoid `any` and `enum`; use `as const` and object maps.
-- Use **React Testing Library + Vitest/Jest** to reach ≥80% coverage.
-- Use JSDoc for complex logic.
-- Optimize rendering: `React.memo`, `useMemo`, `useCallback`.
-- Lazy-load large components via `React.lazy` + `Suspense`.
-- Use **framer-motion** for UI animations.
-- Use optimized media (WebP, lazy loaded images).
-- Handle forms via **react-hook-form** + `zod` + `@hookform/resolvers`.
+## TypeScript
+- Enable strict mode in `tsconfig.json`
+- Use interfaces for object types
+- Use `satisfies` operator for type inference
+- Avoid `any` and `enum`
+- Use `as const` for literal types
+- Use proper type guards
+- Document complex types with JSDoc
+
+## Testing
+- Use React Testing Library + Vitest
+- Aim for ≥80% test coverage
+- Test user interactions and accessibility
+- Use proper test data and mocks
+- Test error states and edge cases
+- Use proper test descriptions
+- Implement proper test isolation
+
+## Performance
+- Use `React.memo` for expensive renders
+- Implement proper `useMemo` and `useCallback`
+- Use `React.lazy` for code splitting
+- Optimize images and assets
+- Implement proper loading states
+- Use proper caching strategies
+- Monitor and optimize bundle size
+
+## Forms
+- Use react-hook-form for form handling
+- Implement proper validation with Zod
+- Use proper error messages
+- Handle form submission states
+- Implement proper field validation
+- Use proper form accessibility
+- Handle form reset and cleanup

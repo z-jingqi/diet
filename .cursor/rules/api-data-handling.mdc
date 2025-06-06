@@ -1,0 +1,36 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# 🔄 API & Data Handling
+
+## API Integration
+- Use React Query for data fetching and caching
+- Implement proper error handling and loading states
+- Use TypeScript interfaces for API responses
+- Implement request/response interceptors for common operations
+
+## Data Transformation
+- Keep data transformation logic in separate utility functions
+- Use TypeScript to ensure type safety
+- Implement proper validation using Zod
+- Handle edge cases and null values gracefully
+
+## State Management
+- Use React Query for server state
+- Implement optimistic updates where appropriate
+- Handle loading and error states consistently
+- Use proper caching strategies
+
+## Error Handling
+- Implement proper error boundaries
+- Use toast notifications for user feedback
+- Log errors appropriately
+- Provide fallback UI for error states
+
+## Performance
+- Implement proper data caching
+- Use pagination for large datasets
+- Optimize network requests
+- Implement proper loading states
