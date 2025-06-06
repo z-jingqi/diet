@@ -1,7 +1,14 @@
-import { ChatPage } from './pages/chat';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HomePage } from './pages/home'
 
 function App() {
-  return <ChatPage />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </Router>
+  )
 }
 
-export default App;
+export default App

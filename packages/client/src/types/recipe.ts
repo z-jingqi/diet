@@ -20,8 +20,8 @@ export interface RecipeStep {
   description: string;
   /** 烹饪小贴士 */
   tips?: string;
-  /** 该步骤所需时间，例如："5分钟"、"10-15分钟" */
-  time: string;
+  /** 该步骤所需时间（秒） */
+  time: number;
 }
 
 /**

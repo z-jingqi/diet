@@ -3,13 +3,13 @@
  */
 export const STORAGE_KEYS = {
   /** 搜索历史 */
-  SEARCH_HISTORY: 'diet_search_history',
+  SEARCH_HISTORY: "diet_search_history",
   /** 收藏的菜谱 */
-  FAVORITE_RECIPES: 'diet_favorite_recipes',
+  FAVORITE_RECIPES: "diet_favorite_recipes",
   /** 最近查看 */
-  RECENT_VIEWS: 'diet_recent_views',
+  RECENT_VIEWS: "diet_recent_views",
   /** 自定义饮食限制 */
-  CUSTOM_RESTRICTIONS: 'diet_custom_restrictions'
+  CUSTOM_RESTRICTIONS: "diet_custom_restrictions",
 } as const;
 
 /**
@@ -25,43 +25,37 @@ export interface SearchHistory {
 }
 
 /**
- * 收藏的菜谱
- */
-export interface FavoriteRecipe {
-  /** 菜谱ID */
-  id: string;
-  /** 菜谱名称 */
-  name: string;
-  /** 收藏时间 */
-  savedAt: string;
-  /** 收藏备注 */
-  note?: string;
-}
-
-/**
  * 最近查看记录
  */
 export interface RecentView {
-  /** 菜谱ID */
-  id: string;
   /** 菜谱名称 */
   name: string;
-  /** 菜谱分类 */
-  category: string;
+  /** 菜谱描述 */
+  description: string;
   /** 查看时间 */
   viewedAt: string;
+  /** 图片URL */
+  imageUrl?: string;
+  /** 标签 */
+  tags?: string[];
 }
 
 /**
  * 自定义饮食限制
  */
 export interface CustomRestriction {
-  /** 限制ID */
-  id: string;
   /** 限制名称 */
   name: string;
   /** 限制原因 */
   reason: string;
+  /** 限制说明 */
+  description: string;
   /** 添加时间 */
   addedAt: string;
-} 
+  /** 限制等级 */
+  level: "strict" | "moderate" | "flexible";
+  /** 相关食材 */
+  relatedIngredients?: string[];
+  /** 注意事项 */
+  notes?: string;
+}

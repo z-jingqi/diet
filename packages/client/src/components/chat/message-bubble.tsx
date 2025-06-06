@@ -23,14 +23,23 @@ export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
     <div className="flex w-full justify-start">
       <div className="max-w-[80%]">
         {isRecipe ? (
-          <button
-            onClick={() =>
-              message.recipeId && onRecipeClick?.(message.recipeId)
-            }
-            className="text-left underline underline-offset-2 hover:text-blue-600"
-          >
-            {message.content}
-          </button>
+          <div className="bg-white rounded-lg p-4 space-y-4">
+            <Markdown 
+              content={JSON.parse(message.content).description} 
+              className="prose dark:prose-invert max-w-none" 
+            />
+            <div className="flex flex-wrap gap-2">
+              {JSON.parse(message.content).recipes.map((recipe: any) => (
+                <button
+                  key={recipe.id}
+                  onClick={() => onRecipeClick?.(recipe.id)}
+                  className="text-left underline underline-offset-2 hover:text-blue-600"
+                >
+                  {recipe.name}
+                </button>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="bg-white rounded-lg p-2">
             <Markdown content={message.content} className="prose dark:prose-invert max-w-none" />
