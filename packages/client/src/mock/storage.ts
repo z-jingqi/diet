@@ -36,3 +36,4 @@ export const mockCustomRestrictions: CustomRestriction[] = [
     notes: "每日钠摄入量不超过2000mg"
   }
 ]; 
+ 
