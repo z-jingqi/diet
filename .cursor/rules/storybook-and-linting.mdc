@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Storybook, linting, and CI tool conventions
+globs: ["**/*.stories.@(js|jsx|ts|tsx)", ".eslintrc.js", "vite.config.*", "storybook/**"]
+alwaysApply: false
+---
+
+# 🧪 Storybook & CI Quality Standards
+
+- Stories should exemplify component usage with various states (default, disabled, interactive).
+- Use `@storybook/addon-a11y`, `addon-docs`, `addon-vitest`, `addon-onboarding`.
+- Use **Vitest** or **Jest** in Storybook for component-level tests.
+- Run `eslint .` on all `.tsx`, `.ts`, `.js`, `.jsx` files; follow existing ESLint config.
+- Clean up unused imports/variables; fix lint warnings automatically.
+- Ensure story snapshots and accessibility checks are included in CI.

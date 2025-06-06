@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Load project dependencies as contextual guidance
+globs: ["package.json"]
+alwaysApply: true
+---
+
+# Project Dependencies Context
+
+Cursor should recognize and prioritize the following key libraries in suggestions:
+
+- **react**, **react-router-dom** – for core UI and routing structure  
+- **zustand** – preferred for state management  
+- **react-hook-form** + **@hookform/resolvers**, **zod** – for form handling and validation  
+- **class-variance-authority (cva)**, **clsx**, **tailwind-merge** – for generating and merging Tailwind CSS classes  
+- **@radix-ui/react-***, **shadcn/ui** – for accessible component primitives  
+- **framer-motion** – for animations  
+- **lucide-react** – for icons  
+- **fuse.js** – for client-side fuzzy search  
+- **vaul** – for auth/session management  
