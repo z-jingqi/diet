@@ -1,6 +1,7 @@
 import type { Message } from "@/types/chat";
 import { Markdown } from "@/components/ui/markdown";
 import type { Recipe } from "@/types/recipe";
+import RecipeQuickActionButton from "./recipe-quick-action-button";
 
 interface MessageBubbleProps {
   message: Message;
@@ -31,13 +32,13 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
             />
             <div className="flex flex-wrap gap-2">
               {message.recipes?.map((recipe) => (
-                <button
+                <RecipeQuickActionButton
                   key={recipe.id}
-                  onClick={() => onRecipeClick?.(recipe)}
-                  className="text-left underline underline-offset-2 hover:text-blue-600"
-                >
-                  {recipe.name}
-                </button>
+                  recipe={recipe}
+                  onClick={onRecipeClick}
+                  onPreview={() => {/* TODO: 实现预览功能 */}}
+                  onFavorite={() => {/* TODO: 实现收藏功能 */}}
+                />
               ))}
             </div>
           </div>
