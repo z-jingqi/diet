@@ -1,12 +1,17 @@
-import { useChatStore } from '../../store/chat';
-import { MessageBubble } from './message-bubble';
+import useChatStore from "../../store/chat";
+import MessageBubble from "./message-bubble";
+import { useNavigate } from "react-router-dom";
+import useRecipeStore from "@/store/recipe";
+import type { Recipe } from "@/types/recipe";
 
-export function ChatMessages() {
+const ChatMessages = () => {
   const { messages, isLoading } = useChatStore();
+  const navigate = useNavigate();
+  const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
 
-  const handleRecipeClick = (recipeId: string) => {
-    // TODO: 跳转到菜谱页面
-    console.log('Navigate to recipe:', recipeId);
+  const handleRecipeClick = (recipe: Recipe) => {
+    setCurrentRecipe(recipe);
+    navigate("/recipe");
   };
 
   return (
@@ -25,4 +30,6 @@ export function ChatMessages() {
       )}
     </div>
   );
-} 
+};
+
+export default ChatMessages;

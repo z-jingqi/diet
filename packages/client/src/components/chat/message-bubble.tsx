@@ -1,12 +1,13 @@
 import type { Message } from "@/types/chat";
 import { Markdown } from "@/components/ui/markdown";
+import type { Recipe } from "@/types/recipe";
 
 interface MessageBubbleProps {
   message: Message;
-  onRecipeClick?: (recipeId: string) => void;
+  onRecipeClick?: (recipe: Recipe) => void;
 }
 
-export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
+const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
   const isRecipe = message.type === "recipe";
 
   if (message.isUser) {
@@ -25,18 +26,18 @@ export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
         {isRecipe ? (
           <div className="bg-white rounded-lg p-4 space-y-4">
             <Markdown 
-              content={JSON.parse(message.content).description} 
+              content={message.content} 
               className="prose dark:prose-invert max-w-none" 
             />
             <div className="flex flex-wrap gap-2">
-              {JSON.parse(message.content).recipes.map((recipe: any) => (
-          <button
+              {message.recipes?.map((recipe) => (
+                <button
                   key={recipe.id}
-                  onClick={() => onRecipeClick?.(recipe.id)}
-            className="text-left underline underline-offset-2 hover:text-blue-600"
-          >
+                  onClick={() => onRecipeClick?.(recipe)}
+                  className="text-left underline underline-offset-2 hover:text-blue-600"
+                >
                   {recipe.name}
-          </button>
+                </button>
               ))}
             </div>
           </div>
@@ -48,4 +49,6 @@ export function MessageBubble({ message, onRecipeClick }: MessageBubbleProps) {
       </div>
     </div>
   );
-} 
+};
+
+export default MessageBubble; 

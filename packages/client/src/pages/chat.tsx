@@ -1,8 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChatInput } from "../components/chat/chat-input";
-import { ChatMessages } from "../components/chat/chat-messages";
-import { useChatStore } from "../store/chat";
+import ChatInput from "../components/chat/chat-input";
+import ChatMessages from "../components/chat/chat-messages";
+import TypingPrompt from "../components/chat/typing-prompt";
+import useChatStore from "@/store/chat";
+import useRecipeStore from "@/store/recipe";
+import type { Message, AIResponse } from "@/types/chat";
+import CHAT_PROMPT from "@/prompts/chat-prompt";
+import { mockRecipes } from "@/mock/recipe";
+import { buildMessageFromAIResponse, buildUserMessage } from "@/utils/message-builder";
 
 const prompts = [
   "今天想吃什么？",
@@ -11,43 +17,50 @@ const prompts = [
   "需要营养建议吗？",
 ];
 
-export function ChatPage() {
-  const messages = useChatStore((state) => state.messages);
-  const [currentPrompt, setCurrentPrompt] = useState(0);
-  const [displayText, setDisplayText] = useState("");
+const ChatPage = () => {
+  const { messages, addMessage, setLoading } = useChatStore();
+  const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
+  const [showTyping, setShowTyping] = useState(true);
   const [isTyping, setIsTyping] = useState(true);
 
-  useEffect(() => {
-    // 如果有消息，立即清空文字并停止动画
-    if (messages.length > 0) {
-      setDisplayText("");
-      setIsTyping(false);
-      return;
+  const handleSendMessage = async (content: string) => {
+    // 添加用户消息
+    const userMessage = buildUserMessage(content);
+    addMessage(userMessage);
+    setLoading(true);
+    setShowTyping(false);
+
+    try {
+      // 使用模板格式化用户输入
+      const prompt = CHAT_PROMPT.replace("{user_input}", content);
+
+      // 模拟 AI 响应
+      setTimeout(() => {
+        // 随机选择一个菜谱作为响应
+        const randomRecipe = mockRecipes[Math.floor(Math.random() * mockRecipes.length)];
+        
+        // 设置当前菜谱
+        setCurrentRecipe(randomRecipe);
+
+        // 创建模拟的 AI 响应
+        const mockResponse: AIResponse = {
+          intent_type: 'recipe',
+          content_body: {
+            description: `我为您推荐一道${randomRecipe.name}，这是一道${randomRecipe.difficulty}的菜品，适合${randomRecipe.dietNote}。\n\n主要食材：\n${randomRecipe.ingredients.map(ing => `- ${ing.name} ${ing.amount}`).join('\n')}\n\n烹饪时间：${randomRecipe.cookingTime}\n份量：${randomRecipe.servings}人份\n\n点击查看详细菜谱 👉`,
+            recipes: [randomRecipe],
+          },
+        };
+
+        // 使用消息构建器创建消息
+        const recipeMessage = buildMessageFromAIResponse(mockResponse);
+        addMessage(recipeMessage);
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Error:", error);
+      setLoading(false);
     }
-
-    let currentIndex = 0;
-    const currentPromptText = prompts[currentPrompt];
-
-    const typeText = () => {
-      if (currentIndex < currentPromptText.length) {
-        setDisplayText(currentPromptText.slice(0, currentIndex + 1));
-        currentIndex++;
-        setTimeout(typeText, 100);
-      } else {
-        setIsTyping(false);
-        setTimeout(() => {
-          setCurrentPrompt((prev) => (prev + 1) % prompts.length);
-          setDisplayText("");
-          setIsTyping(true);
-        }, 2000);
-      }
-    };
-
-    // 只在组件挂载和 currentPrompt 变化时启动动画
-    if (isTyping) {
-      typeText();
-    }
-  }, [currentPrompt, messages.length]);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -63,21 +76,12 @@ export function ChatPage() {
             <ChatMessages />
           </div>
         ) : (
-          displayText && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-2xl font-medium bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent min-h-[2rem]"
-            >
-              {displayText}
-              {isTyping && (
-                <motion.span
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                  className="inline-block w-1 h-6 bg-current ml-1"
-                />
-              )}
-            </motion.div>
+          showTyping && (
+            <TypingPrompt
+              prompts={prompts}
+              onStartTyping={() => setIsTyping(true)}
+              onStopTyping={() => setIsTyping(false)}
+            />
           )
         )}
       </motion.div>
@@ -91,8 +95,10 @@ export function ChatPage() {
         }}
         className="w-full max-w-2xl mx-auto px-4 py-4"
       >
-        <ChatInput />
+        <ChatInput onSendMessage={handleSendMessage} />
       </motion.div>
     </div>
   );
-}
+};
+
+export default ChatPage;

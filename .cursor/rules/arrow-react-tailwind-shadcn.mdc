@@ -20,3 +20,4 @@ alwaysApply: true
 - Use `dark:` classes to support dark mode.
 - Ensure **a11y**: use proper `aria-*`, `role`, and keyboard support.
 - Use `cva`, `clsx`, and `tailwind-merge` for clean, mergeable utility classes.
+- When creating new shadcn components, use the CLI command: `npx shadcn@latest add xxx` (where xxx is the component name).

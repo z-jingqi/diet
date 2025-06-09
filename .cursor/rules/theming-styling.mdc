@@ -5,6 +5,22 @@ alwaysApply: false
 ---
 # 🎨 Theming & Styling
 
+## Responsive Design & Mobile-First
+- Always start with mobile layout first, then enhance for larger screens
+- Use Tailwind's responsive breakpoints consistently:
+  - `sm:` (640px) - Small devices
+  - `md:` (768px) - Medium devices
+  - `lg:` (1024px) - Large devices
+  - `xl:` (1280px) - Extra large devices
+  - `2xl:` (1536px) - 2X large devices
+- Test layouts across all breakpoints
+- Use flexible units (rem, em, %) instead of fixed pixels
+- Implement proper touch targets (min 44x44px) for mobile
+- Consider mobile navigation patterns
+- Optimize images and assets for different screen sizes
+- Use proper spacing and typography scaling
+- Test touch interactions and gestures
+
 ## Tailwind CSS
 - Use mobile-first approach with responsive utilities
 - Follow the project's color scheme and design tokens
