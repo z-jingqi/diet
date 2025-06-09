@@ -45,6 +45,7 @@
   --sidebar-accent-foreground: #0f172a;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #94a3b8;
+  --bottom-nav-height: 3rem;
 }
 
 .dark {

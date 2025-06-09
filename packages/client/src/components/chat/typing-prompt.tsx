@@ -7,7 +7,11 @@ interface TypingPromptProps {
   onStopTyping?: () => void;
 }
 
-const TypingPrompt = ({ prompts, onStartTyping, onStopTyping }: TypingPromptProps) => {
+const TypingPrompt = ({
+  prompts,
+  onStartTyping,
+  onStopTyping,
+}: TypingPromptProps) => {
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
@@ -42,9 +46,18 @@ const TypingPrompt = ({ prompts, onStartTyping, onStopTyping }: TypingPromptProp
       onStartTyping?.();
       typeText();
     }
-  }, [currentPrompt, isTyping, prompts, onStartTyping, onStopTyping, isComplete]);
+  }, [
+    currentPrompt,
+    isTyping,
+    prompts,
+    onStartTyping,
+    onStopTyping,
+    isComplete,
+  ]);
 
-  if (!displayText && isComplete) return null;
+  if (!displayText && isComplete) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -64,4 +77,4 @@ const TypingPrompt = ({ prompts, onStartTyping, onStopTyping }: TypingPromptProp
   );
 };
 
-export default TypingPrompt; 
+export default TypingPrompt;

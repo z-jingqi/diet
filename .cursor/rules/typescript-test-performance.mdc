@@ -46,3 +46,58 @@ alwaysApply: false
 - Implement proper field validation
 - Use proper form accessibility
 - Handle form reset and cleanup
+
+## Code Style
+- Always use block statements for control flow statements (if, for, while, etc.)
+- Avoid single-line control flow statements without braces
+- Examples:
+  ```typescript
+  // ❌ Avoid
+  if (condition) return null;
+  if (condition) continue;
+  if (condition) break;
+  if (condition) throw new Error();
+  for (const item of items) process(item);
+  while (condition) doSomething();
+  do something() while (condition);
+  
+  // ✅ Prefer
+  if (condition) {
+    return null;
+  }
+  
+  if (condition) {
+    continue;
+  }
+  
+  if (condition) {
+    break;
+  }
+  
+  if (condition) {
+    throw new Error();
+  }
+  
+  for (const item of items) {
+    process(item);
+  }
+  
+  while (condition) {
+    doSomething();
+  }
+  
+  do {
+    something();
+  } while (condition);
+  ```
+- This improves code readability and prevents potential bugs when adding more statements
+- Exception: Arrow functions can use implicit returns for simple expressions
+  ```typescript
+  // ✅ Allowed
+  const double = (x: number) => x * 2;
+  
+  // ✅ Also allowed
+  const double = (x: number) => {
+    return x * 2;
+  };
+  ```

@@ -18,7 +18,7 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t bg-background">
+    <form onSubmit={handleSubmit} className="flex gap-2 p-4">
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
