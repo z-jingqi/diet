@@ -1,4 +1,8 @@
-import { AIService, Message, AIConfig, ResponseFormat } from './types';
+import { AIService } from './base';
+import { ChatMessage, ChatResponse } from '../../types';
+
+const BAIDU_MODEL = 'ERNIE-Bot-4';
+const MAX_TOKENS = 4096;
 
 interface BaiduTokenResponse {
   access_token: string;
@@ -14,19 +18,26 @@ interface BaiduEmbeddingResponse {
   }>;
 }
 
+export interface BaiduConfig {
+  apiKey?: string;
+  apiSecret?: string;
+}
+
 export class BaiduAIService implements AIService {
   private apiKey: string;
   private apiSecret: string;
   private baseUrl = 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat';
-  private defaultFormat: ResponseFormat;
 
-  constructor(config?: AIConfig) {
-    this.apiKey = config?.apiKey || process.env.BAIDU_API_KEY || '';
-    this.apiSecret = config?.apiSecret || process.env.BAIDU_API_SECRET || '';
-    this.defaultFormat = config?.defaultResponseFormat || (process.env.BAIDU_DEFAULT_RESPONSE_FORMAT as ResponseFormat) || 'json';
+  constructor(config?: BaiduConfig) {
+    this.apiKey = config?.apiKey || process.env.BAIDU_API_KEY || 'mock-key';
+    this.apiSecret = config?.apiSecret || process.env.BAIDU_API_SECRET || 'mock-key';
   }
 
   private async getAccessToken(): Promise<string> {
+    if (this.apiKey === 'mock-key' || this.apiSecret === 'mock-key') {
+      return 'mock-token';
+    }
+
     const response = await fetch(
       `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${this.apiKey}&client_secret=${this.apiSecret}`,
       {
@@ -45,42 +56,50 @@ export class BaiduAIService implements AIService {
     return data.access_token;
   }
 
-  async chat(messages: Message[], format?: ResponseFormat): Promise<string | ReadableStream> {
-    const responseFormat = format || this.defaultFormat;
+  async chat(messages: ChatMessage[]): Promise<ChatResponse> {
+    if (this.apiKey === 'mock-key' || this.apiSecret === 'mock-key') {
+      return this.mockResponse(messages);
+    }
+
     try {
       const accessToken = await this.getAccessToken();
-      const body: Record<string, unknown> = {
-        messages: messages.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
-      };
-      if (responseFormat === 'event-stream') {
-        body.stream = true;
-      }
       const response = await fetch(`${this.baseUrl}?access_token=${accessToken}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          parameters: {
+            max_tokens: MAX_TOKENS
+          }
+        })
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (responseFormat === 'event-stream') {
-        return response.body as ReadableStream;
-      }
-
       const data = await response.json() as BaiduChatResponse;
-      return data.result;
+      return {
+        role: 'assistant',
+        content: data.result
+      };
     } catch (error) {
       console.error('Baidu AI chat error:', error);
       throw new Error('Failed to get response from Baidu AI');
     }
+  }
+
+  private mockResponse(messages: ChatMessage[]): ChatResponse {
+    const lastMessage = messages[messages.length - 1];
+    return {
+      role: 'assistant',
+      content: `[Baidu AI Mock] 这是对 "${lastMessage.content}" 的模拟回复。\n\n在开发环境中，我们使用模拟数据。当您配置了实际的 API 密钥后，这里将返回真实的 AI 响应。`,
+    };
   }
 
   async getEmbedding(text: string): Promise<number[]> {

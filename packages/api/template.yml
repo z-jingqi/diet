@@ -5,6 +5,8 @@ Resources:
     Type: 'Aliyun::Serverless::Service'
     Properties:
       Description: 'Diet API Service'
+      Policies:
+        - AliyunFCInvocationAccess
     diet-function:
       Type: 'Aliyun::Serverless::Function'
       Properties:
@@ -15,9 +17,22 @@ Resources:
         MemorySize: 512
         EnvironmentVariables:
           DASHSCOPE_API_KEY: '${DASHSCOPE_API_KEY}'
+        # 函数级别的限流配置
+        InstanceConcurrency: 10  # 单个实例并发数
+        InstanceSoftConcurrency: 5  # 软并发限制
+        # 服务级别的限流配置
+        ServiceConcurrency: 100  # 服务总并发数
+        ServiceSoftConcurrency: 50  # 服务软并发限制
+        # 按用户限流
+        UserConcurrency: 5  # 每个用户并发数
+        UserSoftConcurrency: 3  # 每个用户软并发限制
       Events:
         httpTrigger:
           Type: HTTP
           Properties:
             AuthType: ANONYMOUS
-            Methods: ['GET', 'POST', 'PUT', 'DELETE'] 
+            Methods: ['GET', 'POST', 'PUT', 'DELETE']
+            # API 网关限流配置
+            RateLimit:
+              Rate: 60  # 每秒请求数
+              Burst: 100  # 突发请求数 

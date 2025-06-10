@@ -1,4 +1,8 @@
-import { AIService, Message, AIConfig, ResponseFormat } from './types';
+import { AIService } from './base';
+import { ChatMessage, ChatResponse } from '../../types';
+
+const QWEN_MODEL = 'qwen-max';
+const MAX_TOKENS = 4096;
 
 interface QwenChatResponse {
   output: {
@@ -12,28 +16,32 @@ interface QwenEmbeddingResponse {
   };
 }
 
+export interface QwenConfig {
+  apiKey?: string;
+}
+
 export class QwenService implements AIService {
   private apiKey: string;
   private baseUrl = 'https://dashscope.aliyuncs.com/api/v1';
-  private defaultFormat: ResponseFormat = 'json';
 
-  constructor(config?: AIConfig) {
-    this.apiKey = config?.apiKey || process.env.QWEN_API_KEY || '';
-    this.defaultFormat = config?.defaultResponseFormat || (process.env.QWEN_DEFAULT_RESPONSE_FORMAT as ResponseFormat) || 'json';
+  constructor(config?: QwenConfig) {
+    this.apiKey = config?.apiKey || process.env.QWEN_API_KEY || 'mock-key';
   }
 
-  async chat(messages: Message[], format?: ResponseFormat): Promise<string | ReadableStream> {
-    const responseFormat = format || this.defaultFormat;
+  async chat(messages: ChatMessage[]): Promise<ChatResponse> {
+    if (!this.apiKey || this.apiKey === 'mock-key') {
+      return this.mockResponse(messages);
+    }
+
     try {
       const response = await fetch(`${this.baseUrl}/services/aigc/text-generation/generation`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
         },
         body: JSON.stringify({
-          model: 'qwen-turbo',
+          model: QWEN_MODEL,
           input: {
             messages: messages.map(msg => ({
               role: msg.role,
@@ -41,7 +49,7 @@ export class QwenService implements AIService {
             }))
           },
           parameters: {
-            stream: responseFormat === 'event-stream'
+            max_tokens: MAX_TOKENS
           }
         })
       });
@@ -50,16 +58,23 @@ export class QwenService implements AIService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (responseFormat === 'event-stream') {
-        return response.body as ReadableStream;
-      }
-
       const data = await response.json() as QwenChatResponse;
-      return data.output.text;
+      return {
+        role: 'assistant',
+        content: data.output.text
+      };
     } catch (error) {
       console.error('Qwen chat error:', error);
       throw new Error('Failed to get response from Qwen');
     }
+  }
+
+  private mockResponse(messages: ChatMessage[]): ChatResponse {
+    const lastMessage = messages[messages.length - 1];
+    return {
+      role: 'assistant',
+      content: `[Qwen Mock] 这是对 "${lastMessage.content}" 的模拟回复。\n\n在开发环境中，我们使用模拟数据。当您配置了实际的 API 密钥后，这里将返回真实的 AI 响应。`,
+    };
   }
 
   async getEmbedding(text: string): Promise<number[]> {

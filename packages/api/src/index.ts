@@ -1,28 +1,28 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import { AIServiceFactory } from './services/ai/factory';
-import { AIProvider } from './services/ai/types';
+import createAIService from './services/ai/factory';
+import type { AIServiceType } from './services/ai/factory';
+import { defaultRateLimiter } from './middleware/rate-limit';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // 健康检查接口
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
-// 聊天接口
-app.post('/api/chat', async (req: Request, res: Response) => {
+// 聊天接口 - 应用速率限制
+app.post('/api/chat', defaultRateLimiter.middleware, async (req: Request, res: Response) => {
   try {
     const { messages, provider = 'qwen' } = req.body;
     
-    const aiService = AIServiceFactory.create({
-      type: provider as AIProvider,
+    const aiService = createAIService({
+      type: provider as AIServiceType,
       apiKey: process.env[`${provider.toUpperCase()}_API_KEY`] || '',
-      apiSecret: process.env[`${provider.toUpperCase()}_API_SECRET`],
-      defaultResponseFormat: 'json'
+      apiSecret: process.env[`${provider.toUpperCase()}_API_SECRET`]
     });
 
     const response = await aiService.chat(messages);
@@ -32,6 +32,11 @@ app.post('/api/chat', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to process chat request' });
   }
 });
+
+// 定期清理过期的速率限制记录
+setInterval(() => {
+  defaultRateLimiter.cleanup();
+}, 60 * 1000); // 每分钟清理一次
 
 // 阿里云函数计算入口
 export const handler = (req: Request, resp: Response) => {
