@@ -2,13 +2,20 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@/components/ui/button";
 
 const meta: Meta<typeof Button> = {
-  title: "UI/Button",
+  title: "Components/UI/Button",
   component: Button,
   tags: ["autodocs"],
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
+      options: [
+        "default",
+        "destructive",
+        "outline",
+        "secondary",
+        "ghost",
+        "link",
+      ],
     },
     size: {
       control: "select",
@@ -82,4 +89,4 @@ export const Icon: Story = {
     size: "icon",
     children: "🔍",
   },
-}; 
+};
