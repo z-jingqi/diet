@@ -1,3 +1,5 @@
+import { Recipe } from './recipe';
+
 /**
  * 消息类型
  */
@@ -10,7 +12,7 @@ export interface AIResponse {
   intent_type: 'chat' | 'recipe';
   content_body: string | {
     description: string;
-    recipes: import('./recipe').Recipe[];
+    recipes: Recipe[];
   };
 }
 
@@ -29,7 +31,7 @@ export interface Message {
   /** 消息创建时间 */
   createdAt: Date;
   /** 菜谱列表（仅当 type 为 recipe 时有效） */
-  recipes?: import('./recipe').Recipe[];
+  recipes?: Recipe[];
 }
 
 /**

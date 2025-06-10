@@ -33,8 +33,7 @@ export const mockMessages: Message[] = [
   },
   {
     id: "msg-5",
-    content: JSON.stringify({
-      description: `# 低钠鸡胸肉沙拉推荐
+    content: `# 低钠鸡胸肉沙拉推荐
 
 这是一道非常适合控制钠摄入人群的沙拉，具有以下特点：
 
@@ -47,11 +46,10 @@ export const mockMessages: Message[] = [
 - 制作简单，只需 20 分钟
 - 适合 2 人食用
 - 适合减脂人群`,
-      recipes: [mockRecipes[0]]
-    }),
     type: "recipe" as MessageType,
     isUser: false,
-    createdAt: new Date("2024-03-20T10:00:25")
+    createdAt: new Date("2024-03-20T10:00:25"),
+    recipes: [mockRecipes[0]]
   },
   {
     id: "msg-6",
@@ -76,8 +74,7 @@ export const mockMessages: Message[] = [
   },
   {
     id: "msg-9",
-    content: JSON.stringify({
-      description: `# 低钠菜谱推荐
+    content: `# 低钠菜谱推荐
 
 为您推荐两道低钠菜谱，它们都具有以下特点：
 
@@ -92,11 +89,10 @@ export const mockMessages: Message[] = [
 - 营养均衡，适合健身人群
 
 两道菜都简单易做，营养均衡，您可以根据自己的需求选择。`,
-      recipes: [mockRecipes[1], mockRecipes[2]]
-    }),
     type: "recipe" as MessageType,
     isUser: false,
-    createdAt: new Date("2024-03-20T10:00:50")
+    createdAt: new Date("2024-03-20T10:00:50"),
+    recipes: [mockRecipes[1], mockRecipes[2]]
   },
   {
     id: "msg-10",
