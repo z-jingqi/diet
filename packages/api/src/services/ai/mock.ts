@@ -16,15 +16,14 @@ export class MockAIService {
   }
 
   async chat(prompt: string): Promise<AsyncGenerator<string>> {
-    // 根据提示词判断意图
-    if (prompt.includes('recipe') || prompt.includes('食谱')) {
+    if (prompt.includes('mock recipe')) {
       return this.streamResponse({
         description: '这是一道美味的食谱',
         recipes: [mockRecipes[0]]
       });
     }
 
-    if (prompt.includes('food') || prompt.includes('食材')) {
+    if (prompt.includes('mock food')) {
       return this.streamResponse({
         type: "single_food",
         query: "香蕉",
@@ -50,13 +49,17 @@ export class MockAIService {
   }
 
   async getIntent(prompt: string): Promise<string> {
-    // 模拟意图识别
-    if (prompt.includes('recipe') || prompt.includes('食谱')) {
+    // 使用特定的 mock 关键字
+    if (prompt.includes('mock recipe')) {
       return 'recipe';
     }
-    if (prompt.includes('food') || prompt.includes('食材')) {
+    if (prompt.includes('mock food')) {
       return 'food_availability';
     }
+    if (prompt.includes('mock chat')) {
+      return 'chat';
+    }
+    // 如果没有 mock 关键字，默认返回 chat
     return 'chat';
   }
 } 
