@@ -1,30 +1,78 @@
-import { create } from 'zustand';
-import type { Message, AIResponse } from '@shared/types/chat';
-import type { Recipe } from '@shared/types/recipe';
-import { buildMessageFromAIResponse, buildUserMessage } from '@/utils/message-builder';
-import { INTENT_PROMPT, CHAT_PROMPT, RECIPE_PROMPT, FOOD_AVAILABILITY_PROMPT } from '@/prompts/chat-prompt';
+import { create } from "zustand";
+import type { Message, AIResponse } from "@shared/types/chat";
+import type { Recipe } from "@shared/types/recipe";
+import {
+  buildMessageFromAIResponse,
+  buildUserMessage,
+} from "@/utils/message-builder";
+import {
+  INTENT_PROMPT,
+  CHAT_PROMPT,
+  RECIPE_PROMPT,
+  FOOD_AVAILABILITY_PROMPT,
+} from "@/prompts/chat-prompt";
 
 interface ChatState {
   messages: Message[];
-  isLoading: boolean;
   addMessage: (message: Message) => void;
-  setLoading: (loading: boolean) => void;
-  sendMessage: (content: string, setCurrentRecipe: (recipe: Recipe) => void) => Promise<void>;
+  updateLastMessage: (updater: (message: Message) => Message) => void;
+  sendMessage: (
+    content: string,
+    setCurrentRecipe: (recipe: Recipe) => void
+  ) => Promise<void>;
   getIntent: (content: string) => Promise<AIResponse["intent_type"]>;
   sendChatMessage: (content: string) => Promise<string>;
-  getRecipe: (content: string) => Promise<{ description: string; recipes: Recipe[] }>;
+  getRecipe: (
+    content: string,
+    onChunk?: (chunk: string) => void
+  ) => Promise<{ description: string; recipes: Recipe[] }>;
   getFoodAvailability: (content: string) => Promise<AIResponse["content_body"]>;
+}
+
+// 处理流式响应的通用函数
+async function handleStreamResponse(
+  response: Response,
+  onChunk?: (chunk: string) => void
+): Promise<string> {
+  if (!response.ok) {
+    throw new Error("Failed to get response");
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No reader available");
+
+  let result = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = new TextDecoder().decode(value);
+    const lines = chunk.split("\n");
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const data = line.slice(6);
+        result += data;
+        onChunk?.(data);
+      }
+    }
+  }
+
+  return result;
 }
 
 const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
-  isLoading: false,
-  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
-  setLoading: (loading) => set({ isLoading: loading }),
+  addMessage: (message) =>
+    set((state) => ({ messages: [...state.messages, message] })),
+  updateLastMessage: (updater) =>
+    set((state) => ({
+      messages: state.messages.map((msg, index) =>
+        index === state.messages.length - 1 ? updater(msg) : msg
+      ),
+    })),
 
   getIntent: async (content: string) => {
     const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
-    const intentResponse = await fetch("http://localhost:3000/api/chat", {
+    const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,12 +82,8 @@ const useChatStore = create<ChatState>((set, get) => ({
       }),
     });
 
-    if (!intentResponse.ok) {
-      throw new Error("Failed to get intent");
-    }
-
-    const { response: intentResult } = await intentResponse.json();
-    return intentResult.trim() as AIResponse["intent_type"];
+    const result = await handleStreamResponse(response);
+    return result.trim() as AIResponse["intent_type"];
   },
 
   sendChatMessage: async (content: string) => {
@@ -54,15 +98,10 @@ const useChatStore = create<ChatState>((set, get) => ({
       }),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to get response");
-    }
-
-    const { response: chatContent } = await response.json();
-    return chatContent;
+    return handleStreamResponse(response);
   },
 
-  getRecipe: async (content: string) => {
+  getRecipe: async (content: string, onChunk?: (chunk: string) => void) => {
     const prompt = RECIPE_PROMPT.replace("{user_input}", content);
     const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
@@ -74,11 +113,7 @@ const useChatStore = create<ChatState>((set, get) => ({
       }),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to get recipe");
-    }
-
-    const { response: result } = await response.json();
+    const result = await handleStreamResponse(response, onChunk);
     return JSON.parse(result) as { description: string; recipes: Recipe[] };
   },
 
@@ -94,20 +129,25 @@ const useChatStore = create<ChatState>((set, get) => ({
       }),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to get food availability");
-    }
-
-    const { response: result } = await response.json();
+    const result = await handleStreamResponse(response);
     return JSON.parse(result);
   },
 
-  sendMessage: async (content: string, setCurrentRecipe: (recipe: Recipe) => void) => {
-    const { addMessage, setLoading, getIntent, sendChatMessage, getRecipe, getFoodAvailability } = get();
+  sendMessage: async (
+    content: string,
+    setCurrentRecipe: (recipe: Recipe) => void
+  ) => {
+    const {
+      addMessage,
+      updateLastMessage,
+      getIntent,
+      sendChatMessage,
+      getRecipe,
+      getFoodAvailability,
+    } = get();
 
     const userMessage = buildUserMessage(content);
     addMessage(userMessage);
-    setLoading(true);
 
     try {
       const intent = await getIntent(content);
@@ -115,14 +155,72 @@ const useChatStore = create<ChatState>((set, get) => ({
       let aiResponse: AIResponse;
       switch (intent) {
         case "recipe": {
-          const recipeContent = await getRecipe(content);
+          // 创建一个初始的 recipe 消息
+          const initialMessage = {
+            id: `msg-${Date.now()}`,
+            content: "",
+            type: "recipe" as const,
+            isUser: false,
+            createdAt: new Date(),
+            recipes: [],
+          };
+          addMessage(initialMessage);
+
+          let buffer = "";
+          let descriptionBuffer = "";
+          let descriptionDone = false;
+
+          // 获取菜谱数据，并实时更新消息内容
+          const recipeContent = await getRecipe(content, (chunk) => {
+            buffer += chunk;
+
+            // 动态提取 description 字段内容
+            if (!descriptionDone) {
+              const descStart = buffer.indexOf('"description":"');
+              if (descStart !== -1) {
+                const descContentStart = descStart + 15;
+                let descContent = "";
+                for (let i = descContentStart; i < buffer.length; i++) {
+                  if (buffer[i] === '"' && buffer[i - 1] !== '\\') {
+                    // description 字段内容结束
+                    descriptionDone = true;
+                    break;
+                  }
+                  descContent += buffer[i];
+                }
+                // 只在内容有变化时更新
+                if (descContent !== descriptionBuffer) {
+                  descriptionBuffer = descContent;
+                  updateLastMessage((msg) => ({
+                    ...msg,
+                    content: descriptionBuffer,
+                  }));
+                }
+              }
+            }
+
+            // 只有能完整解析 JSON 时才渲染 recipes
+            try {
+              const parsed = JSON.parse(buffer);
+              if (parsed.recipes) {
+                updateLastMessage((msg) => ({
+                  ...msg,
+                  recipes: parsed.recipes,
+                }));
+                if (parsed.recipes[0]) {
+                  setCurrentRecipe(parsed.recipes[0]);
+                }
+              }
+              buffer = "";
+            } catch {
+              // 还没完整，不做任何处理
+            }
+          });
+
           aiResponse = {
             intent_type: "recipe",
             content_body: recipeContent,
           };
-          if (recipeContent.recipes?.[0]) {
-            setCurrentRecipe(recipeContent.recipes[0]);
-          }
           break;
         }
         case "food_availability": {
@@ -131,6 +229,8 @@ const useChatStore = create<ChatState>((set, get) => ({
             intent_type: "food_availability",
             content_body: foodAvailabilityContent,
           };
+          const message = buildMessageFromAIResponse(aiResponse);
+          addMessage(message);
           break;
         }
         default: {
@@ -139,11 +239,10 @@ const useChatStore = create<ChatState>((set, get) => ({
             intent_type: "chat",
             content_body: chatContent,
           };
+          const message = buildMessageFromAIResponse(aiResponse);
+          addMessage(message);
         }
       }
-
-      const message = buildMessageFromAIResponse(aiResponse);
-      addMessage(message);
     } catch (error) {
       console.error("Error:", error);
       addMessage({
@@ -153,10 +252,8 @@ const useChatStore = create<ChatState>((set, get) => ({
         isUser: false,
         createdAt: new Date(),
       });
-    } finally {
-      setLoading(false);
     }
   },
 }));
 
-export default useChatStore; 
+export default useChatStore;

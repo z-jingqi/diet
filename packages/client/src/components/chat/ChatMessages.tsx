@@ -5,7 +5,7 @@ import type { Recipe } from '@shared/types/recipe';
 import MessageBubble from './MessageBubble';
 
 const ChatMessages = () => {
-  const { messages, isLoading } = useChatStore();
+  const { messages } = useChatStore();
   const navigate = useNavigate();
   const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
 
@@ -23,11 +23,6 @@ const ChatMessages = () => {
           onRecipeClick={handleRecipeClick}
         />
       ))}
-      {isLoading && (
-        <div className="flex justify-start">
-          <div className="text-gray-500">AI 正在思考...</div>
-        </div>
-      )}
     </div>
   );
 };

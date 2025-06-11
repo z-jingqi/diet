@@ -4,17 +4,28 @@ import { mockRecipes } from '@shared/mock/recipe';
 import { mockFoods } from '@shared/mock/food';
 
 export class MockAIService {
-  async chat(prompt: string): Promise<string> {
+  private async *streamResponse(data: any): AsyncGenerator<string> {
+    // 将数据转换为字符串并按空格分割成单词
+    const words = JSON.stringify(data).split(/(\s+)/);
+    
+    for (const word of words) {
+      yield word;
+      // 每个单词之间添加一个短暂的延迟
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    }
+  }
+
+  async chat(prompt: string): Promise<AsyncGenerator<string>> {
     // 根据提示词判断意图
     if (prompt.includes('recipe') || prompt.includes('食谱')) {
-      return JSON.stringify({
+      return this.streamResponse({
         description: '这是一道美味的食谱',
         recipes: [mockRecipes[0]]
       });
     }
 
     if (prompt.includes('food') || prompt.includes('食材')) {
-      return JSON.stringify({
+      return this.streamResponse({
         type: "single_food",
         query: "香蕉",
         result: {
@@ -35,6 +46,6 @@ export class MockAIService {
     }
 
     // 默认返回聊天消息
-    return mockMessages[0].content;
+    return this.streamResponse(mockMessages[0].content);
   }
 } 

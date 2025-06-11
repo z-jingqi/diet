@@ -17,21 +17,28 @@ app.get('/health', (req: Request, res: Response) => {
 // 聊天接口
 app.post('/api/chat', async (req: Request, res: Response) => {
   try {
-    // const { messages, provider = 'qwen' } = req.body;
     const { prompt } = req.body;
     
-    // const aiService = AIServiceFactory.create({
-    //   type: provider as AIProvider,
-    //   apiKey: process.env[`${provider.toUpperCase()}_API_KEY`] || '',
-    //   apiSecret: process.env[`${provider.toUpperCase()}_API_SECRET`],
-    //   defaultResponseFormat: 'json'
-    // });
+    // 设置 SSE 响应头
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
     const aiService = new MockAIService();
-    const response = await aiService.chat(prompt);
-    res.json({ response });
+    const stream = await aiService.chat(prompt);
+
+    // 发送流式响应
+    for await (const chunk of stream) {
+      res.write(`data: ${chunk}\n\n`);
+    }
+    
+    // 结束响应
+    res.end();
   } catch (error) {
     console.error('Chat error:', error);
-    res.status(500).json({ error: 'Failed to process chat request' });
+    // 发送错误事件
+    res.write(`event: error\ndata: ${JSON.stringify({ error: 'Failed to process chat request' })}\n\n`);
+    res.end();
   }
 });
 
