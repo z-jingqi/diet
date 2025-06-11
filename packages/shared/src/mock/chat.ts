@@ -2,9 +2,9 @@ import type { Message, MessageType } from '../types/chat';
 import type { Recipe } from '../types/recipe';
 
 // 获取食谱数据的函数，避免循环依赖
-const getMockRecipes = (): Recipe[] => {
-  // 动态导入，避免循环依赖
-  const { mockRecipes } = require('./recipe');
+const getMockRecipes = async (): Promise<Recipe[]> => {
+  // 使用 ESM 动态导入
+  const { mockRecipes } = await import('./recipe');
   return mockRecipes;
 };
 
@@ -56,7 +56,7 @@ export const mockMessages: Message[] = [
     type: "recipe" as MessageType,
     isUser: false,
     createdAt: new Date("2024-03-20T10:00:25"),
-    recipes: getMockRecipes().slice(0, 1)
+    recipes: [] // 暂时为空数组，在运行时动态填充
   },
   {
     id: "msg-6",
@@ -99,7 +99,7 @@ export const mockMessages: Message[] = [
     type: "recipe" as MessageType,
     isUser: false,
     createdAt: new Date("2024-03-20T10:00:50"),
-    recipes: getMockRecipes().slice(1, 3)
+    recipes: [] // 暂时为空数组，在运行时动态填充
   },
   {
     id: "msg-10",
@@ -424,5 +424,11 @@ export const mockMessages: Message[] = [
       ]
     }
   }
-]; 
+];
+
+// 在运行时动态填充食谱数据
+getMockRecipes().then(recipes => {
+  mockMessages[4].recipes = recipes.slice(0, 1);
+  mockMessages[8].recipes = recipes.slice(1, 3);
+}); 
  
