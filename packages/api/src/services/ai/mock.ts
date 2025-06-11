@@ -5,8 +5,9 @@ import { mockFoods } from '@shared/mock/food';
 
 export class MockAIService {
   private async *streamResponse(data: any): AsyncGenerator<string> {
-    // 将数据转换为字符串并按空格分割成单词
-    const words = JSON.stringify(data).split(/(\s+)/);
+    // 如果是字符串，直接按空格分割
+    const text = typeof data === 'string' ? data : JSON.stringify(data);
+    const words = text.split(/(\s+)/);
     
     for (const word of words) {
       yield word;
@@ -44,8 +45,12 @@ export class MockAIService {
       });
     }
 
+    if (prompt.includes('long chat')) {
+      return this.streamResponse(mockMessages[0].content);
+    }
+
     // 默认返回聊天消息
-    return this.streamResponse(mockMessages[0].content);
+    return this.streamResponse(mockMessages[1].content);
   }
 
   async getIntent(prompt: string): Promise<string> {
@@ -57,6 +62,9 @@ export class MockAIService {
       return 'food_availability';
     }
     if (prompt.includes('mock chat')) {
+      return 'chat';
+    }
+    if (prompt.includes('long chat')) {
       return 'chat';
     }
     // 如果没有 mock 关键字，默认返回 chat

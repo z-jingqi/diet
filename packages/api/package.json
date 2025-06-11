@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
     "start": "node dist/index.ts",
-    "dev": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "watch": "tsup src/index.ts --format esm,cjs --dts --watch",
     "lint": "eslint ."
   },

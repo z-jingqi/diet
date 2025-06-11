@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import axios from "axios";
 import type { Message, AIResponse } from "@shared/types/chat";
 import type { Recipe } from "@shared/types/recipe";
 import {
@@ -39,12 +40,16 @@ async function handleStreamResponse(
   }
 
   const reader = response.body?.getReader();
-  if (!reader) throw new Error("No reader available");
+  if (!reader) {
+    throw new Error("No reader available");
+  }
 
   let result = "";
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done) {
+      break;
+    }
     const chunk = new TextDecoder().decode(value);
     const lines = chunk.split("\n");
     for (const line of lines) {
@@ -61,80 +66,87 @@ async function handleStreamResponse(
 
 const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
-  addMessage: (message) =>
-    set((state) => ({ messages: [...state.messages, message] })),
-  updateLastMessage: (updater) =>
+  addMessage: (message) => {
+    set((state) => ({ messages: [...state.messages, message] }));
+  },
+  updateLastMessage: (updater) => {
     set((state) => ({
-      messages: state.messages.map((msg, index) =>
-        index === state.messages.length - 1 ? updater(msg) : msg
-      ),
-    })),
+      messages: state.messages.map((msg, index) => {
+        if (index === state.messages.length - 1) {
+          return updater(msg);
+        }
+        return msg;
+      }),
+    }));
+  },
 
   getIntent: async (content: string) => {
     const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const { data } = await axios.post("http://localhost:3000/api/intent", {
         prompt: intentPrompt,
-      }),
-    });
-
-    if (!response.ok) {
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return data.intent as AIResponse["intent_type"];
+    } catch (error) {
       throw new Error("Failed to get intent");
     }
-
-    const { intent } = await response.json();
-    return intent as AIResponse["intent_type"];
   },
 
   sendChatMessage: async (content: string) => {
     const prompt = CHAT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const response = await axios.post("http://localhost:3000/api/chat", {
         prompt,
-      }),
-    });
-
-    return handleStreamResponse(response);
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        responseType: "stream",
+      });
+      return handleStreamResponse(response.data);
+    } catch (error) {
+      throw new Error("Failed to send chat message");
+    }
   },
 
   getRecipe: async (content: string, onChunk?: (chunk: string) => void) => {
     const prompt = RECIPE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const response = await axios.post("http://localhost:3000/api/chat", {
         prompt,
-      }),
-    });
-
-    const result = await handleStreamResponse(response, onChunk);
-    return JSON.parse(result) as { description: string; recipes: Recipe[] };
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        responseType: "stream",
+      });
+      const result = await handleStreamResponse(response.data, onChunk);
+      return JSON.parse(result) as { description: string; recipes: Recipe[] };
+    } catch (error) {
+      throw new Error("Failed to get recipe");
+    }
   },
 
   getFoodAvailability: async (content: string) => {
     const prompt = FOOD_AVAILABILITY_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const response = await axios.post("http://localhost:3000/api/chat", {
         prompt,
-      }),
-    });
-
-    const result = await handleStreamResponse(response);
-    return JSON.parse(result);
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        responseType: "stream",
+      });
+      const result = await handleStreamResponse(response.data);
+      return JSON.parse(result);
+    } catch (error) {
+      throw new Error("Failed to get food availability");
+    }
   },
 
   sendMessage: async (
