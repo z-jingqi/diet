@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import useRecipeStore from "@/store/recipe";
-import RecipeBasicInfo from "@/components/recipe/recipe-basic-info";
-import RecipeIngredients from "@/components/recipe/recipe-ingredients";
-import RecipeSteps from "@/components/recipe/recipe-steps";
-import RecipeNutrition from "@/components/recipe/recipe-nutrition";
-import RecipeNotes from "@/components/recipe/recipe-notes";
+import useRecipeStore from '@/store/Recipe';
+import RecipeBasicInfo from '@/components/recipe/RecipeBasicInfo';
+import RecipeIngredients from '@/components/recipe/RecipeIngredients';
+import RecipeSteps from '@/components/recipe/RecipeSteps';
+import RecipeNutrition from '@/components/recipe/RecipeNutrition';
+import RecipeNotes from '@/components/recipe/RecipeNotes';
 
 const RecipePage = () => {
   const navigate = useNavigate();

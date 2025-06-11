@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import RecipeSteps from '@/components/recipe/recipe-steps';
-import { mockRecipes } from '@/mock/recipe';
+import RecipeSteps from '@/components/recipe/RecipeSteps';
+import { mockRecipes } from '@/mock/Recipe';
 
 const meta = {
   title: 'Components/Recipe/RecipeSteps',

@@ -1,5 +1,5 @@
-import { Markdown } from "@/components/ui/markdown";
-import type { Message } from "@/types/chat";
+import { Markdown } from '@/components/ui/Markdown';
+import type { Message } from '@/types/Chat';
 
 /**
  * 食物可食性查询消息气泡

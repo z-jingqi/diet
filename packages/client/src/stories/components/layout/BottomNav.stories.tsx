@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import BottomNav from '@/components/layout/bottom-nav';
+import BottomNav from '@/components/layout/BottomNav';
 import { MemoryRouter } from 'react-router-dom';
 
 const meta = {

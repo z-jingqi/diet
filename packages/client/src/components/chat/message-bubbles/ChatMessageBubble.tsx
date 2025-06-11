@@ -1,4 +1,4 @@
-import { Markdown } from "@/components/ui/markdown";
+import { Markdown } from '@/components/ui/Markdown';
 
 /**
  * 普通对话消息气泡

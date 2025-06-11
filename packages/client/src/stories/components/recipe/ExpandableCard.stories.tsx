@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ExpandableCard from '@/components/recipe/expandable-card';
+import ExpandableCard from '@/components/recipe/ExpandableCard';
 
 const meta = {
   title: 'Components/Recipe/ExpandableCard',

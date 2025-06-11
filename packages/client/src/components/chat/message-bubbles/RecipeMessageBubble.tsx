@@ -1,5 +1,5 @@
-import { Markdown } from "@/components/ui/markdown";
-import type { Recipe } from "@/types/recipe";
+import { Markdown } from '@/components/ui/Markdown';
+import type { Recipe } from '@/types/Recipe';
 import RecipeQuickActionButton from "../recipe-quick-action-button";
 
 /**

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { MessageSquare, Heart, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/Button';
 import { cn } from "@/lib/utils";
 
 // 底部/顶部导航组件（响应式）

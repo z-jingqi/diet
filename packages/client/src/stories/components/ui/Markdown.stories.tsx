@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Markdown } from '@/components/ui/markdown';
+import { Markdown } from '@/components/ui/Markdown';
 
 const meta = {
   title: 'Components/UI/Markdown',

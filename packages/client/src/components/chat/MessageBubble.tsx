@@ -1,5 +1,5 @@
-import type { Message } from "@/types/chat";
-import type { Recipe } from "@/types/recipe";
+import type { Message } from '@/types/Chat';
+import type { Recipe } from '@/types/Recipe';
 import UserMessageBubble from "./message-bubbles/user-message-bubble";
 import ChatMessageBubble from "./message-bubbles/chat-message-bubble";
 import RecipeMessageBubble from "./message-bubbles/recipe-message-bubble";

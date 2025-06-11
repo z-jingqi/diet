@@ -2,10 +2,10 @@ import {
   createBrowserRouter,
   Outlet,
 } from "react-router-dom";
-import HomePage from "@/pages/home";
-import ChatPage from "@/pages/chat";
-import RecipePage from "@/pages/recipe";
-import BottomNav from "@/components/layout/bottom-nav";
+import HomePage from '@/pages/Home';
+import ChatPage from '@/pages/Chat';
+import RecipePage from '@/pages/Recipe';
+import BottomNav from '@/components/layout/BottomNav';
 
 // 布局组件
 const Layout = () => {

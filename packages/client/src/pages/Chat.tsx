@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import ChatInput from "../components/chat/chat-input";
-import ChatMessages from "../components/chat/chat-messages";
-import TypingPrompt from "../components/chat/typing-prompt";
-import useChatStore from "@/store/chat";
-import useRecipeStore from "@/store/recipe";
+import ChatInput from '@/components/chat/ChatInput';
+import ChatMessages from '@/components/chat/ChatMessages';
+import TypingPrompt from '@/components/chat/TypingPrompt';
+import useChatStore from '@/store/Chat';
+import useRecipeStore from '@/store/Recipe';
 
 const prompts = ["今天想吃什么？", "有什么饮食禁忌吗？", "想了解什么食材？", "需要营养建议吗？"];
 

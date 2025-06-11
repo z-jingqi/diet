@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/Button';
 import { Copy } from "lucide-react";
-import type { RecipeIngredient } from "@/types/recipe";
+import type { RecipeIngredient } from '@/types/Recipe';
 import ExpandableCard from "./expandable-card";
 
 interface RecipeIngredientsProps {
