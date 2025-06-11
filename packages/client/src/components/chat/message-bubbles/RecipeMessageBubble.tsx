@@ -1,6 +1,6 @@
 import { Markdown } from '@/components/ui/Markdown';
-import type { Recipe } from '@/types/Recipe';
-import RecipeQuickActionButton from "../recipe-quick-action-button";
+import type { Recipe } from '@/types/recipe';
+import RecipeQuickActionButton from '../RecipeQuickActionButton';
 
 /**
  * 菜谱消息气泡

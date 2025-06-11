@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ChatMessages from '../../../components/chat/chat-messages';
-import { mockMessages } from '../../../mock/chat';
+import { mockMessages } from '@/mock/chat';
 import { BrowserRouter } from 'react-router-dom';
 import { create } from 'zustand';
-import type { Message } from '../../../types/chat';
-import type { Recipe } from '../../../types/recipe';
-import useChatStore from '../../../store/chat';
-import useRecipeStore from '../../../store/recipe';
+import type { Message } from '@/types/chat';
+import type { Recipe } from '@/types/recipe';
 import type { ReactNode } from 'react';
+import ChatMessages from '@/components/chat/ChatMessages';
+import useChatStore from '@/store/chat';
+import useRecipeStore from '@/store/recipe';
 
 // Create mock stores
 const createMockChatStore = (initialState = {}) => create(() => ({

@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Clock, Timer } from "lucide-react";
-import type { RecipeStep } from '@/types/Recipe';
-import ExpandableCard from "./expandable-card";
+import type { RecipeStep } from '@/types/recipe';
+import ExpandableCard from './ExpandableCard';
 
 interface RecipeStepsProps {
   steps: RecipeStep[];

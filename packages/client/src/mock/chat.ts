@@ -1,4 +1,4 @@
-import type { Message, MessageType } from '../types/chat';
+import type { Message, MessageType } from '@/types/chat';
 import { mockRecipes } from './recipe';
 
 // 聊天消息数据

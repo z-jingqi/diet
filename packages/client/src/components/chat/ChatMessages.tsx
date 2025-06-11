@@ -1,8 +1,8 @@
-import useChatStore from '@/store/Chat';
-import MessageBubble from "./message-bubble";
+import useChatStore from '@/store/chat';
 import { useNavigate } from "react-router-dom";
-import useRecipeStore from '@/store/Recipe';
-import type { Recipe } from '@/types/Recipe';
+import useRecipeStore from '@/store/recipe';
+import type { Recipe } from '@/types/recipe';
+import MessageBubble from './MessageBubble';
 
 const ChatMessages = () => {
   const { messages, isLoading } = useChatStore();

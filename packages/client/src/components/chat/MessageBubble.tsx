@@ -1,9 +1,9 @@
-import type { Message } from '@/types/Chat';
-import type { Recipe } from '@/types/Recipe';
-import UserMessageBubble from "./message-bubbles/user-message-bubble";
-import ChatMessageBubble from "./message-bubbles/chat-message-bubble";
-import RecipeMessageBubble from "./message-bubbles/recipe-message-bubble";
-import FoodAvailabilityMessageBubble from "./message-bubbles/food-availability-message-bubble";
+import type { Message } from "@/types/chat";
+import type { Recipe } from "@/types/recipe";
+import ChatMessageBubble from "./message-bubbles/ChatMessageBubble";
+import FoodAvailabilityMessageBubble from "./message-bubbles/FoodAvailabilityMessageBubble";
+import RecipeMessageBubble from "./message-bubbles/RecipeMessageBubble";
+import UserMessageBubble from "./message-bubbles/UserMessageBubble";
 
 interface MessageBubbleProps {
   message: Message;
@@ -19,18 +19,18 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
   }
 
   switch (message.type) {
-    case 'recipe':
+    case "recipe":
       return (
-        <RecipeMessageBubble 
-          content={message.content} 
-          recipes={message.recipes || []} 
+        <RecipeMessageBubble
+          content={message.content}
+          recipes={message.recipes || []}
           onRecipeClick={onRecipeClick}
         />
       );
-    case 'food_availability':
+    case "food_availability":
       return (
-        <FoodAvailabilityMessageBubble 
-          content={message.content} 
+        <FoodAvailabilityMessageBubble
+          content={message.content}
           foodAvailability={message.foodAvailability}
         />
       );
@@ -39,4 +39,4 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
   }
 };
 
-export default MessageBubble; 
+export default MessageBubble;

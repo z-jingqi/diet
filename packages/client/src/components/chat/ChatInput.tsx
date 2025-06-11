@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;

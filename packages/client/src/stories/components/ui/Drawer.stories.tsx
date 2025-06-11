@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Drawer } from '@/components/ui/Drawer';
+import { Drawer } from '@/components/ui/drawer';
 
 const meta = {
   title: 'Components/UI/Drawer',

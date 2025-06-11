@@ -1,5 +1,5 @@
-import type { Recipe } from '@/types/Recipe';
-import ExpandableCard from "./expandable-card";
+import type { Recipe } from '@/types/recipe';
+import ExpandableCard from './ExpandableCard';
 
 interface RecipeNutritionProps {
   nutrition: Recipe["nutrition"];

@@ -1,7 +1,7 @@
 import { FC } from "react";
-import type { Recipe } from '@/types/Recipe';
+import type { Recipe } from '@/types/recipe';
 import { Eye, Heart, ChevronRight } from "lucide-react";
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface RecipeQuickActionButtonProps {
   recipe: Recipe;
