@@ -1,0 +1,23 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# 🏗️ Component Architecture
+
+## Component Design
+- One component per file
+- Each component should have a single responsibility
+- Break down complex components into smaller, reusable pieces
+- Keep components focused and maintainable
+
+## File Organization
+- Components should be in their own files
+- Related components should be grouped in feature folders
+- Keep component files small and focused
+
+## Component Structure
+- Use functional components with hooks
+- Keep component logic simple and focused
+- Extract complex logic into custom hooks
+- Use proper prop types and interfaces

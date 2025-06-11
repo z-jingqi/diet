@@ -1,0 +1,30 @@
+---
+description: 
+globs: *.ts,*.tsx,*.css
+alwaysApply: false
+---
+# 🎨 Styling
+
+## Tailwind CSS
+- Use Tailwind CSS for styling
+- Follow mobile-first approach
+- Use responsive utilities consistently:
+  - `sm:` (640px) - Small devices
+  - `md:` (768px) - Medium devices
+  - `lg:` (1024px) - Large devices
+  - `xl:` (1280px) - Extra large devices
+  - `2xl:` (1536px) - 2X large devices
+
+## shadcn/ui
+- Use shadcn/ui components as base
+- Extend components with Tailwind utilities
+- Keep styles modular and reusable
+- Use proper component variants
+
+## Responsive Design
+- Start with mobile layout first
+- Test layouts across all breakpoints
+- Use flexible units (rem, em, %)
+- Implement proper touch targets (min 44x44px)
+- Consider mobile navigation patterns
+- Optimize for different screen sizes

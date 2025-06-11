@@ -1,0 +1,40 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# 🎨 Coding Style
+
+## Function Declarations
+- Always use arrow functions for components and functions
+- Use `const` by default; use `let` only when needed
+- Always use `export default` for all exports (components, hooks, utilities, etc.)
+
+## Control Flow
+- Always use block statements with curly braces
+- Avoid single-line control flow statements
+- Examples:
+  ```typescript
+  // ❌ Avoid
+  if (condition) return null;
+  if (condition) continue;
+  if (condition) break;
+  
+  // ✅ Prefer
+  if (condition) {
+    return null;
+  }
+  
+  if (condition) {
+    continue;
+  }
+  
+  if (condition) {
+    break;
+  }
+  ```
+
+## Naming Conventions
+- React Components: PascalCase (e.g., `Button.tsx`, `UserProfile.tsx`)
+- Hooks: camelCase (e.g., `useAuth.ts`, `useForm.ts`)
+- Utilities/Stores: kebab-case (e.g., `auth-store.ts`, `format-date.ts`)
