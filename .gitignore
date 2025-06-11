@@ -11,6 +11,7 @@ lerna-debug.log*
 node_modules
 packages/client/node_modules
 packages/api/node_modules
+.pnpm-store
 .vite
 .vite-temp
 dist
