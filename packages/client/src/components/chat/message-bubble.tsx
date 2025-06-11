@@ -1,55 +1,42 @@
 import type { Message } from "@/types/chat";
-import { Markdown } from "@/components/ui/markdown";
 import type { Recipe } from "@/types/recipe";
-import RecipeQuickActionButton from "./recipe-quick-action-button";
+import UserMessageBubble from "./message-bubbles/user-message-bubble";
+import ChatMessageBubble from "./message-bubbles/chat-message-bubble";
+import RecipeMessageBubble from "./message-bubbles/recipe-message-bubble";
+import FoodAvailabilityMessageBubble from "./message-bubbles/food-availability-message-bubble";
 
 interface MessageBubbleProps {
   message: Message;
   onRecipeClick?: (recipe: Recipe) => void;
 }
 
+/**
+ * 消息气泡组件
+ */
 const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
-  const isRecipe = message.type === "recipe";
-
   if (message.isUser) {
-    return (
-      <div className="flex w-full justify-end">
-        <div className="max-w-[80%] bg-[#e9e9e9]/80 rounded-lg">
-          <p className="text-gray-900 p-2">{message.content}</p>
-        </div>
-      </div>
-    );
+    return <UserMessageBubble content={message.content} />;
   }
 
-  return (
-    <div className="flex w-full justify-start">
-      <div className="max-w-[80%]">
-        {isRecipe ? (
-          <div className="bg-white rounded-lg p-4 space-y-4">
-            <Markdown 
-              content={message.content} 
-              className="prose dark:prose-invert max-w-none" 
-            />
-            <div className="flex flex-wrap gap-2">
-              {message.recipes?.map((recipe) => (
-                <RecipeQuickActionButton
-                  key={recipe.id}
-                  recipe={recipe}
-                  onClick={onRecipeClick}
-                  onPreview={() => {/* TODO: 实现预览功能 */}}
-                  onFavorite={() => {/* TODO: 实现收藏功能 */}}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg p-2">
-            <Markdown content={message.content} className="prose dark:prose-invert max-w-none" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  switch (message.type) {
+    case 'recipe':
+      return (
+        <RecipeMessageBubble 
+          content={message.content} 
+          recipes={message.recipes || []} 
+          onRecipeClick={onRecipeClick}
+        />
+      );
+    case 'food_availability':
+      return (
+        <FoodAvailabilityMessageBubble 
+          content={message.content} 
+          foodAvailability={message.foodAvailability}
+        />
+      );
+    default:
+      return <ChatMessageBubble content={message.content} />;
+  }
 };
 
 export default MessageBubble; 

@@ -36,6 +36,15 @@ export const buildMessageFromAIResponse = (
     } as Message;
   }
 
+  if (response.intent_type === 'food_availability') {
+    const content = response.content_body;
+    return {
+      ...baseMessage,
+      content: JSON.stringify(content, null, 2),
+      foodAvailability: content,
+    } as Message;
+  }
+
   return {
     ...baseMessage,
     content: response.content_body as string,
