@@ -1,4 +1,5 @@
 import { AIService, Message, AIConfig, ResponseFormat } from './types';
+import axios from 'axios';
 
 interface QwenChatResponse {
   output: {
@@ -6,33 +7,30 @@ interface QwenChatResponse {
   };
 }
 
-interface QwenEmbeddingResponse {
-  output: {
-    embeddings: number[][];
-  };
-}
-
 export class QwenService implements AIService {
   private apiKey: string;
   private baseUrl = 'https://dashscope.aliyuncs.com/api/v1';
   private defaultFormat: ResponseFormat = 'json';
+  private axiosInstance;
 
   constructor(config?: AIConfig) {
     this.apiKey = config?.apiKey || process.env.QWEN_API_KEY || '';
     this.defaultFormat = config?.defaultResponseFormat || (process.env.QWEN_DEFAULT_RESPONSE_FORMAT as ResponseFormat) || 'json';
+    
+    this.axiosInstance = axios.create({
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      }
+    });
   }
 
   async chat(messages: Message[], format?: ResponseFormat): Promise<string | ReadableStream> {
     const responseFormat = format || this.defaultFormat;
     try {
-      const response = await fetch(`${this.baseUrl}/services/aigc/text-generation/generation`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-          'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await this.axiosInstance.post(
+        `${this.baseUrl}/services/aigc/text-generation/generation`,
+        {
           model: 'qwen-turbo',
           input: {
             messages: messages.map(msg => ({
@@ -43,18 +41,20 @@ export class QwenService implements AIService {
           parameters: {
             stream: responseFormat === 'event-stream'
           }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+        },
+        {
+          headers: {
+            'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
+          },
+          responseType: responseFormat === 'event-stream' ? 'stream' : 'json'
+        }
+      );
 
       if (responseFormat === 'event-stream') {
-        return response.body as ReadableStream;
+        return response.data as ReadableStream;
       }
 
-      const data = await response.json() as QwenChatResponse;
+      const data = response.data as QwenChatResponse;
       return data.output.text;
     } catch (error) {
       console.error('Qwen chat error:', error);
@@ -62,31 +62,33 @@ export class QwenService implements AIService {
     }
   }
 
-  async getEmbedding(text: string): Promise<number[]> {
+  async getIntent(prompt: string): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/services/embeddings/text-embedding/text-embedding`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'text-embedding-v1',
+      const response = await this.axiosInstance.post(
+        `${this.baseUrl}/services/aigc/text-generation/generation`,
+        {
+          model: 'qwen-turbo',
           input: {
-            texts: [text]
+            messages: [{
+              role: 'user',
+              content: prompt
+            }]
           }
-        })
-      });
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const data = response.data as QwenChatResponse;
+      const intent = data.output.text.trim().toLowerCase();
+      
+      // 确保返回的意图是有效的
+      if (!['chat', 'recipe', 'food_availability'].includes(intent)) {
+        return 'chat';
       }
-
-      const data = await response.json() as QwenEmbeddingResponse;
-      return data.output.embeddings[0];
+      
+      return intent;
     } catch (error) {
-      console.error('Qwen embedding error:', error);
-      throw new Error('Failed to get embedding from Qwen');
+      console.error('Qwen intent detection error:', error);
+      return 'chat'; // 发生错误时默认返回普通对话
     }
   }
 } 

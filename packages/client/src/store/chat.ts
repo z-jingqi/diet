@@ -72,7 +72,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   getIntent: async (content: string) => {
     const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
+    const response = await fetch("http://localhost:3000/api/intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -82,8 +82,12 @@ const useChatStore = create<ChatState>((set, get) => ({
       }),
     });
 
-    const result = await handleStreamResponse(response);
-    return result.trim() as AIResponse["intent_type"];
+    if (!response.ok) {
+      throw new Error("Failed to get intent");
+    }
+
+    const { intent } = await response.json();
+    return intent as AIResponse["intent_type"];
   },
 
   sendChatMessage: async (content: string) => {

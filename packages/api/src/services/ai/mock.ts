@@ -48,4 +48,15 @@ export class MockAIService {
     // 默认返回聊天消息
     return this.streamResponse(mockMessages[0].content);
   }
+
+  async getIntent(prompt: string): Promise<string> {
+    // 模拟意图识别
+    if (prompt.includes('recipe') || prompt.includes('食谱')) {
+      return 'recipe';
+    }
+    if (prompt.includes('food') || prompt.includes('食材')) {
+      return 'food_availability';
+    }
+    return 'chat';
+  }
 } 
