@@ -1,5 +1,12 @@
-import type { Message, MessageType } from '@/types/chat';
-import { mockRecipes } from './recipe';
+import type { Message, MessageType } from '../types/chat';
+import type { Recipe } from '../types/recipe';
+
+// 获取食谱数据的函数，避免循环依赖
+const getMockRecipes = (): Recipe[] => {
+  // 动态导入，避免循环依赖
+  const { mockRecipes } = require('./recipe');
+  return mockRecipes;
+};
 
 // 聊天消息数据
 export const mockMessages: Message[] = [
@@ -49,7 +56,7 @@ export const mockMessages: Message[] = [
     type: "recipe" as MessageType,
     isUser: false,
     createdAt: new Date("2024-03-20T10:00:25"),
-    recipes: [mockRecipes[0]]
+    recipes: getMockRecipes().slice(0, 1)
   },
   {
     id: "msg-6",
@@ -92,7 +99,7 @@ export const mockMessages: Message[] = [
     type: "recipe" as MessageType,
     isUser: false,
     createdAt: new Date("2024-03-20T10:00:50"),
-    recipes: [mockRecipes[1], mockRecipes[2]]
+    recipes: getMockRecipes().slice(1, 3)
   },
   {
     id: "msg-10",

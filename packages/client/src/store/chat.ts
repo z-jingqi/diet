@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { Message, AIResponse } from '@/types/chat';
-import type { Recipe } from '@/types/recipe';
+import type { Message, AIResponse } from '@shared/types/chat';
+import type { Recipe } from '@shared/types/recipe';
 import { buildMessageFromAIResponse, buildUserMessage } from '@/utils/message-builder';
 import { INTENT_PROMPT, CHAT_PROMPT, RECIPE_PROMPT, FOOD_AVAILABILITY_PROMPT } from '@/prompts/chat-prompt';
 
@@ -24,7 +24,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   getIntent: async (content: string) => {
     const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
-    const intentResponse = await fetch("/api/chat", {
+    const intentResponse = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,13 +38,13 @@ const useChatStore = create<ChatState>((set, get) => ({
       throw new Error("Failed to get intent");
     }
 
-    const intentResult = await intentResponse.text();
+    const { response: intentResult } = await intentResponse.json();
     return intentResult.trim() as AIResponse["intent_type"];
   },
 
   sendChatMessage: async (content: string) => {
     const prompt = CHAT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+    const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,12 +58,13 @@ const useChatStore = create<ChatState>((set, get) => ({
       throw new Error("Failed to get response");
     }
 
-    return await response.text();
+    const { response: chatContent } = await response.json();
+    return chatContent;
   },
 
   getRecipe: async (content: string) => {
     const prompt = RECIPE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+    const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,13 +78,13 @@ const useChatStore = create<ChatState>((set, get) => ({
       throw new Error("Failed to get recipe");
     }
 
-    const result = await response.text();
+    const { response: result } = await response.json();
     return JSON.parse(result) as { description: string; recipes: Recipe[] };
   },
 
   getFoodAvailability: async (content: string) => {
     const prompt = FOOD_AVAILABILITY_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+    const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +98,7 @@ const useChatStore = create<ChatState>((set, get) => ({
       throw new Error("Failed to get food availability");
     }
 
-    const result = await response.text();
+    const { response: result } = await response.json();
     return JSON.parse(result);
   },
 

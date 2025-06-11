@@ -1,5 +1,5 @@
-import type { Message, AIResponse } from '@/types/chat';
-import type { Recipe } from '@/types/recipe';
+import type { Message, AIResponse } from '@shared/types/chat';
+import type { Recipe } from '@shared/types/recipe';
 
 /**
  * 生成随机ID

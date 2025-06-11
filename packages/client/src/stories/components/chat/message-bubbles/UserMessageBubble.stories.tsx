@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import UserMessageBubble from "../../../../components/chat/message-bubbles/user-message-bubble";
+import UserMessageBubble from "@/components/chat/message-bubbles/UserMessageBubble";
 
 const meta: Meta<typeof UserMessageBubble> = {
   title: "Chat/message-bubbles/UserMessageBubble",

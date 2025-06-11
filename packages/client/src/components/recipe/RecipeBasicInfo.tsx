@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Users } from "lucide-react";
-import type { Recipe } from '@/types/recipe';
+import type { Recipe } from '@shared/types/recipe';
 
 interface RecipeBasicInfoProps {
   recipe: Recipe;

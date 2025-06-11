@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import RecipeMessageBubble from '../../../../components/chat/message-bubbles/recipe-message-bubble';
+import RecipeMessageBubble from '@/components/chat/message-bubbles/RecipeMessageBubble';
 
 const meta: Meta<typeof RecipeMessageBubble> = {
   title: 'Chat/message-bubbles/RecipeMessageBubble',

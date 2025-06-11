@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import TypingPrompt from '../../../components/chat/typing-prompt';
+import TypingPrompt from '@/components/chat/TypingPrompt';
 
 const meta: Meta<typeof TypingPrompt> = {
   title: 'Chat/TypingPrompt',

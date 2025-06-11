@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Recipe } from "@/types/recipe";
+import type { Recipe } from "@shared/types/recipe";
 
 interface RecipeState {
   currentRecipe: Recipe | null;

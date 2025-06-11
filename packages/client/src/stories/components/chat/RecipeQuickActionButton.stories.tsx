@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import RecipeQuickActionButton from '../../../components/chat/recipe-quick-action-button';
+import RecipeQuickActionButton from '@/components/chat/RecipeQuickActionButton';
 
 const meta: Meta<typeof RecipeQuickActionButton> = {
   title: 'Chat/RecipeQuickActionButton',
