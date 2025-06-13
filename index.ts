@@ -10,8 +10,7 @@ export default {
       console.log("📡 Routing to API", path);
 
       // 创建新的请求，去掉 /api 前缀
-      const apiPath = path.replace("/api", "") || "/";
-      const apiUrl = new URL(apiPath, url.origin);
+      const apiUrl = new URL(path, url.origin);
       apiUrl.search = url.search; // 保留查询参数
 
       const apiRequest = new Request(apiUrl.toString(), {
