@@ -5,12 +5,10 @@ import {
   buildMessageFromAIResponse,
   buildUserMessage,
 } from "@/utils/message-builder";
-import {
-  INTENT_PROMPT,
-  CHAT_PROMPT,
-  RECIPE_PROMPT,
-  FOOD_AVAILABILITY_PROMPT,
-} from "@/prompts/chat-prompt";
+import INTENT_PROMPT from "@/prompts/intent-prompt";
+import CHAT_PROMPT from "@/prompts/chat-prompt";
+import RECIPE_PROMPT from "@/prompts/recipe-prompt";
+import HEALTH_ADVICE_PROMPT from "@/prompts/health-advice-prompt";
 
 interface ChatState {
   messages: Message[];
@@ -26,7 +24,7 @@ interface ChatState {
     content: string,
     onChunk?: (chunk: string) => void
   ) => Promise<{ description: string; recipes: Recipe[] }>;
-  getFoodAvailability: (content: string) => Promise<AIResponse["content_body"]>;
+  getHealthAdvice: (content: string) => Promise<AIResponse["content_body"]>;
 }
 
 // 处理流式响应的通用函数
@@ -130,8 +128,8 @@ const useChatStore = create<ChatState>((set, get) => ({
     return JSON.parse(result) as { description: string; recipes: Recipe[] };
   },
 
-  getFoodAvailability: async (content: string) => {
-    const prompt = FOOD_AVAILABILITY_PROMPT.replace("{user_input}", content);
+  getHealthAdvice: async (content: string) => {
+    const prompt = HEALTH_ADVICE_PROMPT.replace("{user_input}", content);
     const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       headers: {
@@ -156,7 +154,7 @@ const useChatStore = create<ChatState>((set, get) => ({
       getIntent,
       sendChatMessage,
       getRecipe,
-      getFoodAvailability,
+      getHealthAdvice,
     } = get();
 
     const userMessage = buildUserMessage(content);
@@ -236,11 +234,11 @@ const useChatStore = create<ChatState>((set, get) => ({
           };
           break;
         }
-        case "food_availability": {
-          const foodAvailabilityContent = await getFoodAvailability(content);
+        case "health_advice": {
+          const healthAdviceContent = await getHealthAdvice(content);
           aiResponse = {
-            intent_type: "food_availability",
-            content_body: foodAvailabilityContent,
+            intent_type: "health_advice",
+            content_body: healthAdviceContent,
           };
           const message = buildMessageFromAIResponse(aiResponse);
           addMessage(message);
