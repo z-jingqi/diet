@@ -12,7 +12,7 @@ const ChatPage = () => {
   const { messages, sendMessage } = useChatStore();
   const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
   const [showTyping, setShowTyping] = useState(true);
-  const [isTyping, setIsTyping] = useState(true);
+  const [, setIsTyping] = useState(true);
 
   const handleSendMessage = async (content: string) => {
     setShowTyping(false);

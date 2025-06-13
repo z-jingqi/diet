@@ -1,0 +1,9 @@
+name = "diet"
+compatibility_date = "2025-06-13"      # 请根据需要使用最新日期
+workers_dev = true                     # 使用 *.workers.dev 默认子域名
+main = "./index.ts"  # 指向构建后的 API 入口文件
+
+[assets]
+directory = "./packages/client/dist"   # 指向前端构建输出目录
+binding = "ASSETS"                     # 资源绑定名称
+not_found_handling = "single-page-application"  # SPA 路由模式

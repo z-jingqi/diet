@@ -14,12 +14,14 @@
   },
   "dependencies": {
     "@diet/shared": "file:../shared",
+    "@hono/node-server": "1.14.4",
     "axios": "1.9.0",
     "baidu-aip-sdk": "^4.16.11",
     "cors": "^2.8.5",
     "dashscope": "^1.0.0",
     "dotenv": "^16.4.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "hono": "4.7.11"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

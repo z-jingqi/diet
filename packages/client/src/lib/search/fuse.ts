@@ -1,13 +1,13 @@
-import Fuse from 'fuse.js';
-import type { Food, Nutrition } from '../../types/food';
+import Fuse from "fuse.js";
+import type { Food, Nutrition } from "@shared/types/food";
 
 const fuseOptions = {
   keys: [
-    { name: 'name', weight: 2 },
-    { name: 'altNames', weight: 1 }
+    { name: "name", weight: 2 },
+    { name: "altNames", weight: 1 },
   ],
   threshold: 0.3,
-  includeScore: true
+  includeScore: true,
 };
 
 export class FoodSearch {
@@ -19,17 +19,12 @@ export class FoodSearch {
 
   search(query: string): Food[] {
     if (!query.trim()) return [];
-    return this.fuse.search(query).map(result => result.item);
-  }
-
-  searchByCategory(query: string, category: string): Food[] {
-    const results = this.search(query);
-    return results.filter(food => food.category === category);
+    return this.fuse.search(query).map((result) => result.item);
   }
 
   searchByNutrition(query: string, nutrition: Partial<Nutrition>): Food[] {
     const results = this.search(query);
-    return results.filter(food => {
+    return results.filter((food) => {
       if (!food.nutrition) return false;
       return Object.entries(nutrition).every(([key, value]) => {
         const foodValue = food.nutrition?.[key as keyof Nutrition];
@@ -37,4 +32,4 @@ export class FoodSearch {
       });
     });
   }
-} 
+}

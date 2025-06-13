@@ -18,6 +18,8 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "1.6.0",
+    "@cloudflare/workers-types": "4.20250613.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@types/react-syntax-highlighter": "^15.5.13",
@@ -30,6 +32,7 @@
     "tsx": "^4.20.0",
     "turbo": "^1.12.2",
     "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "wrangler": "4.20.0"
   }
 }

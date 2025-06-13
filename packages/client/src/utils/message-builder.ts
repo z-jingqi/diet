@@ -36,12 +36,12 @@ export const buildMessageFromAIResponse = (
     } as Message;
   }
 
-  if (response.intent_type === 'food_availability') {
+  if (response.intent_type === 'health_advice') {
     const content = response.content_body;
     return {
       ...baseMessage,
       content: JSON.stringify(content, null, 2),
-      foodAvailability: content,
+      healthAdvice: content,
     } as Message;
   }
 
