@@ -1,4 +1,4 @@
-import { createApiApp } from "./packages/api/src/index";
+import apiApp from "./packages/api/src/index";
 
 export default {
   async fetch(request: Request, env: any, ctx): Promise<Response> {
@@ -8,8 +8,6 @@ export default {
     // API 路由处理
     if (path.startsWith("/api/")) {
       console.log("📡 Routing to API", path);
-      // 创建 API 应用实例
-      const apiApp = createApiApp();
 
       // 创建新的请求，去掉 /api 前缀
       const apiPath = path.replace("/api", "") || "/";

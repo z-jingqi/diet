@@ -51,4 +51,6 @@ export const createApiApp = () => {
   return app;
 };
 
-export type ApiApp = ReturnType<typeof createApiApp>;
+const app = createApiApp();
+
+export default app;
