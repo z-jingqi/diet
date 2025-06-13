@@ -1,0 +1,30 @@
+name = "diet-api"
+main = "dist/index.js"
+compatibility_date = "2024-03-21"
+
+[build]
+command = "npm run build"
+watch_dir = "src"
+
+[build.upload]
+format = "modules"
+main = "./dist/index.js"
+dir = "dist"
+
+# 使用 Pages 自定义域名，不需要单独配置 API 域名
+# [env.production]
+# name = "diet-api-prod"
+# route = "api.yourdomain.com/*"
+
+# [env.development]
+# name = "diet-api-dev"
+# route = "dev-api.yourdomain.com/*"
+
+[vars]
+ENVIRONMENT = "production"
+
+# 使用 KV 存储缓存数据
+[[kv_namespaces]]
+binding = "DIET_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id" 

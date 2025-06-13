@@ -8,6 +8,32 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@shared": path.resolve(__dirname, "../shared/src"),
+    },
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: true,
+    // 确保资源路径正确
+    assetsDir: "assets",
+    // 分块策略
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-slot"],
+        },
+      },
+    },
+  },
+  // 开发服务器配置
+  server: {
+    port: 3000,
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
     },
   },
 })
