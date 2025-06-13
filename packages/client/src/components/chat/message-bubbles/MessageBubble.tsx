@@ -3,6 +3,7 @@ import type { Recipe } from "@shared/types/recipe";
 import ChatMessageBubble from "./ChatMessageBubble";
 import RecipeMessageBubble from "./RecipeMessageBubble";
 import UserMessageBubble from "./UserMessageBubble";
+import HealthAdviceMessageBubble from "./HealthAdviceMessageBubble";
 
 interface MessageBubbleProps {
   message: Message;
@@ -27,8 +28,12 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
         />
       );
     case "health_advice":
-      // TODO: 健康建议消息气泡
-      return <div>健康建议消息气泡</div>;
+      return (
+        <HealthAdviceMessageBubble
+          content={message.content}
+          healthAdvice={message.healthAdvice}
+        />
+      );
     default:
       return <ChatMessageBubble content={message.content} />;
   }

@@ -1,0 +1,105 @@
+import type { HealthAdviceResponse } from "@shared/types/health-advice";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+interface HealthAdviceMessageBubbleProps {
+  content: string;
+  healthAdvice?: HealthAdviceResponse;
+}
+
+const statusMap = {
+  recommended: { label: "推荐", className: "bg-green-500" },
+  moderate: { label: "适量", className: "bg-yellow-500" },
+  not_recommended: { label: "不建议", className: "bg-orange-500" },
+  forbidden: { label: "禁止", className: "bg-red-500" },
+};
+
+const typeMap = {
+  diet: "饮食",
+  exercise: "运动",
+  lifestyle: "生活方式",
+  mental: "心理",
+  environment: "环境",
+  social: "社交",
+  seasonal: "季节",
+  other: "其他",
+};
+
+/**
+ * 健康建议消息气泡组件
+ */
+const HealthAdviceMessageBubble = ({
+  content,
+  healthAdvice,
+}: HealthAdviceMessageBubbleProps) => {
+  if (!healthAdvice) {
+    return <div className="text-sm">{content}</div>;
+  }
+
+  const status = statusMap[healthAdvice.status];
+  const type = typeMap[healthAdvice.type];
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{healthAdvice.title}</CardTitle>
+          <div className="flex gap-2">
+            <Badge variant="outline">{type}</Badge>
+            <Badge className={cn("text-white", status.className)}>
+              {status.label}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* 原因分析 */}
+          {healthAdvice.reasons.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2">原因分析</h4>
+              <ul className="list-disc pl-4 space-y-1">
+                {healthAdvice.reasons.map((reason, index) => (
+                  <li key={index} className="text-sm">
+                    {reason.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 具体建议 */}
+          {healthAdvice.suggestions.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2">具体建议</h4>
+              <ul className="list-disc pl-4 space-y-1">
+                {healthAdvice.suggestions.map((suggestion, index) => (
+                  <li key={index} className="text-sm">
+                    {suggestion.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 适用场景 */}
+          {healthAdvice.scenarios.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-2">适用场景</h4>
+              <ul className="list-disc pl-4 space-y-1">
+                {healthAdvice.scenarios.map((scenario, index) => (
+                  <li key={index} className="text-sm">
+                    {scenario.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default HealthAdviceMessageBubble; 
