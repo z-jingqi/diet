@@ -7,6 +7,7 @@ export default {
 
     // API 路由处理
     if (path.startsWith("/api/")) {
+      console.log("📡 Routing to API", path);
       // 创建 API 应用实例
       const apiApp = createApiApp();
 
@@ -23,6 +24,11 @@ export default {
 
       // 调用 Hono 应用处理请求
       return apiApp.fetch(apiRequest, env, ctx);
+    }
+
+    if (!env.ASSETS) {
+      console.error("❌ env.ASSETS is undefined");
+      return new Response("Internal error: ASSETS not bound", { status: 500 });
     }
 
     // 前端静态资源处理
