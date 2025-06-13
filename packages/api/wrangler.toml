@@ -27,4 +27,9 @@ ENVIRONMENT = "production"
 [[kv_namespaces]]
 binding = "DIET_KV"
 id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id" 
+preview_id = "your-preview-kv-namespace-id"
+
+# 使用免费子域名
+[env.production]
+name = "diet-api"
+workers_dev = true  # 启用 workers.dev 子域名 
