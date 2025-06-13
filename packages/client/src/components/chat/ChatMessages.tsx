@@ -2,7 +2,7 @@ import useChatStore from '@/store/chat';
 import { useNavigate } from "react-router-dom";
 import useRecipeStore from '@/store/recipe';
 import type { Recipe } from '@shared/types/recipe';
-import MessageBubble from './MessageBubble';
+import MessageBubble from './message-bubbles/MessageBubble';
 import { useEffect, useRef, useState } from 'react';
 
 const ChatMessages = () => {

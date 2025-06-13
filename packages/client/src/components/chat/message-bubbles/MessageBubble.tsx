@@ -1,9 +1,8 @@
 import type { Message } from "@shared/types/chat";
 import type { Recipe } from "@shared/types/recipe";
-import ChatMessageBubble from "./message-bubbles/ChatMessageBubble";
-import FoodAvailabilityMessageBubble from "./message-bubbles/FoodAvailabilityMessageBubble";
-import RecipeMessageBubble from "./message-bubbles/RecipeMessageBubble";
-import UserMessageBubble from "./message-bubbles/UserMessageBubble";
+import ChatMessageBubble from "./ChatMessageBubble";
+import RecipeMessageBubble from "./RecipeMessageBubble";
+import UserMessageBubble from "./UserMessageBubble";
 
 interface MessageBubbleProps {
   message: Message;
@@ -27,13 +26,9 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
           onRecipeClick={onRecipeClick}
         />
       );
-    case "food_availability":
-      return (
-        <FoodAvailabilityMessageBubble
-          content={message.content}
-          foodAvailability={message.foodAvailability}
-        />
-      );
+    case "health_advice":
+      // TODO: 健康建议消息气泡
+      return <div>健康建议消息气泡</div>;
     default:
       return <ChatMessageBubble content={message.content} />;
   }
