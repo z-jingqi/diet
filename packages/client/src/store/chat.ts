@@ -79,7 +79,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   getIntent: async (content: string) => {
     const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/intent", {
+    const response = await fetch("/api/intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +99,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   sendChatMessage: async (content: string) => {
     const prompt = CHAT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   getRecipe: async (content: string, onChunk?: (chunk: string) => void) => {
     const prompt = RECIPE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -130,7 +130,7 @@ const useChatStore = create<ChatState>((set, get) => ({
 
   getHealthAdvice: async (content: string) => {
     const prompt = HEALTH_ADVICE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("http://localhost:3000/api/chat", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
