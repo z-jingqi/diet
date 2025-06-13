@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "shadcn-ui@latest add button card badge",
     "dev": "vite",
     "build": "tsc && vite build",
     "watch": "tsc --watch",

@@ -1,4 +1,4 @@
-import { Markdown } from '@/components/ui/Markdown';
+import { Markdown } from '@/components/ui/markdown';
 import { useEffect, useState } from 'react';
 
 /**

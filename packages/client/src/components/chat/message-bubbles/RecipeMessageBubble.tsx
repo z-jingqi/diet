@@ -1,4 +1,4 @@
-import { Markdown } from '@/components/ui/Markdown';
+import { Markdown } from '@/components/ui/markdown';
 import type { Recipe } from '@shared/types/recipe';
 import RecipeQuickActionButton from '../RecipeQuickActionButton';
 import { useEffect, useState } from 'react';
