@@ -1,56 +1,99 @@
 import { Hono } from "hono";
-import { serveStatic } from "hono/cloudflare-workers";
 import { cors } from "hono/cors";
-import { handle } from "hono/vercel";
-// import { AIServiceFactory } from './services/ai/factory';
-// import { AIProvider } from './services/ai/types';
 import { MockAIService } from "./services/ai/mock";
+import type { KVNamespace } from "@cloudflare/workers-types";
+import type { R2Bucket } from "@cloudflare/workers-types";
+import type { Fetcher } from "@cloudflare/workers-types";
 
+// 定义环境变量类型
 export type Bindings = {
-  // 这里可以添加环境变量类型
+  // 环境变量
+  ENVIRONMENT: string;  // 环境名称，如 'development', 'production'
+  
+  // AI 服务相关
+  BAIDU_API_KEY?: string;      // 百度 API Key
+  BAIDU_SECRET_KEY?: string;   // 百度 Secret Key
+  DASHSCOPE_API_KEY?: string;  // 阿里云 DashScope API Key
+  
+  // 数据库相关
+  DATABASE_URL?: string;       // 数据库连接 URL
+  
+  // 缓存相关
+  CACHE_KV?: KVNamespace;      // Cloudflare KV 存储
+  
+  // 对象存储相关
+  BUCKET?: R2Bucket;           // Cloudflare R2 存储
+  
+  // 其他服务
+  ASSETS: Fetcher;             // 静态资源绑定
 };
 
-export const createApiApp = () => {
-  const app = new Hono<{ Bindings: Bindings }>();
+// 创建 Hono 应用
+const app = new Hono<{ Bindings: Bindings }>();
 
-  // 启用 CORS
-  app.use("*", cors());
+// 启用 CORS
+app.use("*", cors());
 
-  // 静态资源服务
-  app.use("/*", serveStatic({ root: "./", manifest: {} }));
+// 全局错误处理
+app.onError((err, c) => {
+  console.error("API Error:", err);
+  return c.json({ error: "Internal Server Error" }, 500);
+});
 
-  // API 路由
-  app.get("/api/health", (c) => {
-    return c.json({ status: "ok" });
-  });
+// 健康检查接口
+app.get("/health", (c) => {
+  return c.json({ status: "ok" });
+});
 
-  // 获取用户意图接口
-  app.post("/api/intent", async (c) => {
-    try {
-      const aiService = new MockAIService();
-      const { message } = await c.req.json();
-      const result = await aiService.getIntent(message);
-      return c.json(result);
-    } catch (error) {
-      return c.json({ error: "Failed to process intent" }, 500);
+// 获取用户意图接口
+app.post("/intent", async (c) => {
+  try {
+    // 打印请求头，用于调试
+    const headers: Record<string, string> = {};
+    c.req.raw.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    
+    // 获取请求体
+    const body = await c.req.json();
+    
+    if (!body.prompt) {
+      return c.json({ error: "Missing prompt in request body" }, 400);
     }
-  });
 
-  // 聊天接口
-  app.post("/api/chat", async (c) => {
-    try {
-      const aiService = new MockAIService();
-      const { message } = await c.req.json();
-      const result = await aiService.chat(message);
-      return c.json(result);
-    } catch (error) {
-      return c.json({ error: "Failed to process chat" }, 500);
+    const aiService = new MockAIService();
+    const result = await aiService.getIntent(body.prompt);
+    return c.json(result);
+  } catch (error) {
+    console.error("Intent Error:", error);
+    return c.json({ error: "Failed to process intent" }, 500);
+  }
+});
+
+// 聊天接口
+app.post("/chat", async (c) => {
+  try {
+    // 打印请求头，用于调试
+    const headers: Record<string, string> = {};
+    c.req.raw.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    
+    // 获取请求体
+    const body = await c.req.json();
+    
+    if (!body.prompt) {
+      return c.json({ error: "Missing prompt in request body" }, 400);
     }
-  });
 
-  return app;
-};
+    const aiService = new MockAIService();
+    const result = await aiService.chat(body.prompt);
+    return c.json(result);
+  } catch (error) {
+    console.error("Chat Error:", error);
+    return c.json({ error: "Failed to process chat" }, 500);
+  }
+});
 
-const app = createApiApp();
-
+// 导出 Hono 应用
 export default app;

@@ -6,10 +6,10 @@
   "description": "Diet API service",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
-    "start": "node dist/index.ts",
+    "build": "tsup src/index.ts --format esm --dts",
+    "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "watch": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "watch": "tsup src/index.ts --format esm --dts --watch",
     "lint": "eslint ."
   },
   "dependencies": {

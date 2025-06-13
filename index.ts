@@ -1,4 +1,4 @@
-import apiApp from "./packages/api/src/index";
+import apiApp from "./packages/api/dist/index";
 
 export default {
   async fetch(request: Request, env: any, ctx): Promise<Response> {
@@ -10,7 +10,8 @@ export default {
       console.log("📡 Routing to API", path);
 
       // 创建新的请求，去掉 /api 前缀
-      const apiUrl = new URL(path, url.origin);
+      const apiPath = path.replace(/^\/api/, "");
+      const apiUrl = new URL(apiPath, url.origin);
       apiUrl.search = url.search; // 保留查询参数
 
       const apiRequest = new Request(apiUrl.toString(), {
