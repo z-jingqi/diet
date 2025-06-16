@@ -1,4 +1,4 @@
-import { AIService, Message, AIConfig, ResponseFormat } from './types';
+import { AIService, Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from './types';
 import axios from 'axios';
 
 interface QwenChatResponse {
@@ -7,15 +7,28 @@ interface QwenChatResponse {
   };
 }
 
+interface ServiceEnv {
+  DASHSCOPE_API_KEY?: string;
+  QWEN_MODEL?: string;
+}
+
 export class QwenService implements AIService {
   private apiKey: string;
   private baseUrl = 'https://dashscope.aliyuncs.com/api/v1';
+  private model: string;
   private defaultFormat: ResponseFormat = 'json';
   private axiosInstance;
 
-  constructor(config?: AIConfig) {
-    this.apiKey = config?.apiKey || process.env.QWEN_API_KEY || '';
-    this.defaultFormat = config?.defaultResponseFormat || (process.env.QWEN_DEFAULT_RESPONSE_FORMAT as ResponseFormat) || 'json';
+  constructor(config?: AIConfig, env?: ServiceEnv) {
+    // 优先使用配置中的值，然后是环境变量
+    this.apiKey = config?.apiKey || env?.DASHSCOPE_API_KEY || process.env.DASHSCOPE_API_KEY || '';
+    this.model = config?.model || env?.QWEN_MODEL || DEFAULT_MODELS.qwen;
+    
+    if (!this.apiKey) {
+      throw new Error('DashScope API Key is required');
+    }
+
+    this.defaultFormat = config?.defaultResponseFormat || 'json';
     
     this.axiosInstance = axios.create({
       headers: {
@@ -31,7 +44,7 @@ export class QwenService implements AIService {
       const response = await this.axiosInstance.post(
         `${this.baseUrl}/services/aigc/text-generation/generation`,
         {
-          model: 'qwen-turbo',
+          model: this.model,
           input: {
             messages: messages.map(msg => ({
               role: msg.role,
@@ -67,7 +80,7 @@ export class QwenService implements AIService {
       const response = await this.axiosInstance.post(
         `${this.baseUrl}/services/aigc/text-generation/generation`,
         {
-          model: 'qwen-turbo',
+          model: this.model,
           input: {
             messages: [{
               role: 'user',

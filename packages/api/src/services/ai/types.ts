@@ -19,14 +19,22 @@ export interface AIService {
   getIntent: (prompt: string) => Promise<string>;
 }
 
-export type AIProvider = 'openai' | 'anthropic' | 'qwen' | 'baidu';
+export type AIProvider = 'openai' | 'anthropic' | 'qwen' | 'baidu' | 'cloudflare';
 
 export interface AIConfig {
   type: AIProvider;
-  apiKey: string;
+  apiKey?: string;  // Optional for Cloudflare
   apiSecret?: string; // For Baidu AI
-  model?: string;
+  accountId?: string; // For Cloudflare AI
+  model?: string;    // Model name/ID for the AI service
   baseUrl?: string;
   defaultResponseFormat?: ResponseFormat;
-} 
+}
+
+// 添加默认模型配置
+export const DEFAULT_MODELS = {
+  cloudflare: '@cf/meta/llama-3.1-8b-instruct',
+  qwen: 'qwen-turbo',
+  baidu: 'ERNIE-Bot-4'
+} as const; 
  

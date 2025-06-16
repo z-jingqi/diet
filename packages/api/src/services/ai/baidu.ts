@@ -1,4 +1,4 @@
-import { AIService, Message, AIConfig, ResponseFormat } from './types';
+import { AIService, Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from './types';
 import axios from 'axios';
 
 interface BaiduTokenResponse {
@@ -9,17 +9,31 @@ interface BaiduChatResponse {
   result: string;
 }
 
+interface ServiceEnv {
+  BAIDU_API_KEY?: string;
+  BAIDU_SECRET_KEY?: string;
+  BAIDU_MODEL?: string;
+}
+
 export class BaiduAIService implements AIService {
   private apiKey: string;
   private apiSecret: string;
   private baseUrl = 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat';
+  private model: string;
   private defaultFormat: ResponseFormat;
   private axiosInstance;
 
-  constructor(config?: AIConfig) {
-    this.apiKey = config?.apiKey || process.env.BAIDU_API_KEY || '';
-    this.apiSecret = config?.apiSecret || process.env.BAIDU_API_SECRET || '';
-    this.defaultFormat = config?.defaultResponseFormat || (process.env.BAIDU_DEFAULT_RESPONSE_FORMAT as ResponseFormat) || 'json';
+  constructor(config?: AIConfig, env?: ServiceEnv) {
+    // 优先使用配置中的值，然后是环境变量
+    this.apiKey = config?.apiKey || env?.BAIDU_API_KEY || process.env.BAIDU_API_KEY || '';
+    this.apiSecret = config?.apiSecret || env?.BAIDU_SECRET_KEY || process.env.BAIDU_SECRET_KEY || '';
+    this.model = config?.model || env?.BAIDU_MODEL || DEFAULT_MODELS.baidu;
+    
+    if (!this.apiKey || !this.apiSecret) {
+      throw new Error('Baidu API Key and Secret are required');
+    }
+
+    this.defaultFormat = config?.defaultResponseFormat || 'json';
     
     this.axiosInstance = axios.create({
       headers: {
@@ -65,7 +79,7 @@ export class BaiduAIService implements AIService {
       }
 
       const response = await this.axiosInstance.post(
-        `${this.baseUrl}?access_token=${accessToken}`,
+        `${this.baseUrl}/${this.model}?access_token=${accessToken}`,
         body,
         {
           headers: {
@@ -91,7 +105,7 @@ export class BaiduAIService implements AIService {
     try {
       const accessToken = await this.getAccessToken();
       const response = await this.axiosInstance.post(
-        `${this.baseUrl}?access_token=${accessToken}`,
+        `${this.baseUrl}/${this.model}?access_token=${accessToken}`,
         {
           messages: [{
             role: 'user',

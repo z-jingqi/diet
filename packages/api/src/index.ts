@@ -1,31 +1,35 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { MockAIService } from "./services/ai/mock";
+import { AIServiceFactory } from "./services/ai/factory";
 import type { KVNamespace } from "@cloudflare/workers-types";
 import type { R2Bucket } from "@cloudflare/workers-types";
 import type { Fetcher } from "@cloudflare/workers-types";
+import type { AIProvider } from "./services/ai/types";
 
 // 定义环境变量类型
 export type Bindings = {
   // 环境变量
-  ENVIRONMENT: string;  // 环境名称，如 'development', 'production'
-  
+  ENVIRONMENT: string; // 环境名称，如 'development', 'production'
+
   // AI 服务相关
-  BAIDU_API_KEY?: string;      // 百度 API Key
-  BAIDU_SECRET_KEY?: string;   // 百度 Secret Key
-  DASHSCOPE_API_KEY?: string;  // 阿里云 DashScope API Key
-  
+  AI_SERVICE?: AIProvider; // 使用的 AI 服务提供商
+  BAIDU_API_KEY?: string; // 百度 API Key
+  BAIDU_SECRET_KEY?: string; // 百度 Secret Key
+  DASHSCOPE_API_KEY?: string; // 阿里云 DashScope API Key
+  CLOUDFLARE_WORKERS_AI_API_TOKEN?: string; // Cloudflare API Token
+  CLOUDFLARE_ACCOUNT_ID?: string; // Cloudflare Account ID
+
   // 数据库相关
-  DATABASE_URL?: string;       // 数据库连接 URL
-  
+  DATABASE_URL?: string; // 数据库连接 URL
+
   // 缓存相关
-  CACHE_KV?: KVNamespace;      // Cloudflare KV 存储
-  
+  CACHE_KV?: KVNamespace; // Cloudflare KV 存储
+
   // 对象存储相关
-  BUCKET?: R2Bucket;           // Cloudflare R2 存储
-  
+  BUCKET?: R2Bucket; // Cloudflare R2 存储
+
   // 其他服务
-  ASSETS: Fetcher;             // 静态资源绑定
+  ASSETS: Fetcher; // 静态资源绑定
 };
 
 // 创建 Hono 应用
@@ -53,15 +57,22 @@ app.post("/intent", async (c) => {
     c.req.raw.headers.forEach((value, key) => {
       headers[key] = value;
     });
-    
+
     // 获取请求体
     const body = await c.req.json();
-    
+
     if (!body.prompt) {
       return c.json({ error: "Missing prompt in request body" }, 400);
     }
 
-    const aiService = new MockAIService();
+    // 根据配置选择 AI 服务
+    const aiService = AIServiceFactory.create(
+      {
+        type: c.env.AI_SERVICE || 'cloudflare',
+      },
+      c.env
+    );
+
     const result = await aiService.getIntent(body.prompt);
     return c.json(result);
   } catch (error) {
@@ -82,13 +93,20 @@ app.post("/chat", async (c) => {
     // 获取请求体
     const body = await c.req.json();
     
-    if (!body.prompt) {
-      return c.json({ error: "Missing prompt in request body" }, 400);
+    if (!body.messages || !Array.isArray(body.messages)) {
+      return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
 
-    const aiService = new MockAIService();
-    const result = await aiService.chat(body.prompt);
-    return c.json(result);
+    // 根据配置选择 AI 服务
+    const aiService = AIServiceFactory.create(
+      {
+        type: c.env.AI_SERVICE || 'cloudflare',
+      },
+      c.env
+    );
+      
+    const result = await aiService.chat(body.messages);
+    return c.json({ response: result });
   } catch (error) {
     console.error("Chat Error:", error);
     return c.json({ error: "Failed to process chat" }, 500);

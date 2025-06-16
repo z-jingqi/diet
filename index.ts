@@ -1,4 +1,4 @@
-import apiApp from "./packages/api/dist/index";
+import apiApp from "./packages/api/src/index";
 
 export default {
   async fetch(request: Request, env: any, ctx): Promise<Response> {
