@@ -8,10 +8,12 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "deploy": "wrangler deploy",
+    "local": "wrangler dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "2.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",

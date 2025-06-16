@@ -57,12 +57,12 @@ app.post("/intent", async (c) => {
     c.req.raw.headers.forEach((value, key) => {
       headers[key] = value;
     });
-
+    
     // 获取请求体
     const body = await c.req.json();
-
-    if (!body.prompt) {
-      return c.json({ error: "Missing prompt in request body" }, 400);
+    
+    if (!body.messages || !Array.isArray(body.messages)) {
+      return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
 
     // 根据配置选择 AI 服务
@@ -72,9 +72,9 @@ app.post("/intent", async (c) => {
       },
       c.env
     );
-
-    const result = await aiService.getIntent(body.prompt);
-    return c.json(result);
+      
+    const result = await aiService.getIntent(body.messages);
+    return c.json({ response: result });
   } catch (error) {
     console.error("Intent Error:", error);
     return c.json({ error: "Failed to process intent" }, 500);
@@ -97,6 +97,10 @@ app.post("/chat", async (c) => {
       return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
 
+    if (!body.intent) {
+      return c.json({ error: "Missing intent in request body" }, 400);
+    }
+
     // 根据配置选择 AI 服务
     const aiService = AIServiceFactory.create(
       {
@@ -105,7 +109,20 @@ app.post("/chat", async (c) => {
       c.env
     );
       
-    const result = await aiService.chat(body.messages);
+    const result = await aiService.chat(body.messages, body.intent, body.format);
+
+    // 如果是流式响应，直接返回流
+    if (result instanceof ReadableStream) {
+      return new Response(result, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // 如果是普通响应，返回 JSON
     return c.json({ response: result });
   } catch (error) {
     console.error("Chat Error:", error);

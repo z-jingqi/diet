@@ -1,91 +1,34 @@
 import { create } from "zustand";
-import type { Message, AIResponse } from "@shared/types/chat";
+import type { Message, AIResponse, MessageType } from "@shared/types/chat";
 import type { Recipe } from "@shared/types/recipe";
-import {
-  buildMessageFromAIResponse,
-  buildUserMessage,
-} from "@/utils/message-builder";
-import INTENT_PROMPT from "@/prompts/intent-prompt";
-import CHAT_PROMPT from "@/prompts/chat-prompt";
-import RECIPE_PROMPT from "@/prompts/recipe-prompt";
-import HEALTH_ADVICE_PROMPT from "@/prompts/health-advice-prompt";
+import { buildMessage, buildUserMessage } from "@/utils/message-builder";
+import { fetchEventSource, EventSourceMessage } from "@microsoft/fetch-event-source";
 
 interface ChatState {
   messages: Message[];
   addMessage: (message: Message) => void;
-  updateLastMessage: (updater: (message: Message) => Message) => void;
-  sendMessage: (
-    content: string,
-    setCurrentRecipe: (recipe: Recipe) => void
-  ) => Promise<void>;
+  sendMessage: (content: string, setCurrentRecipe: (recipe: Recipe) => void) => Promise<void>;
   getIntent: (content: string) => Promise<AIResponse["intent_type"]>;
   sendChatMessage: (content: string) => Promise<string>;
-  getRecipe: (
-    content: string,
-    onChunk?: (chunk: string) => void
-  ) => Promise<{ description: string; recipes: Recipe[] }>;
-  getHealthAdvice: (content: string) => Promise<AIResponse["content_body"]>;
-}
-
-// 处理流式响应的通用函数
-async function handleStreamResponse(
-  response: Response,
-  onChunk?: (chunk: string) => void
-): Promise<string> {
-  if (!response.ok) {
-    throw new Error("Failed to get response");
-  }
-
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new Error("No reader available");
-  }
-
-  let result = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    const chunk = new TextDecoder().decode(value);
-    const lines = chunk.split("\n");
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const data = line.slice(6);
-        result += data;
-        onChunk?.(data);
-      }
-    }
-  }
-
-  return result;
+  sendRecipeMessage: (content: string) => Promise<{ description: string; recipes: Recipe[] }>;
+  sendHealthAdviceMessage: (content: string) => Promise<AIResponse["content_body"]>;
 }
 
 const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
+
   addMessage: (message) => {
     set((state) => ({ messages: [...state.messages, message] }));
   },
-  updateLastMessage: (updater) => {
-    set((state) => ({
-      messages: state.messages.map((msg, index) => {
-        if (index === state.messages.length - 1) {
-          return updater(msg);
-        }
-        return msg;
-      }),
-    }));
-  },
 
   getIntent: async (content: string) => {
-    const intentPrompt = INTENT_PROMPT.replace("{user_input}", content);
     const response = await fetch("/api/intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt: intentPrompt,
+        messages: [{ role: "user", content }],
       }),
     });
 
@@ -93,69 +36,147 @@ const useChatStore = create<ChatState>((set, get) => ({
       throw new Error("Failed to get intent");
     }
 
-    const { intent } = await response.json();
+    const { response: intent } = await response.json();
     return intent as AIResponse["intent_type"];
   },
 
   sendChatMessage: async (content: string) => {
-    const prompt = CHAT_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+    let result = "";
+    const { messages } = get();
+    const currentMessage = messages[messages.length - 1];
+
+    await fetchEventSource("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "text/event-stream",
       },
       body: JSON.stringify({
-        prompt,
+        messages: [{ role: "user", content }],
+        intent: "chat" as MessageType,
       }),
-    });
+      onmessage(event: EventSourceMessage) {
+        try {
+          if (event.data === "[DONE]") {
+            return;
+          }
 
-    return handleStreamResponse(response);
+          const data = JSON.parse(event.data);
+          if (data.response !== null && data.response !== undefined) {
+            result += data.response;
+            set((state) => ({
+              messages: state.messages.map((msg) => {
+                if (msg.id === currentMessage.id) {
+                  return { ...msg, content: result };
+                }
+                return msg;
+              }),
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      },
+      onerror(error: Error) {
+        console.error("SSE error:", error);
+        throw error;
+      },
+    });
+    return result;
   },
 
-  getRecipe: async (content: string, onChunk?: (chunk: string) => void) => {
-    const prompt = RECIPE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+  sendRecipeMessage: async (content: string) => {
+    let result = "";
+    const { messages } = get();
+    const currentMessage = messages[messages.length - 1];
+
+    await fetchEventSource("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "text/event-stream",
       },
       body: JSON.stringify({
-        prompt,
+        messages: [{ role: "user", content }],
+        intent: "recipe" as MessageType,
       }),
-    });
+      onmessage(event: EventSourceMessage) {
+        try {
+          if (event.data === "[DONE]") {
+            return;
+          }
 
-    const result = await handleStreamResponse(response, onChunk);
+          const data = JSON.parse(event.data);
+          if (data.response !== null && data.response !== undefined) {
+            result += data.response;
+            set((state) => ({
+              messages: state.messages.map((msg) => {
+                if (msg.id === currentMessage.id) {
+                  return { ...msg, content: result };
+                }
+                return msg;
+              }),
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      },
+      onerror(error: Error) {
+        console.error("SSE error:", error);
+        throw error;
+      },
+    });
     return JSON.parse(result) as { description: string; recipes: Recipe[] };
   },
 
-  getHealthAdvice: async (content: string) => {
-    const prompt = HEALTH_ADVICE_PROMPT.replace("{user_input}", content);
-    const response = await fetch("/api/chat", {
+  sendHealthAdviceMessage: async (content: string) => {
+    let result = "";
+    const { messages } = get();
+    const currentMessage = messages[messages.length - 1];
+
+    await fetchEventSource("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "text/event-stream",
       },
       body: JSON.stringify({
-        prompt,
+        messages: [{ role: "user", content }],
+        intent: "health_advice" as MessageType,
       }),
-    });
+      onmessage(event: EventSourceMessage) {
+        try {
+          if (event.data === "[DONE]") {
+            return;
+          }
 
-    const result = await handleStreamResponse(response);
+          const data = JSON.parse(event.data);
+          if (data.response !== null && data.response !== undefined) {
+            result += data.response;
+            set((state) => ({
+              messages: state.messages.map((msg) => {
+                if (msg.id === currentMessage.id) {
+                  return { ...msg, content: result };
+                }
+                return msg;
+              }),
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      },
+      onerror(error: Error) {
+        console.error("SSE error:", error);
+        throw error;
+      },
+    });
     return JSON.parse(result);
   },
 
-  sendMessage: async (
-    content: string,
-    setCurrentRecipe: (recipe: Recipe) => void
-  ) => {
-    const {
-      addMessage,
-      updateLastMessage,
-      getIntent,
-      sendChatMessage,
-      getRecipe,
-      getHealthAdvice,
-    } = get();
+  sendMessage: async (content: string) => {
+    const { addMessage, getIntent, sendChatMessage, sendRecipeMessage: getRecipe, sendHealthAdviceMessage: getHealthAdvice } = get();
 
     const userMessage = buildUserMessage(content);
     addMessage(userMessage);
@@ -163,95 +184,26 @@ const useChatStore = create<ChatState>((set, get) => ({
     try {
       const intent = await getIntent(content);
 
-      let aiResponse: AIResponse;
       switch (intent) {
         case "recipe": {
           // 创建一个初始的 recipe 消息
-          const initialMessage = {
-            id: `msg-${Date.now()}`,
-            content: "",
-            type: "recipe" as const,
-            isUser: false,
-            createdAt: new Date(),
-            recipes: [],
-          };
-          addMessage(initialMessage);
-
-          let buffer = "";
-          let descriptionBuffer = "";
-          let descriptionDone = false;
+          const message = buildMessage("recipe");
+          addMessage(message);
 
           // 获取菜谱数据，并实时更新消息内容
-          const recipeContent = await getRecipe(content, (chunk) => {
-            buffer += chunk;
-
-            // 动态提取 description 字段内容
-            if (!descriptionDone) {
-              const descStart = buffer.indexOf('"description":"');
-              if (descStart !== -1) {
-                const descContentStart = descStart + 15;
-                let descContent = "";
-                for (let i = descContentStart; i < buffer.length; i++) {
-                  if (buffer[i] === '"' && buffer[i - 1] !== '\\') {
-                    // description 字段内容结束
-                    descriptionDone = true;
-                    break;
-                  }
-                  descContent += buffer[i];
-                }
-                // 只在内容有变化时更新
-                if (descContent !== descriptionBuffer) {
-                  descriptionBuffer = descContent;
-                  updateLastMessage((msg) => ({
-                    ...msg,
-                    content: descriptionBuffer,
-                  }));
-                }
-              }
-            }
-
-            // 只有能完整解析 JSON 时才渲染 recipes
-            try {
-              const parsed = JSON.parse(buffer);
-              if (parsed.recipes) {
-                updateLastMessage((msg) => ({
-                  ...msg,
-                  recipes: parsed.recipes,
-                }));
-                if (parsed.recipes[0]) {
-                  setCurrentRecipe(parsed.recipes[0]);
-                }
-              }
-              buffer = "";
-            } catch {
-              // 还没完整，不做任何处理
-            }
-          });
-
-          aiResponse = {
-            intent_type: "recipe",
-            content_body: recipeContent,
-          };
+          getRecipe(content);
           break;
         }
         case "health_advice": {
-          const healthAdviceContent = await getHealthAdvice(content);
-          aiResponse = {
-            intent_type: "health_advice",
-            content_body: healthAdviceContent,
-          };
-          const message = buildMessageFromAIResponse(aiResponse);
+          const message = buildMessage("health_advice");
           addMessage(message);
+          getHealthAdvice(content);
           break;
         }
         default: {
-          const chatContent = await sendChatMessage(content);
-          aiResponse = {
-            intent_type: "chat",
-            content_body: chatContent,
-          };
-          const message = buildMessageFromAIResponse(aiResponse);
+          const message = buildMessage("chat");
           addMessage(message);
+          sendChatMessage(content);
         }
       }
     } catch (error) {

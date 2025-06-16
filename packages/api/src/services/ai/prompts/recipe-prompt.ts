@@ -1,7 +1,5 @@
-const RECIPE_PROMPT = `
+export const RECIPE_PROMPT = `
 你是一个智能助手。请根据用户的输入生成相应的菜谱。
-
-用户输入：{user_input}
 
 请严格按照以下 JSON 格式回答，不要添加任何其他内容：
 {
@@ -48,6 +46,4 @@ const RECIPE_PROMPT = `
   }
 ]
 }
-`;
-
-export default RECIPE_PROMPT; 
+`; 

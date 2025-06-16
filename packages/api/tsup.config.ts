@@ -4,10 +4,10 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
   dts: true,
+  platform: 'node',
+  target: 'node18',
   clean: true,
   minify: true,
   sourcemap: true,
-  target: 'es2020',
-  platform: 'browser',
   outDir: 'dist',
 }); 

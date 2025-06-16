@@ -1,5 +1,4 @@
-import type { Message, AIResponse } from '@shared/types/chat';
-import type { Recipe } from '@shared/types/recipe';
+import type { Message, MessageType } from '@shared/types/chat';
 
 /**
  * 生成随机ID
@@ -16,38 +15,16 @@ const generateRandomId = (): string => {
  * @param isUser 是否为用户消息
  * @returns 构建的消息对象
  */
-export const buildMessageFromAIResponse = (
-  response: AIResponse,
+export const buildMessage = (
+  type: MessageType,
   isUser: boolean = false
 ): Message => {
-  const baseMessage: Partial<Message> = {
+  return {
     id: generateRandomId(),
-    type: response.intent_type,
+    type,
+    content: "",
     isUser,
     createdAt: new Date(),
-  };
-
-  if (response.intent_type === 'recipe') {
-    const content = response.content_body as { description: string; recipes: Recipe[] };
-    return {
-      ...baseMessage,
-      content: content.description,
-      recipes: content.recipes,
-    } as Message;
-  }
-
-  if (response.intent_type === 'health_advice') {
-    const content = response.content_body;
-    return {
-      ...baseMessage,
-      content: JSON.stringify(content, null, 2),
-      healthAdvice: content,
-    } as Message;
-  }
-
-  return {
-    ...baseMessage,
-    content: response.content_body as string,
   } as Message;
 };
 

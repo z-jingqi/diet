@@ -15,8 +15,8 @@ export interface ChatResponse {
 export type ResponseFormat = 'json' | 'event-stream';
 
 export interface AIService {
-  chat: (messages: Message[], format?: ResponseFormat) => Promise<string | ReadableStream>;
-  getIntent: (prompt: string) => Promise<string>;
+  chat: (messages: Message[], intent: string, format?: ResponseFormat) => Promise<string | ReadableStream>;
+  getIntent: (messages: Message[]) => Promise<string>;
 }
 
 export type AIProvider = 'openai' | 'anthropic' | 'qwen' | 'baidu' | 'cloudflare';

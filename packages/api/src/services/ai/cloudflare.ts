@@ -1,5 +1,9 @@
 import { AIService, Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from './types';
-import axios from 'axios';
+import { INTENT_PROMPT } from './prompts/intent-prompt';
+import { CHAT_PROMPT } from './prompts/chat-prompt';
+import { RECIPE_PROMPT } from './prompts/recipe-prompt';
+import { HEALTH_ADVICE_PROMPT } from './prompts/health-advice-prompt';
+import { BaseAIService, ServiceEnv } from './base';
 
 interface CloudflareAIResponse {
   result: {
@@ -8,24 +12,19 @@ interface CloudflareAIResponse {
   success: boolean;
 }
 
-interface ServiceEnv {
+interface CloudflareServiceEnv extends ServiceEnv {
   CLOUDFLARE_WORKERS_AI_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_MODEL?: string;
 }
 
-export class CloudflareAIService implements AIService {
-  private apiKey: string;
+export class CloudflareAIService extends BaseAIService {
   private accountId: string;
-  private baseUrl: string;
-  private model: string;
-  private defaultFormat: ResponseFormat = 'json';
-  private axiosInstance;
 
-  constructor(config?: AIConfig, env?: ServiceEnv) {
-    // 优先使用配置中的值，然后是环境变量
-    this.apiKey = config?.apiKey || env?.CLOUDFLARE_WORKERS_AI_API_TOKEN || process.env.CLOUDFLARE_WORKERS_AI_API_TOKEN || '';
-    this.accountId = config?.accountId || env?.CLOUDFLARE_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID || '';
+  constructor(config?: AIConfig, env?: CloudflareServiceEnv) {
+    super(config, env);
+    this.apiKey = config?.apiKey || env?.CLOUDFLARE_WORKERS_AI_API_TOKEN || '';
+    this.accountId = config?.accountId || env?.CLOUDFLARE_ACCOUNT_ID || '';
     this.model = config?.model || env?.CLOUDFLARE_MODEL || DEFAULT_MODELS.cloudflare;
     
     if (!this.apiKey || !this.accountId) {
@@ -33,79 +32,96 @@ export class CloudflareAIService implements AIService {
     }
 
     this.baseUrl = `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/ai/run`;
-    this.defaultFormat = config?.defaultResponseFormat || 'json';
-    
-    this.axiosInstance = axios.create({
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      }
-    });
   }
 
-  async chat(messages: Message[], format?: ResponseFormat): Promise<string | ReadableStream> {
-    const responseFormat = format || this.defaultFormat;
-    
-    try {
-      const response = await this.axiosInstance.post(
-        `${this.baseUrl}/${this.model}`,
-        {
-          messages: messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          stream: responseFormat === 'event-stream'
-        },
-        {
-          headers: {
-            'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
-          },
-          responseType: responseFormat === 'event-stream' ? 'stream' : 'json'
-        }
-      );
+  protected parseResponse(data: any): string {
+    return (data as CloudflareAIResponse).result.response;
+  }
 
-      if (responseFormat === 'event-stream') {
-        return response.data as ReadableStream;
+  async chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream> {
+    const responseFormat = format || this.defaultFormat;
+    try {
+      // 根据 intent 选择对应的 prompt
+      let systemPrompt = CHAT_PROMPT;
+      switch (intent) {
+        case 'recipe':
+          systemPrompt = RECIPE_PROMPT;
+          break;
+        case 'health_advice':
+          systemPrompt = HEALTH_ADVICE_PROMPT;
+          break;
       }
 
-      const data = response.data as CloudflareAIResponse;
-      return data.result.response;
+      // 添加系统提示到消息列表的开头
+      const messagesWithPrompt = [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ];
+
+      const requestBody = {
+        messages: messagesWithPrompt.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        stream: responseFormat === 'event-stream'
+      };
+
+      const headers = {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      const response = await this.makeRequest(
+        `${this.baseUrl}/${this.model}`,
+        requestBody,
+        responseFormat,
+        headers
+      );
+
+      // 如果是流式响应，直接返回流
+      if (response instanceof ReadableStream) {
+        return response;
+      }
+
+      // 如果是普通响应，解析并返回文本
+      return this.parseResponse(response);
     } catch (error) {
       console.error('Cloudflare AI chat error:', error);
       throw new Error('Failed to get response from Cloudflare AI');
     }
   }
 
-  async getIntent(prompt: string): Promise<string> {
+  async getIntent(messages: Message[]): Promise<string> {
     try {
-      const response = await this.axiosInstance.post(
+      const result = await this.makeRequest(
         `${this.baseUrl}/${this.model}`,
         {
           messages: [
             {
               role: 'system',
-              content: 'You are an intent classifier. Your task is to analyze user input and return exactly one of these words: "chat", "recipe", or "food_availability".'
+              content: INTENT_PROMPT
             },
-            {
-              role: 'user',
-              content: prompt
-            }
+            ...messages
           ]
+        },
+        'json',
+        {
+          'Authorization': `Bearer ${this.apiKey}`
         }
-      );
+      ) as string;
 
-      const data = response.data as CloudflareAIResponse;
-      const intent = data.result.response.trim().toLowerCase();
+      const intent = result.trim().toLowerCase();
       
       // Ensure the returned intent is valid
-      if (!['chat', 'recipe', 'food_availability'].includes(intent)) {
+      if (!['chat', 'recipe', 'health_advice'].includes(intent)) {
         return 'chat';
       }
       
       return intent;
     } catch (error) {
       console.error('Cloudflare AI intent detection error:', error);
-      return 'chat'; // Default to chat on error
+      throw new Error('Failed to get intent from Cloudflare AI');
     }
   }
 } 

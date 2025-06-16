@@ -1,5 +1,9 @@
-import { AIService, Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from './types';
-import axios from 'axios';
+import { Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from "./types";
+import { INTENT_PROMPT } from "./prompts/intent-prompt";
+import { CHAT_PROMPT } from "./prompts/chat-prompt";
+import { RECIPE_PROMPT } from "./prompts/recipe-prompt";
+import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
+import { BaseAIService, ServiceEnv } from "./base";
 
 interface QwenChatResponse {
   output: {
@@ -7,102 +11,102 @@ interface QwenChatResponse {
   };
 }
 
-interface ServiceEnv {
+interface QwenServiceEnv extends ServiceEnv {
   DASHSCOPE_API_KEY?: string;
   QWEN_MODEL?: string;
 }
 
-export class QwenService implements AIService {
-  private apiKey: string;
-  private baseUrl = 'https://dashscope.aliyuncs.com/api/v1';
-  private model: string;
-  private defaultFormat: ResponseFormat = 'json';
-  private axiosInstance;
-
-  constructor(config?: AIConfig, env?: ServiceEnv) {
-    // 优先使用配置中的值，然后是环境变量
-    this.apiKey = config?.apiKey || env?.DASHSCOPE_API_KEY || process.env.DASHSCOPE_API_KEY || '';
+export class QwenService extends BaseAIService {
+  constructor(config?: AIConfig, env?: QwenServiceEnv) {
+    super(config, env);
+    this.apiKey = config?.apiKey || env?.DASHSCOPE_API_KEY || "";
     this.model = config?.model || env?.QWEN_MODEL || DEFAULT_MODELS.qwen;
-    
-    if (!this.apiKey) {
-      throw new Error('DashScope API Key is required');
-    }
+    this.baseUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation";
 
-    this.defaultFormat = config?.defaultResponseFormat || 'json';
-    
-    this.axiosInstance = axios.create({
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      }
-    });
+    if (!this.apiKey) {
+      throw new Error("DashScope API Key is required");
+    }
   }
 
-  async chat(messages: Message[], format?: ResponseFormat): Promise<string | ReadableStream> {
+  protected parseResponse(data: any): string {
+    return (data as QwenChatResponse).output.text;
+  }
+
+  async chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream> {
     const responseFormat = format || this.defaultFormat;
     try {
-      const response = await this.axiosInstance.post(
-        `${this.baseUrl}/services/aigc/text-generation/generation`,
+      // 根据 intent 选择对应的 prompt
+      let systemPrompt = CHAT_PROMPT;
+      switch (intent) {
+        case "recipe":
+          systemPrompt = RECIPE_PROMPT;
+          break;
+        case "health_advice":
+          systemPrompt = HEALTH_ADVICE_PROMPT;
+          break;
+      }
+
+      // 添加系统提示到消息列表的开头
+      const messagesWithPrompt = [{ role: "system", content: systemPrompt }, ...messages];
+
+      return this.makeRequest(
+        this.baseUrl,
         {
           model: this.model,
           input: {
-            messages: messages.map(msg => ({
+            messages: messagesWithPrompt.map((msg) => ({
               role: msg.role,
-              content: msg.content
-            }))
+              content: msg.content,
+            })),
           },
           parameters: {
-            stream: responseFormat === 'event-stream'
-          }
-        },
-        {
-          headers: {
-            'Accept': responseFormat === 'event-stream' ? 'text/event-stream' : 'application/json',
+            stream: responseFormat === "event-stream",
           },
-          responseType: responseFormat === 'event-stream' ? 'stream' : 'json'
+        },
+        responseFormat,
+        {
+          Authorization: `Bearer ${this.apiKey}`,
         }
       );
-
-      if (responseFormat === 'event-stream') {
-        return response.data as ReadableStream;
-      }
-
-      const data = response.data as QwenChatResponse;
-      return data.output.text;
     } catch (error) {
-      console.error('Qwen chat error:', error);
-      throw new Error('Failed to get response from Qwen');
+      console.error("Qwen chat error:", error);
+      throw new Error("Failed to get response from Qwen");
     }
   }
 
-  async getIntent(prompt: string): Promise<string> {
+  async getIntent(messages: Message[]): Promise<string> {
     try {
-      const response = await this.axiosInstance.post(
-        `${this.baseUrl}/services/aigc/text-generation/generation`,
+      const result = (await this.makeRequest(
+        this.baseUrl,
         {
           model: this.model,
           input: {
-            messages: [{
-              role: 'user',
-              content: prompt
-            }]
-          }
+            messages: [
+              {
+                role: "system",
+                content: INTENT_PROMPT,
+              },
+              ...messages,
+            ],
+          },
+        },
+        "json",
+        {
+          Authorization: `Bearer ${this.apiKey}`,
         }
-      );
+      )) as string;
 
-      const data = response.data as QwenChatResponse;
-      const intent = data.output.text.trim().toLowerCase();
-      
+      const intent = result.trim().toLowerCase();
+
       // 确保返回的意图是有效的
-      if (!['chat', 'recipe', 'food_availability'].includes(intent)) {
-        return 'chat';
+      if (!["chat", "recipe", "health_advice"].includes(intent)) {
+        return "chat";
       }
-      
+
       return intent;
     } catch (error) {
-      console.error('Qwen intent detection error:', error);
-      return 'chat'; // 发生错误时默认返回普通对话
+      console.error("Qwen intent detection error:", error);
+      throw new Error("Failed to get intent from Qwen");
     }
   }
-} 
- 
+}
