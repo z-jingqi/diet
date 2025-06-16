@@ -1,35 +1,30 @@
-import { AIService, Message, AIConfig, ResponseFormat } from './types';
-
-export interface ServiceEnv {
-  [key: string]: string | undefined;
-}
+import { Bindings } from "@/index";
+import { AIService, Message, AIConfig, ResponseFormat } from "./types";
+import { AiModels } from "@cloudflare/workers-types";
 
 export abstract class BaseAIService implements AIService {
   protected apiKey: string;
-  protected baseUrl: string = '';
-  protected model: string;
-  protected defaultFormat: ResponseFormat = 'event-stream';
+  protected baseUrl: string = "";
+  protected model: string | keyof AiModels;
+  protected defaultFormat: ResponseFormat = "event-stream";
+  protected env: Bindings;
 
-  constructor(config?: AIConfig, env?: ServiceEnv) {
-    this.apiKey = config?.apiKey || '';
-    this.model = config?.model || '';
-    this.defaultFormat = config?.defaultResponseFormat || 'event-stream';
+  constructor(config: AIConfig, env: Bindings) {
+    this.apiKey = config?.apiKey || "";
+    this.model = config?.model || "";
+    this.defaultFormat = config?.defaultResponseFormat || "event-stream";
+    this.env = env;
   }
 
-  protected async makeRequest(
-    url: string, 
-    body: any, 
-    format: ResponseFormat = 'json',
-    headers: Record<string, string> = {}
-  ): Promise<string | ReadableStream> {
+  protected async makeRequest(url: string, body: any, format: ResponseFormat = "json", headers: Record<string, string> = {}): Promise<string | ReadableStream> {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': format === 'event-stream' ? 'text/event-stream' : 'application/json',
-        ...headers
+        "Content-Type": "application/json",
+        Accept: format === "event-stream" ? "text/event-stream" : "application/json",
+        ...headers,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -37,7 +32,7 @@ export abstract class BaseAIService implements AIService {
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
-    if (format === 'event-stream') {
+    if (format === "event-stream") {
       return response.body as ReadableStream;
     }
 
@@ -49,4 +44,4 @@ export abstract class BaseAIService implements AIService {
 
   abstract chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream>;
   abstract getIntent(messages: Message[]): Promise<string>;
-} 
+}

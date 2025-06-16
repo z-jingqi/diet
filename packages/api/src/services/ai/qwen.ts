@@ -3,7 +3,8 @@ import { INTENT_PROMPT } from "./prompts/intent-prompt";
 import { CHAT_PROMPT } from "./prompts/chat-prompt";
 import { RECIPE_PROMPT } from "./prompts/recipe-prompt";
 import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
-import { BaseAIService, ServiceEnv } from "./base";
+import { BaseAIService } from "./base";
+import { Bindings } from "@/index";
 
 interface QwenChatResponse {
   output: {
@@ -11,13 +12,8 @@ interface QwenChatResponse {
   };
 }
 
-interface QwenServiceEnv extends ServiceEnv {
-  DASHSCOPE_API_KEY?: string;
-  QWEN_MODEL?: string;
-}
-
 export class QwenService extends BaseAIService {
-  constructor(config?: AIConfig, env?: QwenServiceEnv) {
+  constructor(config: AIConfig, env: Bindings) {
     super(config, env);
     this.apiKey = config?.apiKey || env?.DASHSCOPE_API_KEY || "";
     this.model = config?.model || env?.QWEN_MODEL || DEFAULT_MODELS.qwen;

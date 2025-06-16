@@ -11,6 +11,9 @@ directory = "./packages/client/dist"   # 指向前端构建输出目录
 binding = "ASSETS"                     # 资源绑定名称
 not_found_handling = "single-page-application"  # SPA 路由模式
 
+[ai]
+binding = "AI"
+
 [observability.logs]
 enabled = true
 

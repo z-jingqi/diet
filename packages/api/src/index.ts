@@ -1,9 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { AIServiceFactory } from "./services/ai/factory";
-import type { KVNamespace } from "@cloudflare/workers-types";
-import type { R2Bucket } from "@cloudflare/workers-types";
-import type { Fetcher } from "@cloudflare/workers-types";
+import type { KVNamespace, R2Bucket, Fetcher, Ai } from "@cloudflare/workers-types";
 import type { AIProvider } from "./services/ai/types";
 
 // 定义环境变量类型
@@ -13,11 +11,13 @@ export type Bindings = {
 
   // AI 服务相关
   AI_SERVICE?: AIProvider; // 使用的 AI 服务提供商
+  AI: Ai; // Cloudflare Workers AI binding
   BAIDU_API_KEY?: string; // 百度 API Key
   BAIDU_SECRET_KEY?: string; // 百度 Secret Key
+  BAIDU_MODEL?: string; // 百度模型
+  QWEN_MODEL?: string;  // 千问模型
   DASHSCOPE_API_KEY?: string; // 阿里云 DashScope API Key
-  CLOUDFLARE_WORKERS_AI_API_TOKEN?: string; // Cloudflare API Token
-  CLOUDFLARE_ACCOUNT_ID?: string; // Cloudflare Account ID
+  CLOUDFLARE_MODEL?: string; // Cloudflare AI model
 
   // 数据库相关
   DATABASE_URL?: string; // 数据库连接 URL
@@ -57,10 +57,10 @@ app.post("/intent", async (c) => {
     c.req.raw.headers.forEach((value, key) => {
       headers[key] = value;
     });
-    
+
     // 获取请求体
     const body = await c.req.json();
-    
+
     if (!body.messages || !Array.isArray(body.messages)) {
       return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
@@ -68,11 +68,11 @@ app.post("/intent", async (c) => {
     // 根据配置选择 AI 服务
     const aiService = AIServiceFactory.create(
       {
-        type: c.env.AI_SERVICE || 'cloudflare',
+        type: c.env.AI_SERVICE || "cloudflare",
       },
       c.env
     );
-      
+
     const result = await aiService.getIntent(body.messages);
     return c.json({ response: result });
   } catch (error) {
@@ -89,10 +89,10 @@ app.post("/chat", async (c) => {
     c.req.raw.headers.forEach((value, key) => {
       headers[key] = value;
     });
-    
+
     // 获取请求体
     const body = await c.req.json();
-    
+
     if (!body.messages || !Array.isArray(body.messages)) {
       return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
@@ -104,20 +104,20 @@ app.post("/chat", async (c) => {
     // 根据配置选择 AI 服务
     const aiService = AIServiceFactory.create(
       {
-        type: c.env.AI_SERVICE || 'cloudflare',
+        type: c.env.AI_SERVICE || "cloudflare",
       },
       c.env
     );
-      
+
     const result = await aiService.chat(body.messages, body.intent, body.format);
 
     // 如果是流式响应，直接返回流
     if (result instanceof ReadableStream) {
       return new Response(result, {
         headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
         },
       });
     }

@@ -3,7 +3,8 @@ import { INTENT_PROMPT } from "./prompts/intent-prompt";
 import { CHAT_PROMPT } from "./prompts/chat-prompt";
 import { RECIPE_PROMPT } from "./prompts/recipe-prompt";
 import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
-import { BaseAIService, ServiceEnv } from "./base";
+import { BaseAIService } from "./base";
+import { Bindings } from "@/index";
 
 interface BaiduTokenResponse {
   access_token: string;
@@ -13,17 +14,12 @@ interface BaiduChatResponse {
   result: string;
 }
 
-interface BaiduServiceEnv extends ServiceEnv {
-  BAIDU_API_KEY?: string;
-  BAIDU_SECRET_KEY?: string;
-  BAIDU_MODEL?: string;
-}
 
 export class BaiduAIService extends BaseAIService {
   private apiSecret: string;
   private tokenUrl = "https://aip.baidubce.com/oauth/2.0/token";
 
-  constructor(config?: AIConfig, env?: BaiduServiceEnv) {
+  constructor(config: AIConfig, env: Bindings) {
     super(config, env);
     this.apiKey = config?.apiKey || env?.BAIDU_API_KEY || "";
     this.apiSecret = config?.apiSecret || env?.BAIDU_SECRET_KEY || "";
