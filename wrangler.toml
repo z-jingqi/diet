@@ -27,8 +27,7 @@ BAIDU_MODEL = "ERNIE-Bot-4"
 # 通义千问配置
 DASHSCOPE_API_KEY = "your-dashscope-api-key"
 QWEN_MODEL = "qwen-max"
-
 # Cloudflare 配置
 CLOUDFLARE_WORKERS_AI_API_TOKEN = "OiAqDggSK8CZ3T_8KR1KaAYIUne0EbTmeazkHZY9"
 CLOUDFLARE_ACCOUNT_ID = "d0b62cca82046c4762524de0c436d366"
-CLOUDFLARE_MODEL = "@cf/qwen/qwen1.5-7b-chat-awq"
+CLOUDFLARE_MODEL = "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"
