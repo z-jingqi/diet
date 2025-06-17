@@ -1,12 +1,14 @@
-import type { Message, MessageType } from '@shared/types/chat';
+import type { Message, MessageType } from "@shared/types/chat";
 
 /**
  * 生成随机ID
  * @returns 随机ID字符串
  */
 const generateRandomId = (): string => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 };
 
 /**
@@ -25,6 +27,7 @@ export const buildMessage = (
     content: "",
     isUser,
     createdAt: new Date(),
+    status: isUser ? "done" : "pending",
   } as Message;
 };
 
@@ -36,7 +39,8 @@ export const buildMessage = (
 export const buildUserMessage = (content: string): Message => ({
   id: generateRandomId(),
   content,
-  type: 'chat',
+  type: "chat",
   isUser: true,
   createdAt: new Date(),
-}); 
+  status: "done",
+});

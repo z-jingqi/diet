@@ -6,6 +6,11 @@ import { HealthAdvice, Recipe } from "../schemas";
 export type MessageType = "chat" | "recipe" | "health_advice";
 
 /**
+ * 消息状态
+ */
+export type MessageStatus = "pending" | "streaming" | "done" | "error";
+
+/**
  * 聊天消息
  */
 export interface Message {
@@ -19,8 +24,12 @@ export interface Message {
   isUser: boolean;
   /** 消息创建时间 */
   createdAt: Date;
+  /** 消息完成时间 */
+  finishedAt?: Date;
   /** 菜谱列表（仅当 type 为 recipe 时有效） */
   recipes?: Recipe[];
   /** 健康建议查询结果（仅当 type 为 health_advice 时有效） */
   healthAdvice?: HealthAdvice;
+  /** 消息状态 */
+  status?: MessageStatus;
 }

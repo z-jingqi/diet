@@ -24,6 +24,7 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
         <RecipeMessageBubble
           content={message.content}
           recipes={message.recipes || []}
+          status={message.status}
           onRecipeClick={onRecipeClick}
         />
       );
@@ -32,6 +33,7 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
         <HealthAdviceMessageBubble
           content={message.content}
           healthAdvice={message.healthAdvice}
+          status={message.status}
         />
       );
     default:

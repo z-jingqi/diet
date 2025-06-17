@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 interface HealthAdviceMessageBubbleProps {
   content: string;
   healthAdvice?: HealthAdvice;
+  status?: string;
 }
 
 const statusMap = {
@@ -32,12 +33,19 @@ const typeMap = {
 const HealthAdviceMessageBubble = ({
   content,
   healthAdvice,
+  status,
 }: HealthAdviceMessageBubbleProps) => {
+  if (!healthAdvice && status === 'pending') {
+    return <div className="text-gray-400 animate-pulse">生成健康建议中...</div>;
+  }
+  if (!healthAdvice && status === 'error') {
+    return <div className="text-red-500">生成健康建议失败，请重试</div>;
+  }
   if (!healthAdvice) {
     return <div className="text-sm">{content}</div>;
   }
 
-  const status = statusMap[healthAdvice.status];
+  const statusObj = statusMap[healthAdvice.status];
   const type = typeMap[healthAdvice.type];
 
   return (
@@ -47,8 +55,8 @@ const HealthAdviceMessageBubble = ({
           <CardTitle className="text-lg">{healthAdvice.title}</CardTitle>
           <div className="flex gap-2">
             <Badge variant="outline">{type}</Badge>
-            <Badge className={cn("text-white", status.className)}>
-              {status.label}
+            <Badge className={cn("text-white", statusObj.className)}>
+              {statusObj.label}
             </Badge>
           </div>
         </div>

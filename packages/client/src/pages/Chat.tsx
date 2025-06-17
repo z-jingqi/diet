@@ -1,36 +1,80 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import ChatInput from '@/components/chat/ChatInput';
-import ChatMessages from '@/components/chat/ChatMessages';
-import TypingPrompt from '@/components/chat/TypingPrompt';
-import useChatStore from '@/store/chat';
-import useRecipeStore from '@/store/recipe';
+import ChatInput from "@/components/chat/ChatInput";
+import ChatMessages from "@/components/chat/ChatMessages";
+import TypingPrompt from "@/components/chat/TypingPrompt";
+import useChatStore from "@/store/chat";
 
-const prompts = ["今天想吃什么？", "有什么饮食禁忌吗？", "想了解什么食材？", "需要营养建议吗？"];
+const prompts = [
+  "今天想吃什么？",
+  "有什么饮食禁忌吗？",
+  "想了解什么食材？",
+  "需要营养建议吗？",
+];
 
 const ChatPage = () => {
-  const { messages, sendMessage } = useChatStore();
-  const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
+  const {
+    messages,
+    sendMessage,
+    resetMessages,
+    canSendMessage,
+    abortCurrentMessage,
+  } = useChatStore();
   const [showTyping, setShowTyping] = useState(true);
   const [, setIsTyping] = useState(true);
 
   const handleSendMessage = async (content: string) => {
     setShowTyping(false);
-    await sendMessage(content, setCurrentRecipe);
+    await sendMessage(content);
   };
+
+  const handleReset = () => {
+    resetMessages();
+    setShowTyping(true);
+  };
+
+  // 判断是否可终止
+  const canAbort =
+    messages.length > 0 &&
+    (() => {
+      const last = messages[messages.length - 1];
+      return (
+        !last.isUser &&
+        (last.status === "pending" || last.status === "streaming")
+      );
+    })();
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {messages.length === 0 ? (
         <div className="flex flex-1 flex-col justify-center items-center w-full px-4">
-          {showTyping && <TypingPrompt prompts={prompts} onStartTyping={() => setIsTyping(true)} onStopTyping={() => setIsTyping(false)} />}
+          {showTyping && (
+            <TypingPrompt
+              prompts={prompts}
+              onStartTyping={() => setIsTyping(true)}
+              onStopTyping={() => setIsTyping(false)}
+            />
+          )}
           <div className="w-full max-w-2xl mt-8">
-            <ChatInput onSendMessage={handleSendMessage} />
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              disabled={!canSendMessage()}
+              canAbort={canAbort}
+              onAbort={abortCurrentMessage}
+            />
           </div>
         </div>
       ) : (
         <>
           <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="flex justify-end px-4 pt-4">
+              <button
+                className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 rounded px-2 py-1 transition-colors"
+                onClick={handleReset}
+              >
+                重置会话
+              </button>
+            </div>
             <ChatMessages />
           </div>
           <motion.div
@@ -42,7 +86,12 @@ const ChatPage = () => {
             }}
             className="w-full max-w-2xl mx-auto px-4 py-4"
           >
-            <ChatInput onSendMessage={handleSendMessage} />
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              disabled={!canSendMessage()}
+              canAbort={canAbort}
+              onAbort={abortCurrentMessage}
+            />
           </motion.div>
         </>
       )}
