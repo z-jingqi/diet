@@ -1,11 +1,11 @@
-import type { HealthAdviceResponse } from "@shared/types/health-advice";
+import type { HealthAdvice } from "@shared/schemas/health-advice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface HealthAdviceMessageBubbleProps {
   content: string;
-  healthAdvice?: HealthAdviceResponse;
+  healthAdvice?: HealthAdvice;
 }
 
 const statusMap = {
@@ -62,7 +62,7 @@ const HealthAdviceMessageBubble = ({
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.reasons.map((reason, index) => (
                   <li key={index} className="text-sm">
-                    {reason.content}
+                    {reason.description}
                   </li>
                 ))}
               </ul>
@@ -76,7 +76,7 @@ const HealthAdviceMessageBubble = ({
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.suggestions.map((suggestion, index) => (
                   <li key={index} className="text-sm">
-                    {suggestion.content}
+                    {suggestion.description}
                   </li>
                 ))}
               </ul>
@@ -90,7 +90,7 @@ const HealthAdviceMessageBubble = ({
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.scenarios.map((scenario, index) => (
                   <li key={index} className="text-sm">
-                    {scenario.description}
+                    {scenario.condition}
                   </li>
                 ))}
               </ul>

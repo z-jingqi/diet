@@ -1,5 +1,5 @@
 import { FC } from "react";
-import type { Recipe } from '@shared/types/recipe';
+import type { Recipe } from '@shared/schemas/recipe';
 import { Eye, Heart, ChevronRight } from "lucide-react";
 import { Button } from '@/components/ui/button';
 

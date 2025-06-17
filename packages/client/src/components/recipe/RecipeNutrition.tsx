@@ -1,77 +1,42 @@
-import type { Recipe } from '@shared/types/recipe';
-import ExpandableCard from './ExpandableCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Droplet, Flame, Scale } from "lucide-react";
+import type { Recipe } from '@shared/schemas/recipe';
 
 interface RecipeNutritionProps {
   nutrition: Recipe["nutrition"];
 }
 
 const RecipeNutrition = ({ nutrition }: RecipeNutritionProps) => {
-  const expandedContent = (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-lg border space-y-2">
-          <p className="text-sm text-muted-foreground">蛋白质</p>
-          <p className="text-2xl font-bold">{nutrition.totalProtein}g</p>
-          <p className="text-sm text-muted-foreground">每日推荐摄入量：60g</p>
-        </div>
-        <div className="p-4 rounded-lg border space-y-2">
-          <p className="text-sm text-muted-foreground">卡路里</p>
-          <p className="text-2xl font-bold">{nutrition.totalCalories}kcal</p>
-          <p className="text-sm text-muted-foreground">每日推荐摄入量：2000kcal</p>
-        </div>
-        <div className="p-4 rounded-lg border space-y-2">
-          <p className="text-sm text-muted-foreground">钾</p>
-          <p className="text-2xl font-bold">{nutrition.totalPotassium}mg</p>
-          <p className="text-sm text-muted-foreground">每日推荐摄入量：3500mg</p>
-        </div>
-        <div className="p-4 rounded-lg border space-y-2">
-          <p className="text-sm text-muted-foreground">磷</p>
-          <p className="text-2xl font-bold">{nutrition.totalPhosphorus}mg</p>
-          <p className="text-sm text-muted-foreground">每日推荐摄入量：700mg</p>
-        </div>
-        <div className="p-4 rounded-lg border space-y-2">
-          <p className="text-sm text-muted-foreground">钠</p>
-          <p className="text-2xl font-bold">{nutrition.totalSodium}mg</p>
-          <p className="text-sm text-muted-foreground">每日推荐摄入量：2300mg</p>
-        </div>
-      </div>
-      <div className="p-4 rounded-lg border bg-muted">
-        <h4 className="font-medium mb-2">营养建议</h4>
-        <p className="text-sm text-muted-foreground">
-          根据您的饮食需求，这道菜的营养成分较为均衡。建议搭配适量的蔬菜和主食，以确保营养的全面性。
-        </p>
-      </div>
-    </div>
-  );
-
   return (
-    <ExpandableCard
-      title="营养成分"
-      expandedContent={expandedContent}
-    >
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">蛋白质</p>
-          <p className="text-2xl font-bold">{nutrition.totalProtein}g</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>营养成分</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Flame className="h-4 w-4" />
+            <span>{nutrition.totalCalories} kcal</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Scale className="h-4 w-4" />
+            <span>{nutrition.totalProtein}g 蛋白质</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Droplet className="h-4 w-4" />
+            <span>{nutrition.totalPotassium}mg 钾</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Droplet className="h-4 w-4" />
+            <span>{nutrition.totalPhosphorus}mg 磷</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Droplet className="h-4 w-4" />
+            <span>{nutrition.totalSodium}mg 钠</span>
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">卡路里</p>
-          <p className="text-2xl font-bold">{nutrition.totalCalories}kcal</p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">钾</p>
-          <p className="text-2xl font-bold">{nutrition.totalPotassium}mg</p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">磷</p>
-          <p className="text-2xl font-bold">{nutrition.totalPhosphorus}mg</p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">钠</p>
-          <p className="text-2xl font-bold">{nutrition.totalSodium}mg</p>
-        </div>
-      </div>
-    </ExpandableCard>
+      </CardContent>
+    </Card>
   );
 };
 

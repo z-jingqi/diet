@@ -7,4 +7,14 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  esbuildOptions(options) {
+    options.banner = {
+      js: '"use client";',
+    };
+  },
+  outExtension({ format }) {
+    return {
+      js: format === 'cjs' ? '.js' : '.mjs',
+    };
+  }
 }); 

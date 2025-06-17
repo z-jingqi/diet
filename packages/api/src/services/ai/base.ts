@@ -1,6 +1,10 @@
 import { Bindings } from "@/index";
 import { AIService, Message, AIConfig, ResponseFormat } from "./types";
 import { AiModels } from "@cloudflare/workers-types";
+import { Recipe, HealthAdvice, RecipeRecommendation } from "@diet/shared/src/schemas";
+
+export type RecipeResponse = RecipeRecommendation;
+export type HealthAdviceResponse = HealthAdvice;
 
 export abstract class BaseAIService implements AIService {
   protected apiKey: string;
@@ -42,6 +46,6 @@ export abstract class BaseAIService implements AIService {
 
   protected abstract parseResponse(data: any): string;
 
-  abstract chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream>;
+  abstract chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse>;
   abstract getIntent(messages: Message[]): Promise<string>;
 }

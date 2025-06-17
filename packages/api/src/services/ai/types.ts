@@ -1,3 +1,6 @@
+import { Recipe, HealthAdvice } from "@diet/shared/src/schemas";
+import { RecipeResponse, HealthAdviceResponse } from "./base";
+
 export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -15,7 +18,7 @@ export interface ChatResponse {
 export type ResponseFormat = 'json' | 'event-stream';
 
 export interface AIService {
-  chat: (messages: Message[], intent: string, format?: ResponseFormat) => Promise<string | ReadableStream>;
+  chat: (messages: Message[], intent: string, format?: ResponseFormat) => Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse>;
   getIntent: (messages: Message[]) => Promise<string>;
 }
 

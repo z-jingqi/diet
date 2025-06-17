@@ -26,6 +26,12 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+      zod:
+        specifier: ^3.25.58
+        version: 3.25.58
+      zod-to-json-schema:
+        specifier: ^3.24.5
+        version: 3.24.5(zod@3.25.58)
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.6.0
@@ -166,9 +172,6 @@ importers:
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.1.6(@types/react@19.1.7))(@types/react@19.1.7)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      zod:
-        specifier: ^3.25.50
-        version: 3.25.58
       zustand:
         specifier: ^5.0.5
         version: 5.0.5(@types/react@19.1.7)(react@19.1.0)
@@ -225,17 +228,7 @@ importers:
         specifier: ^3.2.2
         version: 3.2.3(@types/debug@4.1.12)(@types/node@20.19.0)(@vitest/browser@3.2.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.0)
 
-  packages/shared:
-    devDependencies:
-      tsup:
-        specifier: ^8.0.2
-        version: 8.5.0(jiti@2.4.2)(postcss@8.5.4)(tsx@4.20.0)(typescript@5.8.3)
-      tsx:
-        specifier: ^4.20.0
-        version: 4.20.0
-      typescript:
-        specifier: ~5.8.3
-        version: 5.8.3
+  packages/shared: {}
 
 packages:
 
@@ -4144,6 +4137,11 @@ packages:
 
   youch@3.3.4:
     resolution: {integrity: sha512-UeVBXie8cA35DS6+nBkls68xaBBXCye0CNznrhszZjTbRVnJKQuNsyLKBTTL4ln1o1rh2PKtv35twV7irj5SEg==}
+
+  zod-to-json-schema@3.24.5:
+    resolution: {integrity: sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==}
+    peerDependencies:
+      zod: ^3.24.1
 
   zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
@@ -8227,6 +8225,10 @@ snapshots:
       cookie: 0.7.1
       mustache: 4.2.0
       stacktracey: 2.1.8
+
+  zod-to-json-schema@3.24.5(zod@3.25.58):
+    dependencies:
+      zod: 3.25.58
 
   zod@3.22.3: {}
 

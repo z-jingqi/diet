@@ -1,35 +1,39 @@
-import { Markdown } from '@/components/ui/markdown';
-import type { Recipe } from '@shared/types/recipe';
-import RecipeQuickActionButton from '../RecipeQuickActionButton';
+import { Markdown } from "@/components/ui/markdown";
+import type { Recipe } from "@shared/schemas/recipe";
+import RecipeQuickActionButton from "../RecipeQuickActionButton";
 
 /**
  * 菜谱消息气泡
  */
-const RecipeMessageBubble = ({ 
-  content, 
-  recipes, 
-  onRecipeClick 
-}: { 
-  content: string; 
-  recipes: Recipe[]; 
+const RecipeMessageBubble = ({
+  content,
+  recipes,
+  onRecipeClick,
+}: {
+  content: string;
+  recipes: Recipe[];
   onRecipeClick?: (recipe: Recipe) => void;
 }) => {
   return (
     <div className="flex w-full justify-start">
       <div className="max-w-[80%]">
         <div className="bg-white rounded-lg p-4 space-y-4">
-          <Markdown 
-            content={content} 
-            className="prose dark:prose-invert max-w-none" 
+          <Markdown
+            content={content}
+            className="prose dark:prose-invert max-w-none"
           />
           <div className="flex flex-wrap gap-2">
             {recipes.map((recipe) => (
               <RecipeQuickActionButton
-                key={recipe.id}
+                key={recipe.name}
                 recipe={recipe}
                 onClick={onRecipeClick}
-                onPreview={() => {/* TODO: 实现预览功能 */}}
-                onFavorite={() => {/* TODO: 实现收藏功能 */}}
+                onPreview={() => {
+                  /* TODO: 实现预览功能 */
+                }}
+                onFavorite={() => {
+                  /* TODO: 实现收藏功能 */
+                }}
               />
             ))}
           </div>
@@ -39,4 +43,4 @@ const RecipeMessageBubble = ({
   );
 };
 
-export default RecipeMessageBubble; 
+export default RecipeMessageBubble;
