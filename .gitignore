@@ -41,4 +41,8 @@ dist-ssr
 storybook-static
 
 .wrangler
-.dev.vars*
+
+# Cloudflare dev vars
+.dev.vars
+.dev.vars.*
+wrangler.toml

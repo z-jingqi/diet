@@ -6,6 +6,9 @@ import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
 import { BaseAIService } from "./base";
 import { Ai, AiModels } from "@cloudflare/workers-types";
 import { Bindings } from "@/index";
+import { RECIPE_SCHEMA } from "./schemas/recipe-schema";
+import { INTENT_SCHEMA } from "./schemas/intent-schema";
+import { HEALTH_ADVICE_SCHEMA } from "./schemas/health-advice-schema";
 
 export class CloudflareAIService extends BaseAIService {
   private ai: Ai;
@@ -29,14 +32,18 @@ export class CloudflareAIService extends BaseAIService {
     const isStream = responseFormat === "event-stream";
 
     try {
-      // 根据 intent 选择对应的 prompt
+      // 根据 intent 选择对应的 prompt 和 schema
       let systemPrompt = CHAT_PROMPT;
+      let jsonSchema = undefined;
+
       switch (intent) {
         case "recipe":
           systemPrompt = RECIPE_PROMPT;
+          jsonSchema = RECIPE_SCHEMA;
           break;
         case "health_advice":
           systemPrompt = HEALTH_ADVICE_PROMPT;
+          jsonSchema = HEALTH_ADVICE_SCHEMA;
           break;
       }
 
@@ -48,7 +55,12 @@ export class CloudflareAIService extends BaseAIService {
           role: msg.role,
           content: msg.content,
         })),
-        stream: true,
+        stream: isStream,
+        max_tokens: intent === "recipe" ? 2000 : 1000,
+        response_format: jsonSchema ? {
+          type: "json_schema",
+          json_schema: jsonSchema
+        } : undefined
       });
 
       // 如果是流式响应，直接返回
@@ -74,10 +86,13 @@ export class CloudflareAIService extends BaseAIService {
           },
           ...messages,
         ],
-        returnRawResponse: true,
+        response_format: {
+          type: "json_schema",
+          json_schema: INTENT_SCHEMA
+        }
       });
 
-      const intent = result.toString().trim().toLowerCase();
+      const intent = (result as { response: string }).response.trim().toLowerCase();
 
       // Ensure the returned intent is valid
       if (!["chat", "recipe", "health_advice"].includes(intent)) {

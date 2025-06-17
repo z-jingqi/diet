@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "deploy": "wrangler deploy",
     "local": "wrangler dev",
+    "put-model": "wrangler secret put CLOUDFLARE_MODEL",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
