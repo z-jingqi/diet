@@ -90,7 +90,7 @@ export class CloudflareAIService extends BaseAIService {
       if (["recipe", "health_advice"].includes(intent)) {
         options = {
           ...options,
-          max_tokens: 4096,
+          max_tokens: 80000,
         };
       }
 

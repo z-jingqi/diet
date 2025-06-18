@@ -2,10 +2,7 @@ import { create } from "zustand";
 import type { Message, MessageType } from "@shared/types/chat";
 import type { RecipeRecommendation } from "@shared/schemas/recipe";
 import { buildMessage, buildUserMessage } from "@/utils/message-builder";
-import {
-  fetchEventSource,
-  EventSourceMessage,
-} from "@microsoft/fetch-event-source";
+import { fetchEventSource, EventSourceMessage } from "@microsoft/fetch-event-source";
 import { HealthAdvice } from "@diet/shared/src/schemas";
 
 interface ChatState {
@@ -159,27 +156,19 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
   },
 
   abortCurrentMessage: () => {
-    const { abortController, messages } = get();
+    const { abortController } = get();
     if (abortController) {
       abortController.abort();
       set({ abortController: undefined });
       // 标记最后一条AI消息为 error
       set((state) => ({
-        messages: state.messages.map((msg, idx, arr) =>
-          !msg.isUser && idx === arr.length - 1 ? { ...msg, status: "error", finishedAt: new Date() } : msg
-        ),
+        messages: state.messages.map((msg, idx, arr) => (!msg.isUser && idx === arr.length - 1 ? { ...msg, status: "error", finishedAt: new Date() } : msg)),
       }));
     }
   },
 
   sendMessage: async (content: string) => {
-    const {
-      addMessage,
-      getIntent,
-      sendChatMessage,
-      sendRecipeMessage,
-      sendHealthAdviceMessage,
-    } = get();
+    const { addMessage, getIntent, sendChatMessage, sendRecipeMessage, sendHealthAdviceMessage } = get();
 
     // 1. 先把用户消息加到本地消息队列
     const userMessage = buildUserMessage(content);
@@ -200,11 +189,7 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
           addMessage(message);
           const result = await sendRecipeMessage(AIMessages);
           set((state) => ({
-            messages: state.messages.map((msg) =>
-              msg.id === message.id
-                ? { ...msg, recipes: result.recipes, content: result.description, status: "done", finishedAt: new Date() }
-                : msg
-            ),
+            messages: state.messages.map((msg) => (msg.id === message.id ? { ...msg, recipes: result.recipes, content: result.description, status: "done", finishedAt: new Date() } : msg)),
           }));
           break;
         }
@@ -214,11 +199,7 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
           addMessage(message);
           const result = await sendHealthAdviceMessage(AIMessages);
           set((state) => ({
-            messages: state.messages.map((msg) =>
-              msg.id === message.id
-                ? { ...msg, healthAdvice: result, content: result.title, status: "done", finishedAt: new Date() }
-                : msg
-            ),
+            messages: state.messages.map((msg) => (msg.id === message.id ? { ...msg, healthAdvice: result, content: result.title, status: "done", finishedAt: new Date() } : msg)),
           }));
           break;
         }
@@ -229,19 +210,11 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
           try {
             await sendChatMessage(AIMessages);
             set((state) => ({
-              messages: state.messages.map((msg) =>
-                msg.id === message.id
-                  ? { ...msg, status: "done", finishedAt: new Date() }
-                  : msg
-              ),
+              messages: state.messages.map((msg) => (msg.id === message.id ? { ...msg, status: "done", finishedAt: new Date() } : msg)),
             }));
           } catch (error) {
             set((state) => ({
-              messages: state.messages.map((msg) =>
-                msg.id === message.id
-                  ? { ...msg, status: "error", finishedAt: new Date() }
-                  : msg
-              ),
+              messages: state.messages.map((msg) => (msg.id === message.id ? { ...msg, status: "error", finishedAt: new Date() } : msg)),
             }));
             throw error;
           }
@@ -251,9 +224,7 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
       console.error("Error:", error);
       // 找到最后一条 AI 消息，标记为 error
       set((state) => ({
-        messages: state.messages.map((msg, idx, arr) =>
-          !msg.isUser && idx === arr.length - 1 ? { ...msg, status: "error", finishedAt: new Date() } : msg
-        ),
+        messages: state.messages.map((msg, idx, arr) => (!msg.isUser && idx === arr.length - 1 ? { ...msg, status: "error", finishedAt: new Date() } : msg)),
       }));
     }
   },
@@ -273,7 +244,7 @@ const useChatStore = create<ChatState & { abortController?: AbortController; abo
       return false;
     }
     // 如果最后一条AI消息还在处理中
-    if (last.status === 'pending' || last.status === 'streaming') {
+    if (last.status === "pending" || last.status === "streaming") {
       return false;
     }
     return true;
