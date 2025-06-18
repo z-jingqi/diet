@@ -27,7 +27,7 @@ export class CloudflareAIService extends BaseAIService {
     }
   }
 
-  protected parseResponse(data: any): string {
+  parseResponse(data: any): string {
     return data.response || data.content || "";
   }
 
