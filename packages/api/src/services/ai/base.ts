@@ -1,7 +1,7 @@
 import { Bindings } from "@/index";
 import { AIService, Message, AIConfig, ResponseFormat } from "./types";
 import { AiModels } from "@cloudflare/workers-types";
-import { Recipe, HealthAdvice, RecipeRecommendation } from "@diet/shared/src/schemas";
+import { Recipe, HealthAdvice, RecipeRecommendation } from "@shared/schemas";
 
 export type RecipeResponse = RecipeRecommendation;
 export type HealthAdviceResponse = HealthAdvice;
@@ -44,7 +44,10 @@ export abstract class BaseAIService implements AIService {
     return this.parseResponse(data);
   }
 
-  protected abstract parseResponse(data: any): string;
+  parseResponse(data: any): string {
+    // 默认实现，可返回空字符串或抛错
+    return "";
+  }
 
   abstract chat(messages: Message[], intent: string, format?: ResponseFormat): Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse>;
   abstract getIntent(messages: Message[]): Promise<string>;

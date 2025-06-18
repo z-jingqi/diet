@@ -106,10 +106,6 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 
 # Qwen
 QWEN_API_KEY=your_qwen_api_key
-
-# Baidu AI
-BAIDU_API_KEY=your_baidu_api_key
-BAIDU_API_SECRET=your_baidu_api_secret
 ```
 
 ## Development

@@ -1,6 +1,5 @@
 import { AIService, AIConfig } from "./types";
 import { QwenService } from "./qwen";
-import { BaiduAIService } from "./baidu";
 import { CloudflareAIService } from "./cloudflare";
 import { Bindings } from "@/index";
 
@@ -9,8 +8,6 @@ export const AIServiceFactory = {
     switch (config.type) {
       case "qwen":
         return new QwenService(config, env);
-      case "baidu":
-        return new BaiduAIService(config, env);
       case "cloudflare":
         return new CloudflareAIService(config, env);
       default:

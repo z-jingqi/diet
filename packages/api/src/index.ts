@@ -12,9 +12,7 @@ export type Bindings = {
   // AI 服务相关
   AI_SERVICE?: AIProvider; // 使用的 AI 服务提供商
   AI: Ai; // Cloudflare Workers AI binding
-  BAIDU_API_KEY?: string; // 百度 API Key
-  BAIDU_SECRET_KEY?: string; // 百度 Secret Key
-  BAIDU_MODEL?: string; // 百度模型
+  
   QWEN_MODEL?: string;  // 千问模型
   DASHSCOPE_API_KEY?: string; // 阿里云 DashScope API Key
   CLOUDFLARE_MODEL?: string; // Cloudflare AI model

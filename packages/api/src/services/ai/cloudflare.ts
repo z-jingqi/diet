@@ -9,10 +9,10 @@ import { Bindings } from "@/index";
 import {
   CLOUDFLARE_SCHEMAS,
   RecipeRecommendationSchema,
-} from "@diet/shared/src/schemas";
+} from "@shared/schemas";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
-import { MessageType } from "@diet/shared/src";
+import { MessageType } from "@shared/types/chat";
 
 export class CloudflareAIService extends BaseAIService {
   private ai: Ai;
