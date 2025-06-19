@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { AIServiceFactory } from "./services/ai/factory";
-import type { KVNamespace, R2Bucket, Fetcher, Ai } from "@cloudflare/workers-types";
+import type { KVNamespace, R2Bucket, Fetcher, Ai, D1Database } from "@cloudflare/workers-types";
 import type { AIProvider } from "./services/ai/types";
+import tags from "./routes/tags";
 
 // 定义环境变量类型
 export type Bindings = {
@@ -19,6 +20,7 @@ export type Bindings = {
 
   // 数据库相关
   DATABASE_URL?: string; // 数据库连接 URL
+  DB: D1Database; // D1 数据库绑定
 
   // 缓存相关
   CACHE_KV?: KVNamespace; // Cloudflare KV 存储
@@ -35,6 +37,9 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 // 启用 CORS
 app.use("*", cors());
+
+// 挂载标签路由
+app.route("/tags", tags);
 
 // 全局错误处理
 app.onError((err, c) => {

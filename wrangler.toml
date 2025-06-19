@@ -14,5 +14,10 @@ not_found_handling = "single-page-application"  # SPA 路由模式
 [ai]
 binding = "AI"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "diet"
+database_id = "0d57085e-6f5e-49bd-9ebc-2945ad0700b8"
+
 [observability.logs]
 enabled = true
