@@ -8,21 +8,17 @@ import type { Tag } from "@shared/schemas";
  * @param tagsChanged 标签是否发生变化
  * @returns AI 格式的消息数组
  */
-export const toAIMessages = (
-  messages: Message[],
-  currentTags?: Tag[],
-  tagsChanged?: boolean
-): { role: string; content: string }[] => {
+export const toAIMessages = (messages: Message[], currentTags?: Tag[], tagsChanged?: boolean): { role: string; content: string }[] => {
   const result: { role: string; content: string }[] = [];
-  
+
   // 如果标签发生变化且有标签，在第一条用户消息中添加标签信息
   let tagInfoAdded = false;
-  
+
   for (const msg of messages) {
     if (msg.isUser) {
       // 对于第一条用户消息，如果有标签变化，添加标签信息
       if (tagsChanged && currentTags && currentTags.length > 0 && !tagInfoAdded) {
-        const tagInfo = currentTags.map(tag => tag.aiPrompt).join('\n');
+        const tagInfo = currentTags.map((tag) => tag.aiPrompt).join("\n");
         const enhancedContent = `用户饮食限制条件：\n${tagInfo}\n\n用户问题：${msg.content}`;
         result.push({ role: "user", content: enhancedContent });
         tagInfoAdded = true;
@@ -48,7 +44,7 @@ export const toAIMessages = (
       }
     }
   }
-  
+
   return result;
 };
 
@@ -59,6 +55,11 @@ export const toAIMessages = (
  * @returns 是否相同
  */
 export const areTagsEqual = (tags1: Tag[], tags2: Tag[]): boolean => {
-  if (tags1.length !== tags2.length) return false;
-  return tags1.every(tag1 => tags2.some(tag2 => tag2.id === tag1.id));
-}; 
+  if (!tags1 || !tags2) {
+    return false;
+  }
+  if (tags1.length !== tags2.length) {
+    return false;
+  }
+  return tags1.every((tag1) => tags2.some((tag2) => tag2.id === tag1.id));
+};

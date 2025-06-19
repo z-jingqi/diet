@@ -11,22 +11,21 @@ export const RECIPE_PROMPT = `
       "ingredients": [
         {
           "name": "食材名称",                // 必选
-          "amount": "100g",                 // 必选
-          "nutrition": {
+          "amount": 100,                    // 必选：食材数量
+          "unit": "g",                      // 必选：食材单位
+          "nutrition": {                    // 必选：营养成分
             "protein": 10,                  // 必选：蛋白质含量（克）
             "potassium": 200,               // 必选：钾含量（毫克）
             "phosphorus": 100,              // 必选：磷含量（毫克）
             "sodium": 50,                   // 必选：钠含量（毫克）
             "calories": 150                 // 必选：卡路里（千卡）
-          },                                 // 必选
-          "order": 1,                       // 必选
+          },
           "purpose": "用于调味"              // 可选
         }
       ],
       "steps": [
         {
-          "order": 1,                      // 必选
-          "description": "步骤描述",         // 必选
+          "description": "详细的步骤描述，包括具体的操作方法、火候控制、时间把控、注意事项等，确保用户能够按照步骤成功完成烹饪。每个步骤应该包含具体的操作细节，如切法、火候、时间等。",         // 必选
           "time": 5,                       // 必选：预估时间（分钟）
           "tips": "烹饪小贴士"              // 可选
         }
@@ -41,9 +40,9 @@ export const RECIPE_PROMPT = `
       "dietNote": "饮食注意事项",           // 可选
       "tags": ["低钠", "低脂"],             // 可选
       "difficulty": "easy",                // 必选：烹饪难度（easy/medium/hard）
-      "cookingTime": "30 minutes",         // 必选：总烹饪时间（如 "30 minutes"）
+      "cookingTime": 30,                   // 必选：总烹饪时间（分钟）
       "servings": 2                        // 必选：可供食用的人数
     }
   ]
 }
-`; 
+`;

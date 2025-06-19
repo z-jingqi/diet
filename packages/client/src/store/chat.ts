@@ -206,7 +206,7 @@ const useChatStore = create<
 
     // 4. 组装上下文（所有历史消息+当前用户消息）
     const allMessages = [...get().messages];
-    const AIMessages = toAIMessages(allMessages, currentTags, tagsChanged);
+    const AIMessages = toAIMessages(allMessages, tags, tagsChanged);
 
     try {
       // 5. 获取意图

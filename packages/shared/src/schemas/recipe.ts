@@ -3,14 +3,13 @@ import { NutritionSchema } from "./base";
 
 export const RecipeIngredientSchema = z.object({
   name: z.string().describe('食材名称'),
-  amount: z.string().describe('用量，例如："100g"、"2个"'),
+  amount: z.number().describe('用量，例如：100'),
+  unit: z.string().describe('用量单位，例如："g"、"个"'),
   nutrition: NutritionSchema.describe('该食材的营养成分'),
-  order: z.number().describe('食材在列表中的顺序'),
   purpose: z.string().optional().describe('食材的用途说明')
 }).describe('菜谱中的单个食材');
 
 export const RecipeStepSchema = z.object({
-  order: z.number().describe('步骤顺序'),
   description: z.string().describe('步骤描述'),
   time: z.number().describe('预估时间（分钟）'),
   tips: z.string().optional().describe('烹饪技巧提示')
@@ -25,7 +24,7 @@ export const RecipeSchema = z.object({
   dietNote: z.string().optional().describe('饮食注意事项'),
   tags: z.array(z.string()).optional().describe('菜谱标签，例如：["低钠", "低脂", "家常菜"]'),
   difficulty: z.enum(['easy', 'medium', 'hard']).describe('烹饪难度'),
-  cookingTime: z.string().describe('总烹饪时间，例如："30 minutes"'),
+  cookingTime: z.number().describe('总烹饪时间，例如：30'),
   servings: z.number().describe('可供食用的人数')
 }).describe('菜谱信息');
 

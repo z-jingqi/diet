@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Clock, Timer } from "lucide-react";
-import type { RecipeStep } from '@shared/schemas/recipe';
-import ExpandableCard from './ExpandableCard';
+import type { RecipeStep } from "@shared/schemas/recipe";
+import ExpandableCard from "./ExpandableCard";
 
 interface RecipeStepsProps {
   steps: RecipeStep[];
@@ -17,13 +17,10 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
         </Button>
       </div>
       <div className="grid gap-6">
-        {steps.map((step) => (
-          <div
-            key={step.order}
-            className="p-4 rounded-lg border space-y-4"
-          >
+        {steps.map((step, index) => (
+          <div key={index} className="p-4 rounded-lg border space-y-4">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{step.order}.</span>
+              <span className="text-muted-foreground">{index + 1}.</span>
               <span className="font-medium">{step.description}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -32,9 +29,7 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
             </div>
             {step.tips && (
               <div className="bg-muted p-3 rounded-md">
-                <p className="text-sm text-muted-foreground">
-                  小贴士：{step.tips}
-                </p>
+                <p className="text-sm text-muted-foreground">小贴士：{step.tips}</p>
               </div>
             )}
           </div>
@@ -44,26 +39,19 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
   );
 
   return (
-    <ExpandableCard
-      title="烹饪步骤"
-      expandedContent={expandedContent}
-    >
+    <ExpandableCard title="烹饪步骤" expandedContent={expandedContent}>
       <ul className="space-y-6">
-        {steps.map((step) => (
-          <li key={step.order} className="space-y-2">
+        {steps.map((step, index) => (
+          <li key={index} className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{step.order}.</span>
+              <span className="text-muted-foreground">{index + 1}.</span>
               <span>{step.description}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
               <span>{step.time}秒</span>
             </div>
-            {step.tips && (
-              <p className="text-sm text-muted-foreground pl-6">
-                小贴士：{step.tips}
-              </p>
-            )}
+            {step.tips && <p className="text-sm text-muted-foreground pl-6">小贴士：{step.tips}</p>}
           </li>
         ))}
       </ul>
@@ -71,4 +59,4 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
   );
 };
 
-export default RecipeSteps; 
+export default RecipeSteps;

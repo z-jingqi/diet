@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import type { RecipeIngredient } from '@shared/schemas/recipe';
-import ExpandableCard from './ExpandableCard';
+import type { RecipeIngredient } from "@shared/schemas/recipe";
+import ExpandableCard from "./ExpandableCard";
 
 interface RecipeIngredientsProps {
   ingredients: RecipeIngredient[];
@@ -9,9 +9,7 @@ interface RecipeIngredientsProps {
 
 const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
   const handleCopyIngredients = () => {
-    const text = ingredients
-      .map((ing) => `${ing.name} ${ing.amount}`)
-      .join("\n");
+    const text = ingredients.map((ing) => `${ing.name} ${ing.amount}`).join("\n");
     navigator.clipboard.writeText(text);
   };
 
@@ -31,21 +29,12 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
         </Button>
       </div>
       <div className="grid gap-4">
-        {ingredients.map((ingredient) => (
-          <div
-            key={ingredient.order}
-            className="flex items-start gap-4 p-4 rounded-lg border"
-          >
+        {ingredients.map((ingredient, index) => (
+          <div key={index} className="flex items-start gap-4 p-4 rounded-lg border">
             <div className="flex-1">
               <h4 className="font-medium">{ingredient.name}</h4>
-              <p className="text-sm text-muted-foreground">
-                用量：{ingredient.amount}
-              </p>
-              {ingredient.purpose && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  用途：{ingredient.purpose}
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground">用量：{ingredient.amount}</p>
+              {ingredient.purpose && <p className="text-sm text-muted-foreground mt-1">用途：{ingredient.purpose}</p>}
             </div>
           </div>
         ))}
@@ -54,24 +43,15 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
   );
 
   return (
-    <ExpandableCard
-      title="食材清单"
-      expandedContent={expandedContent}
-    >
+    <ExpandableCard title="食材清单" expandedContent={expandedContent}>
       <ul className="space-y-2">
-        {ingredients.map((ingredient) => (
-          <li key={ingredient.order} className="flex items-start gap-2">
-            <span className="text-muted-foreground">{ingredient.order}.</span>
+        {ingredients.map((ingredient, index) => (
+          <li key={index} className="flex items-start gap-2">
+            <span className="text-muted-foreground">{index + 1}.</span>
             <div>
               <span>{ingredient.name}</span>
-              <span className="text-muted-foreground ml-2">
-                {ingredient.amount}
-              </span>
-              {ingredient.purpose && (
-                <p className="text-sm text-muted-foreground">
-                  {ingredient.purpose}
-                </p>
-              )}
+              <span className="text-muted-foreground ml-2">{ingredient.amount}</span>
+              {ingredient.purpose && <p className="text-sm text-muted-foreground">{ingredient.purpose}</p>}
             </div>
           </li>
         ))}
@@ -80,4 +60,4 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
   );
 };
 
-export default RecipeIngredients; 
+export default RecipeIngredients;

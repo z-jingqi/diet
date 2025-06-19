@@ -22,14 +22,14 @@ const ChatPage = () => {
     abortCurrentMessage,
   } = useChatStore();
 
-  const { clearTags } = useTagsStore();
+  const { clearTags, selectedTags } = useTagsStore();
 
   const [showTyping, setShowTyping] = useState(true);
   const [, setIsTyping] = useState(true);
 
   const handleSendMessage = async (content: string) => {
     setShowTyping(false);
-    await sendMessage(content);
+    await sendMessage(content, selectedTags);
   };
 
   const handleReset = () => {

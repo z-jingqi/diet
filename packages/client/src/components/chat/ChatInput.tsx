@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Square, Send } from "lucide-react";
 import TagSelector from "@/components/chat/tag-selector/TagSelector";
-import type { Tag } from "@diet/shared";
 import { Textarea } from "@/components/ui/textarea";
+import useTagsStore from "@/store/tags";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -19,7 +19,7 @@ const ChatInput = ({
   canAbort,
 }: ChatInputProps) => {
   const [input, setInput] = useState("");
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const { selectedTags, setSelectedTags } = useTagsStore();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
