@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from "lucide-react";
+import { MutedText } from '@/components/ui/typography';
 
 interface RecipeNotesProps {
   note: string;
@@ -15,7 +16,7 @@ const RecipeNotes = ({ note }: RecipeNotesProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">{note}</p>
+        <MutedText>{note}</MutedText>
       </CardContent>
     </Card>
   );

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Timer } from "lucide-react";
 import type { RecipeStep } from "@shared/schemas/recipe";
 import ExpandableCard from "./ExpandableCard";
+import { Typography, MutedText } from "@/components/ui/typography";
 
 interface RecipeStepsProps {
   steps: RecipeStep[];
@@ -20,16 +21,16 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
         {steps.map((step, index) => (
           <div key={index} className="p-4 rounded-lg border space-y-4">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{index + 1}.</span>
-              <span className="font-medium">{step.description}</span>
+              <MutedText>{index + 1}.</MutedText>
+              <Typography variant="span" className="font-medium">{step.description}</Typography>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span>{step.time}秒</span>
+              <MutedText>{step.time}秒</MutedText>
             </div>
             {step.tips && (
               <div className="bg-muted p-3 rounded-md">
-                <p className="text-sm text-muted-foreground">小贴士：{step.tips}</p>
+                <MutedText>小贴士：{step.tips}</MutedText>
               </div>
             )}
           </div>
@@ -44,14 +45,14 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
         {steps.map((step, index) => (
           <li key={index} className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{index + 1}.</span>
-              <span>{step.description}</span>
+              <MutedText>{index + 1}.</MutedText>
+              <Typography variant="span">{step.description}</Typography>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span>{step.time}秒</span>
+              <MutedText>{step.time}秒</MutedText>
             </div>
-            {step.tips && <p className="text-sm text-muted-foreground pl-6">小贴士：{step.tips}</p>}
+            {step.tips && <MutedText className="pl-6">小贴士：{step.tips}</MutedText>}
           </li>
         ))}
       </ul>

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Users } from "lucide-react";
 import type { Recipe } from '@shared/schemas/recipe';
+import { MutedText } from '@/components/ui/typography';
 
 interface RecipeBasicInfoProps {
   recipe: Recipe;
@@ -19,11 +20,11 @@ const RecipeBasicInfo = ({ recipe }: RecipeBasicInfoProps) => {
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <Clock className="h-4 w-4" />
-          <span>{recipe.cookingTime}</span>
+          <MutedText>{recipe.cookingTime}</MutedText>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <Users className="h-4 w-4" />
-          <span>{recipe.servings}人份</span>
+          <MutedText>{recipe.servings}人份</MutedText>
         </div>
         {recipe.tags && recipe.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Droplet, Flame, Scale } from "lucide-react";
 import type { Recipe } from '@shared/schemas/recipe';
+import { MutedText } from '@/components/ui/typography';
 
 interface RecipeNutritionProps {
   nutrition: Recipe["nutrition"];
@@ -16,23 +17,23 @@ const RecipeNutrition = ({ nutrition }: RecipeNutritionProps) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Flame className="h-4 w-4" />
-            <span>{nutrition.totalCalories} kcal</span>
+            <MutedText>{nutrition.totalCalories} kcal</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Scale className="h-4 w-4" />
-            <span>{nutrition.totalProtein}g 蛋白质</span>
+            <MutedText>{nutrition.totalProtein}g 蛋白质</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <span>{nutrition.totalPotassium}mg 钾</span>
+            <MutedText>{nutrition.totalPotassium}mg 钾</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <span>{nutrition.totalPhosphorus}mg 磷</span>
+            <MutedText>{nutrition.totalPhosphorus}mg 磷</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <span>{nutrition.totalSodium}mg 钠</span>
+            <MutedText>{nutrition.totalSodium}mg 钠</MutedText>
           </div>
         </div>
       </CardContent>

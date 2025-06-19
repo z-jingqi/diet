@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import type { RecipeIngredient } from "@shared/schemas/recipe";
 import ExpandableCard from "./ExpandableCard";
+import { Typography, MutedText } from "@/components/ui/typography";
 
 interface RecipeIngredientsProps {
   ingredients: RecipeIngredient[];
@@ -32,9 +33,9 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
         {ingredients.map((ingredient, index) => (
           <div key={index} className="flex items-start gap-4 p-4 rounded-lg border">
             <div className="flex-1">
-              <h4 className="font-medium">{ingredient.name}</h4>
-              <p className="text-sm text-muted-foreground">用量：{ingredient.amount}</p>
-              {ingredient.purpose && <p className="text-sm text-muted-foreground mt-1">用途：{ingredient.purpose}</p>}
+              <Typography variant="h4" className="font-medium">{ingredient.name}</Typography>
+              <MutedText>用量：{ingredient.amount}</MutedText>
+              {ingredient.purpose && <MutedText className="mt-1">用途：{ingredient.purpose}</MutedText>}
             </div>
           </div>
         ))}
@@ -47,11 +48,11 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
       <ul className="space-y-2">
         {ingredients.map((ingredient, index) => (
           <li key={index} className="flex items-start gap-2">
-            <span className="text-muted-foreground">{index + 1}.</span>
+            <MutedText>{index + 1}.</MutedText>
             <div>
-              <span>{ingredient.name}</span>
-              <span className="text-muted-foreground ml-2">{ingredient.amount}</span>
-              {ingredient.purpose && <p className="text-sm text-muted-foreground">{ingredient.purpose}</p>}
+              <Typography variant="span">{ingredient.name}</Typography>
+              <MutedText className="ml-2">{ingredient.amount}</MutedText>
+              {ingredient.purpose && <MutedText>{ingredient.purpose}</MutedText>}
             </div>
           </li>
         ))}

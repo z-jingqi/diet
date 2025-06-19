@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
+import { Typography } from '@/components/ui/typography';
 
 interface ExpandableCardProps {
   title: string;
@@ -103,7 +104,7 @@ const ExpandableCard = ({
             <div className="h-full overflow-y-auto p-4">
               <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">{title}</h2>
+                  <Typography variant="h2" className="text-2xl font-bold">{title}</Typography>
                   <Button
                     variant="ghost"
                     size="icon"
