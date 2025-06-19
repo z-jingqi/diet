@@ -98,18 +98,21 @@ const useChatStore = create<
     await fetchEventSource("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/event-stream",
         Accept: "text/event-stream",
       },
       body: JSON.stringify({ messages, intent: "chat" as MessageType }),
       signal: controller.signal,
       onmessage(event: EventSourceMessage) {
         try {
-          if (event.data === "[DONE]") {
+          const data = JSON.parse(event.data);
+
+          // 检查流是否结束
+          if (data.done) {
             set({ abortController: undefined });
             return;
           }
-          const data = JSON.parse(event.data);
+
           if (data.response !== null && data.response !== undefined) {
             result += data.response;
             set((state) => ({
@@ -151,7 +154,11 @@ const useChatStore = create<
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    return data.response as RecipeRecommendation;
+    const result =
+      typeof data.response === "string"
+        ? JSON.parse(data.response)
+        : data.response;
+    return result as RecipeRecommendation;
   },
 
   sendHealthAdviceMessage: async (messages) => {
@@ -173,7 +180,11 @@ const useChatStore = create<
       throw new Error("Failed to get health advice");
     }
     const data = await response.json();
-    return data.response as HealthAdvice;
+    const result =
+      typeof data.response === "string"
+        ? JSON.parse(data.response)
+        : data.response;
+    return result as HealthAdvice;
   },
 
   abortCurrentMessage: () => {

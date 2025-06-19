@@ -1,5 +1,4 @@
-import { MessageType } from "@shared/types/chat";
-import { RecipeResponse, HealthAdviceResponse } from "./base";
+import { HealthAdvice, RecipeRecommendation } from "@shared/schemas";
 
 export interface Message {
   role: "user" | "assistant" | "system";
@@ -15,16 +14,7 @@ export interface ChatResponse {
   };
 }
 
-export type ResponseFormat = "json" | "event-stream";
-
-export interface AIService {
-  chat: (
-    messages: Message[],
-    intent: MessageType,
-    format?: ResponseFormat
-  ) => Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse>;
-  getIntent: (messages: Message[]) => Promise<string>;
-}
+export type ResponseFormat = "json" | "stream";
 
 export type AIProvider = "openai" | "anthropic" | "qwen" | "cloudflare";
 
@@ -39,6 +29,9 @@ export interface AIConfig {
 
 // 添加默认模型配置
 export const DEFAULT_MODELS = {
-  cloudflare: "@cf/meta/llama-3.1-8b-instruct",
+  cloudflare: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
   qwen: "qwen-turbo",
 } as const;
+
+export type RecipeResponse = RecipeRecommendation;
+export type HealthAdviceResponse = HealthAdvice;

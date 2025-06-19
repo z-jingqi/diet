@@ -12,4 +12,9 @@ export const INTENT_PROMPT = `
    - health_advice：用户询问健康相关问题，如食物可食性、运动适宜性、生活方式健康性等
 
 如果用户意图不明确，默认返回 chat。
+
+请以JSON格式返回结果，格式如下：
+{
+  "intent": "chat|recipe|health_advice"
+}
 `; 

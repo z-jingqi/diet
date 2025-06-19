@@ -1,9 +1,15 @@
-import { Message, AIConfig, ResponseFormat, DEFAULT_MODELS } from "./types";
+import {
+  Message,
+  AIConfig,
+  ResponseFormat,
+  DEFAULT_MODELS,
+  RecipeResponse,
+  HealthAdviceResponse,
+} from "./types";
 import { INTENT_PROMPT } from "./prompts/intent-prompt";
 import { CHAT_PROMPT } from "./prompts/chat-prompt";
 import { RECIPE_PROMPT } from "./prompts/recipe-prompt";
 import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
-import { BaseAIService, HealthAdviceResponse, RecipeResponse } from "./base";
 import { Ai, AiModels } from "@cloudflare/workers-types";
 import { Bindings } from "@/index";
 import {
@@ -13,12 +19,14 @@ import {
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
 import { MessageType } from "@shared/types/chat";
+import { Stream } from "openai/core/streaming";
+import { ChatCompletionChunk } from "openai/resources";
 
-export class CloudflareAIService extends BaseAIService {
+export class CloudflareAIService {
   private ai: Ai;
+  private model: string;
 
   constructor(config: AIConfig, env: Bindings) {
-    super(config, env);
     this.ai = env.AI;
     this.model = config.model || DEFAULT_MODELS.cloudflare;
 
@@ -34,11 +42,16 @@ export class CloudflareAIService extends BaseAIService {
   async chat(
     messages: Message[],
     intent: MessageType,
-    format?: ResponseFormat
-  ): Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse> {
-    const responseFormat = format || this.defaultFormat;
+    format: ResponseFormat = "stream"
+  ): Promise<
+    | string
+    | ReadableStream
+    | RecipeResponse
+    | HealthAdviceResponse
+    | Stream<ChatCompletionChunk>
+  > {
     // 当使用 JSON Schema 时，强制禁用流式响应
-    const isStream = responseFormat === "event-stream" && intent === "chat";
+    const isStream = format === "stream" && intent === "chat";
 
     try {
       // 根据 intent 选择对应的 prompt 和 schema

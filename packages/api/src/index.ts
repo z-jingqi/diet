@@ -14,7 +14,7 @@ export type Bindings = {
   AI: Ai; // Cloudflare Workers AI binding
   
   QWEN_MODEL?: string;  // 千问模型
-  DASHSCOPE_API_KEY?: string; // 阿里云 DashScope API Key
+  QWEN_API_KEY?: string; // 阿里云 DashScope API Key
   CLOUDFLARE_MODEL?: string; // Cloudflare AI model
 
   // 数据库相关

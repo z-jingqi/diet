@@ -45,4 +45,3 @@ storybook-static
 # Cloudflare dev vars
 .dev.vars
 .dev.vars.*
-wrangler.toml
