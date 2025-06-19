@@ -4,11 +4,13 @@ import type { Tag } from "@diet/shared";
 
 interface SelectedTagsDisplayProps {
   selectedTags: Tag[];
+  disabled?: boolean;
   onRemoveTag: (tagId: string) => void;
 }
 
 const SelectedTagsDisplay = ({
   selectedTags,
+  disabled,
   onRemoveTag,
 }: SelectedTagsDisplayProps) => {
   if (selectedTags.length === 0) {
@@ -26,6 +28,7 @@ const SelectedTagsDisplay = ({
           <TagIcon className="w-3 h-3" />
           {tag.name}
           <button
+            disabled={disabled}
             onClick={() => onRemoveTag(tag.id)}
             className="ml-1 hover:text-red-500 transition-colors"
           >

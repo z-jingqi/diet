@@ -71,16 +71,20 @@ const ChatPage = () => {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="flex justify-end px-4 pt-4">
-              <button
-                className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 rounded px-2 py-1 transition-colors"
-                onClick={handleReset}
-              >
-                重置会话
-              </button>
+          <div className="flex-1 min-h-0">
+            <div className="max-w-4xl mx-auto w-full px-4 h-full flex flex-col">
+              <div className="flex justify-end pt-4 flex-shrink-0">
+                <button
+                  className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 rounded px-2 py-1 transition-colors"
+                  onClick={handleReset}
+                >
+                  重置会话
+                </button>
+              </div>
+              <div className="flex-1 min-h-0">
+                <ChatMessages />
+              </div>
             </div>
-            <ChatMessages />
           </div>
           <motion.div
             layout

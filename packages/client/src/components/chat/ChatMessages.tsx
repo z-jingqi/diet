@@ -13,6 +13,8 @@ const ChatMessages = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const lastMessageIdRef = useRef<string>('');
+  const lastMessageLengthRef = useRef<number>(0);
+  const isUserScrollingRef = useRef<boolean>(false);
 
   // 处理滚动事件
   const handleScroll = () => {
@@ -23,6 +25,12 @@ const ChatMessages = () => {
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     // 如果用户向上滚动超过 100px，禁用自动滚动
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    
+    // 如果用户手动滚动，标记为用户滚动状态
+    if (!isNearBottom && shouldAutoScroll) {
+      isUserScrollingRef.current = true;
+    }
+    
     setShouldAutoScroll(isNearBottom);
   };
 
@@ -36,12 +44,33 @@ const ChatMessages = () => {
 
   // 监听消息变化
   useEffect(() => {
-    // 如果有新消息，启用自动滚动
-    if (messages.length > 0 && messages[messages.length - 1].id !== lastMessageIdRef.current) {
-      lastMessageIdRef.current = messages[messages.length - 1].id;
-      setShouldAutoScroll(true);
+    const currentMessageCount = messages.length;
+    const lastMessage = messages[currentMessageCount - 1];
+    
+    // 检查是否有新消息（消息数量增加）
+    const hasNewMessage = currentMessageCount > lastMessageLengthRef.current;
+    
+    // 检查是否是新的消息ID（新消息开始）
+    const isNewMessageId = lastMessage && lastMessage.id !== lastMessageIdRef.current;
+    
+    if (hasNewMessage || isNewMessageId) {
+      // 新消息开始时，重置用户滚动状态并启用自动滚动
+      if (isNewMessageId) {
+        isUserScrollingRef.current = false;
+        setShouldAutoScroll(true);
+      }
+      
+      // 更新引用
+      lastMessageLengthRef.current = currentMessageCount;
+      if (lastMessage) {
+        lastMessageIdRef.current = lastMessage.id;
+      }
     }
-    scrollToBottom();
+    
+    // 只有在用户没有主动滚动时才自动滚动
+    if (!isUserScrollingRef.current) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const handleRecipeClick = (recipe: Recipe) => {
@@ -52,7 +81,7 @@ const ChatMessages = () => {
   return (
     <div 
       ref={containerRef}
-      className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
+      className="h-full overflow-y-auto py-6 space-y-6"
       onScroll={handleScroll}
     >
       {messages.map((message) => {

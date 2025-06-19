@@ -80,6 +80,7 @@ const TagSelector = ({
       <SelectedTagsDisplay
         selectedTags={selectedTags}
         onRemoveTag={handleRemoveTag}
+        disabled={disabled}
       />
 
       {/* 标签选择弹窗 */}

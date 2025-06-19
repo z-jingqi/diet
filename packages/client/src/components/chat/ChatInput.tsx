@@ -29,6 +29,16 @@ const ChatInput = ({
     setInput("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!input.trim() || disabled) return;
+      
+      onSendMessage(input);
+      setInput("");
+    }
+  };
+
   const isEmpty = !input.trim();
 
   return (
@@ -40,6 +50,7 @@ const ChatInput = ({
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             setInput(e.target.value)
           }
+          onKeyDown={handleKeyDown}
           placeholder="有什么想问我的吗？比如：今天想吃什么？"
           className="min-h-[60px] h-[60px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}

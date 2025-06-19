@@ -17,23 +17,23 @@ const RecipeNutrition = ({ nutrition }: RecipeNutritionProps) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Flame className="h-4 w-4" />
-            <MutedText>{nutrition.totalCalories} kcal</MutedText>
+            <MutedText>{nutrition.calories} kcal</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Scale className="h-4 w-4" />
-            <MutedText>{nutrition.totalProtein}g 蛋白质</MutedText>
+            <MutedText>{nutrition.protein}g 蛋白质</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <MutedText>{nutrition.totalPotassium}mg 钾</MutedText>
+            <MutedText>{nutrition.potassium}mg 钾</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <MutedText>{nutrition.totalPhosphorus}mg 磷</MutedText>
+            <MutedText>{nutrition.phosphorus}mg 磷</MutedText>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Droplet className="h-4 w-4" />
-            <MutedText>{nutrition.totalSodium}mg 钠</MutedText>
+            <MutedText>{nutrition.sodium}mg 钠</MutedText>
           </div>
         </div>
       </CardContent>

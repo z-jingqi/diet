@@ -12,7 +12,7 @@ const Layout = () => {
   return (
     <div className="flex flex-col min-h-screen h-screen">
       {/* 主内容区域 */}
-      <main className="flex flex-col flex-1 min-h-0 pb-[var(--bottom-nav-height)] md:pt-[var(--bottom-nav-height)]">
+      <main className="flex flex-col flex-1 min-h-0 pb-[var(--bottom-nav-height)] md:pt-16 md:pb-0">
         <Outlet />
       </main>
 
