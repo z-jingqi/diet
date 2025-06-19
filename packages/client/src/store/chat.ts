@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import type { Message, MessageType } from "@shared/types/chat";
 import type { RecipeRecommendation } from "@shared/schemas/recipe";
+import type { Tag } from "@shared/schemas";
 import { buildMessage, buildUserMessage } from "@/utils/message-builder";
+import { toAIMessages, areTagsEqual } from "@/utils/chat-utils";
 import {
   fetchEventSource,
   EventSourceMessage,
@@ -10,8 +12,9 @@ import { HealthAdvice } from "@shared/schemas";
 
 interface ChatState {
   messages: Message[];
+  currentTags: Tag[]; // 跟踪当前使用的标签
   addMessage: (message: Message) => void;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, tags?: Tag[]) => Promise<void>;
   getIntent: (
     messages: { role: string; content: string }[]
   ) => Promise<MessageType>;
@@ -30,31 +33,6 @@ interface ChatState {
   canSendMessage: () => boolean;
 }
 
-const toAIMessages = (
-  messages: Message[]
-): { role: string; content: string }[] => {
-  return messages.map((msg) => {
-    if (msg.isUser) {
-      return { role: "user", content: msg.content };
-    }
-    // assistant 消息：如果是 recipe/health_advice，序列化为字符串
-    if (msg.type === "recipe" && msg.recipes) {
-      return {
-        role: "assistant",
-        content: `以下是推荐菜谱数据：\n${JSON.stringify({ description: msg.content, recipes: msg.recipes }, null, 2)}`,
-      };
-    }
-    if (msg.type === "health_advice" && msg.healthAdvice) {
-      return {
-        role: "assistant",
-        content: `以下是健康建议数据：\n${JSON.stringify(msg.healthAdvice, null, 2)}`,
-      };
-    }
-    // 普通 assistant 消息
-    return { role: "assistant", content: msg.content };
-  });
-};
-
 const useChatStore = create<
   ChatState & {
     abortController?: AbortController;
@@ -62,6 +40,7 @@ const useChatStore = create<
   }
 >((set, get) => ({
   messages: [],
+  currentTags: [],
   isLoading: false,
   error: null,
   abortController: undefined,
@@ -203,25 +182,34 @@ const useChatStore = create<
     }
   },
 
-  sendMessage: async (content: string) => {
+  sendMessage: async (content: string, tags?: Tag[]) => {
     const {
       addMessage,
       getIntent,
       sendChatMessage,
       sendRecipeMessage,
       sendHealthAdviceMessage,
+      currentTags,
     } = get();
 
-    // 1. 先把用户消息加到本地消息队列
+    // 1. 先把用户消息加到本地消息队列（保持原始内容）
     const userMessage = buildUserMessage(content);
     addMessage(userMessage);
 
-    // 2. 组装上下文（所有历史消息+当前用户消息）
+    // 2. 检查标签是否发生变化
+    const tagsChanged = tags && !areTagsEqual(tags, currentTags);
+    
+    // 3. 如果标签发生变化，更新当前标签
+    if (tagsChanged) {
+      set({ currentTags: tags });
+    }
+
+    // 4. 组装上下文（所有历史消息+当前用户消息）
     const allMessages = [...get().messages];
-    const AIMessages = toAIMessages(allMessages);
+    const AIMessages = toAIMessages(allMessages, currentTags, tagsChanged);
 
     try {
-      // 3. 获取意图
+      // 5. 获取意图
       const intent = await getIntent(AIMessages);
 
       switch (intent) {
@@ -292,19 +280,33 @@ const useChatStore = create<
       }
     } catch (error) {
       console.error("Error:", error);
-      // 找到最后一条 AI 消息，标记为 error
-      set((state) => ({
-        messages: state.messages.map((msg, idx, arr) =>
-          !msg.isUser && idx === arr.length - 1
-            ? { ...msg, status: "error", finishedAt: new Date() }
-            : msg
-        ),
-      }));
+      
+      // 检查是否已经有 AI 消息（可能是在 getIntent 之后添加的）
+      const { messages } = get();
+      const lastMessage = messages[messages.length - 1];
+      
+      if (lastMessage && !lastMessage.isUser) {
+        // 如果最后一条是 AI 消息，标记为 error
+        set((state) => ({
+          messages: state.messages.map((msg, idx, arr) =>
+            !msg.isUser && idx === arr.length - 1
+              ? { ...msg, status: "error", finishedAt: new Date() }
+              : msg
+          ),
+        }));
+      } else {
+        // 如果没有 AI 消息（比如 getIntent 失败），添加一个错误消息
+        const errorMessage = buildMessage("chat");
+        errorMessage.status = "error";
+        errorMessage.content = "抱歉，处理您的消息时出现了问题，请重试。";
+        errorMessage.finishedAt = new Date();
+        addMessage(errorMessage);
+      }
     }
   },
 
   resetMessages: () => {
-    set({ messages: [] });
+    set({ messages: [], currentTags: [] });
   },
 
   canSendMessage: () => {

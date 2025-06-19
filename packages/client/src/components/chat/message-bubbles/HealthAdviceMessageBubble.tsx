@@ -2,6 +2,7 @@ import type { HealthAdvice } from "@shared/schemas/health-advice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Typography, MutedText, ErrorText } from "@/components/ui/typography";
 
 interface HealthAdviceMessageBubbleProps {
   content: string;
@@ -36,13 +37,13 @@ const HealthAdviceMessageBubble = ({
   status,
 }: HealthAdviceMessageBubbleProps) => {
   if (!healthAdvice && status === 'pending') {
-    return <div className="text-gray-400 animate-pulse">生成健康建议中...</div>;
+    return <MutedText className="animate-pulse">生成健康建议中...</MutedText>;
   }
   if (!healthAdvice && status === 'error') {
-    return <div className="text-red-500">生成健康建议失败，请重试</div>;
+    return <ErrorText>生成健康建议失败，请重试</ErrorText>;
   }
   if (!healthAdvice) {
-    return <div className="text-sm">{content}</div>;
+    return <Typography variant="p">{content}</Typography>;
   }
 
   const statusObj = statusMap[healthAdvice.status];
@@ -66,11 +67,11 @@ const HealthAdviceMessageBubble = ({
           {/* 原因分析 */}
           {healthAdvice.reasons.length > 0 && (
             <div>
-              <h4 className="font-medium mb-2">原因分析</h4>
+              <Typography variant="h4" className="mb-2">原因分析</Typography>
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.reasons.map((reason, index) => (
-                  <li key={index} className="text-sm">
-                    {reason.description}
+                  <li key={index}>
+                    <MutedText>{reason.description}</MutedText>
                   </li>
                 ))}
               </ul>
@@ -80,11 +81,11 @@ const HealthAdviceMessageBubble = ({
           {/* 具体建议 */}
           {healthAdvice.suggestions.length > 0 && (
             <div>
-              <h4 className="font-medium mb-2">具体建议</h4>
+              <Typography variant="h4" className="mb-2">具体建议</Typography>
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.suggestions.map((suggestion, index) => (
-                  <li key={index} className="text-sm">
-                    {suggestion.description}
+                  <li key={index}>
+                    <MutedText>{suggestion.description}</MutedText>
                   </li>
                 ))}
               </ul>
@@ -94,11 +95,11 @@ const HealthAdviceMessageBubble = ({
           {/* 适用场景 */}
           {healthAdvice.scenarios.length > 0 && (
             <div>
-              <h4 className="font-medium mb-2">适用场景</h4>
+              <Typography variant="h4" className="mb-2">适用场景</Typography>
               <ul className="list-disc pl-4 space-y-1">
                 {healthAdvice.scenarios.map((scenario, index) => (
-                  <li key={index} className="text-sm">
-                    {scenario.condition}
+                  <li key={index}>
+                    <MutedText>{scenario.condition}</MutedText>
                   </li>
                 ))}
               </ul>

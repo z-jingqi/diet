@@ -4,6 +4,7 @@ import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
 import useChatStore from "@/store/chat";
+import useTagsStore from "@/store/tags";
 
 const prompts = [
   "今天想吃什么？",
@@ -20,6 +21,9 @@ const ChatPage = () => {
     canSendMessage,
     abortCurrentMessage,
   } = useChatStore();
+
+  const { clearTags } = useTagsStore();
+
   const [showTyping, setShowTyping] = useState(true);
   const [, setIsTyping] = useState(true);
 
@@ -30,6 +34,7 @@ const ChatPage = () => {
 
   const handleReset = () => {
     resetMessages();
+    clearTags();
     setShowTyping(true);
   };
 
