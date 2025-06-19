@@ -4,6 +4,7 @@ import type { RecipeIngredient } from "@shared/schemas/recipe";
 import ExpandableCard from "./ExpandableCard";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Flame, Scale, Droplet } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipeIngredientsProps {
   ingredients: RecipeIngredient[];
@@ -37,6 +38,11 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
               <div className="flex-1">
                 <Typography variant="h4" className="font-medium">{ingredient.name}</Typography>
                 <MutedText>用量：{ingredient.amount}{ingredient.unit}</MutedText>
+                <div className="mt-1">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    {ingredient.price}元
+                  </Badge>
+                </div>
                 {ingredient.purpose && <MutedText className="mt-1">用途：{ingredient.purpose}</MutedText>}
               </div>
             </div>

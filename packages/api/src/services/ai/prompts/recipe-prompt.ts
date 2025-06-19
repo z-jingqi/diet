@@ -13,6 +13,7 @@ export const RECIPE_PROMPT = `
           "name": "食材名称",                // 必选
           "amount": 100,                    // 必选：食材数量
           "unit": "g",                      // 必选：食材单位
+          "price": "5-8",                   // 必选：食材价格范围（元）
           "nutrition": {                    // 必选：营养成分
             "protein": 10,                  // 必选：蛋白质含量（克）
             "potassium": 200,               // 必选：钾含量（毫克）
@@ -37,6 +38,8 @@ export const RECIPE_PROMPT = `
         "sodium": 100,                     // 必选：总钠含量（毫克）
         "calories": 300                    // 必选：总卡路里（千卡）
       },
+      "cost": "20-35",                     // 必选：总成本范围（元）
+      "leftoverTips": "剩菜可以冷藏保存2-3天，建议重新加热后食用。也可以冷冻保存1个月。", // 可选：剩菜处理建议
       "dietNote": "饮食注意事项",           // 可选
       "tags": ["低钠", "低脂"],             // 可选
       "difficulty": "easy",                // 必选：烹饪难度（easy/medium/hard）

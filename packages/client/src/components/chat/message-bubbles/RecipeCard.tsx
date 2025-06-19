@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ChefHat, Clock } from "lucide-react";
+import { Heart, ChefHat, Clock, DollarSign } from "lucide-react";
 import type { Recipe } from "@shared/schemas/recipe";
 import { cn } from "@/lib/utils";
 import { MutedText } from "@/components/ui/typography";
@@ -31,9 +31,15 @@ const RecipeCard = ({ recipe, onCook, onFavorite }: RecipeCardProps) => {
         <CardTitle className="text-xl font-semibold leading-none tracking-tight">
           {recipe.name}
         </CardTitle>
-        <Badge className={cn("text-white", difficulty.className)}>
-          {difficulty.label}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            <DollarSign className="w-3 h-3 mr-1" />
+            {recipe.cost}元
+          </Badge>
+          <Badge className={cn("text-white", difficulty.className)}>
+            {difficulty.label}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex items-center">

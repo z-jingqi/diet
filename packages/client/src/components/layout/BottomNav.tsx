@@ -40,7 +40,7 @@ const BottomNav = () => {
       className={cn(
         // 移动端底部，桌面端顶部
         "fixed z-50 left-0 right-0 border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-        "h-[var(--bottom-nav-height)] md:h-20",
+        "h-[var(--bottom-nav-height)] md:h-16",
         "bottom-0 md:top-0 md:bottom-auto md:border-t-0 md:border-b md:shadow-sm"
       )}
     >
