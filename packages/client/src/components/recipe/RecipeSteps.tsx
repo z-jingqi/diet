@@ -22,11 +22,13 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
           <div key={index} className="p-4 rounded-lg border space-y-4">
             <div className="flex items-center gap-2">
               <MutedText>{index + 1}.</MutedText>
-              <Typography variant="span" className="font-medium">{step.description}</Typography>
+              <Typography variant="span" className="font-medium">
+                {step.description}
+              </Typography>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <MutedText>{step.time}秒</MutedText>
+              <MutedText>{step.time} 分钟</MutedText>
             </div>
             {step.tips && (
               <div className="bg-muted p-3 rounded-md">
