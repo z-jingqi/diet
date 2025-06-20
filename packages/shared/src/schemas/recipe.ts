@@ -18,11 +18,18 @@ export const RecipeStepSchema = z.object({
 
 export const RecipeCostSchema = z.string().describe('总成本范围（元），例如："20-35"');
 
+export const KitchenToolSchema = z.object({
+  name: z.string().describe('厨具名称'),
+  description: z.string().optional().describe('厨具用途说明'),
+  required: z.boolean().describe('是否必需，true为必需，false为可选')
+}).describe('菜谱需要的厨具');
+
 export const RecipeSchema = z.object({
   name: z.string().describe('菜谱名称'),
   description: z.string().describe('菜谱的简要描述，使用markdown格式，包括菜品特点、口感、适合人群等信息。可以使用**加粗**、*斜体*等markdown语法来强调重要信息'),
   ingredients: z.array(RecipeIngredientSchema).describe('所需食材列表'),
   steps: z.array(RecipeStepSchema).describe('烹饪步骤列表'),
+  kitchenTools: z.array(KitchenToolSchema).describe('需要的厨具列表'),
   nutrition: NutritionSchema.describe('菜谱的营养成分信息'),
   cost: RecipeCostSchema.describe('菜谱成本信息'),
   leftoverTips: z.string().optional().describe('剩菜处理建议'),
@@ -42,4 +49,5 @@ export type Recipe = z.infer<typeof RecipeSchema>;
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
 export type RecipeStep = z.infer<typeof RecipeStepSchema>;
 export type RecipeCost = z.infer<typeof RecipeCostSchema>;
+export type KitchenTool = z.infer<typeof KitchenToolSchema>;
 export type RecipeRecommendation = z.infer<typeof RecipeRecommendationSchema>; 

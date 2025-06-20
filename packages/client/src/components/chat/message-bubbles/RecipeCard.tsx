@@ -5,6 +5,8 @@ import { ThumbsUp, ThumbsDown, ChefHat, Clock, DollarSign } from "lucide-react";
 import type { Recipe } from "@shared/schemas/recipe";
 import { cn } from "@/lib/utils";
 import { MutedText } from "@/components/ui/typography";
+import IngredientsList from "@/components/chat/message-bubbles/IngredientsList";
+import KitchenToolsDisplay from "@/components/chat/message-bubbles/KitchenToolsDisplay";
 
 const difficultyMap = {
   easy: { label: "简单", className: "bg-green-500" },
@@ -42,13 +44,20 @@ const RecipeCard = ({ recipe, onCook, onLike, onDislike }: RecipeCardProps) => {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         <div className="flex items-center">
           <Clock className="w-4 h-4 mr-1" />
           <MutedText className="flex-1">
             烹饪时间：{recipe.cookingTime}分钟
           </MutedText>
         </div>
+        
+        {/* 食材信息 */}
+        <IngredientsList ingredients={recipe.ingredients} />
+        
+        {/* 厨具信息 */}
+        <KitchenToolsDisplay kitchenTools={recipe.kitchenTools} />
+        
         {recipe.description && (
           <MutedText>
             {recipe.description}

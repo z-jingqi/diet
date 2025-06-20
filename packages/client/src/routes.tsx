@@ -5,6 +5,8 @@ import {
 import HomePage from '@/pages/Home';
 import ChatPage from '@/pages/Chat';
 import RecipePage from '@/pages/Recipe';
+import ProfilePage from '@/pages/Profile';
+import KitchenToolsPage from '@/pages/KitchenTools';
 import BottomNav from '@/components/layout/BottomNav';
 
 // 布局组件
@@ -45,7 +47,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "profile",
-        element: <div>个人页面</div>,
+        element: <ProfilePage />,
+      },
+      {
+        path: "kitchen-tools",
+        element: <KitchenToolsPage />,
       },
     ],
   },

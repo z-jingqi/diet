@@ -15,6 +15,7 @@
   "dependencies": {
     "@diet/shared": "file:../shared",
     "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-checkbox": "1.3.2",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-icons": "^1.3.2",
     "@radix-ui/react-scroll-area": "^1.2.9",

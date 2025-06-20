@@ -31,6 +31,13 @@ export const RECIPE_PROMPT = `
           "tips": "烹饪小贴士"              // 可选
         }
       ],
+      "kitchenTools": [
+        {
+          "name": "厨具名称",               // 必选：如"炒锅"、"菜刀"等
+          "description": "厨具用途说明",    // 可选：如"用于炒菜"
+          "required": true                 // 必选：是否必需，true为必需，false为可选
+        }
+      ],
       "nutrition": {
         "protein": 20,                     // 必选：总蛋白质含量（克）
         "potassium": 400,                  // 必选：总钾含量（毫克）
