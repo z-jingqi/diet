@@ -7,7 +7,11 @@ import { Typography, MutedText } from "@/components/ui/typography";
 import { X, Plus, Utensils } from "lucide-react";
 import usePreferencesStore from "@/store/preferences";
 
-const FoodPreferences = () => {
+interface FoodPreferencesProps {
+  className?: string;
+}
+
+const FoodPreferences = ({ className }: FoodPreferencesProps) => {
   const { dislikedFoods, addDislikedFood, removeDislikedFood } = usePreferencesStore();
   const [inputValue, setInputValue] = useState("");
 
@@ -30,7 +34,7 @@ const FoodPreferences = () => {
   };
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Utensils className="h-5 w-5 text-red-500" />
@@ -40,7 +44,7 @@ const FoodPreferences = () => {
           输入您不喜欢或不推荐的食物，AI将避免在菜谱中使用这些食材
         </MutedText>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1 lg:overflow-y-auto">
         {/* 添加食物输入框 */}
         <div className="flex gap-2">
           <Input
