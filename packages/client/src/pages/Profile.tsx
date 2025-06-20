@@ -6,8 +6,12 @@ import {
   Heart, 
   XCircle, 
   Utensils, 
-  Settings
+  Settings,
+  Palette,
+  ChefHat
 } from "lucide-react";
+import TastePreferences from "@/components/profile/TastePreferences";
+import FoodPreferences from "@/components/profile/FoodPreferences";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -32,7 +36,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 p-4 space-y-4">
+    <div className="flex flex-col flex-1 min-h-0 p-4 space-y-6">
       {/* 功能菜单 */}
       <div className="space-y-3">
         <Card>
@@ -114,6 +118,19 @@ const ProfilePage = () => {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* 个性化设置 */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <ChefHat className="h-5 w-5 text-blue-500" />
+          <Typography variant="h3" className="text-lg font-semibold">
+            个性化设置
+          </Typography>
+        </div>
+        
+        <TastePreferences />
+        <FoodPreferences />
       </div>
     </div>
   );
