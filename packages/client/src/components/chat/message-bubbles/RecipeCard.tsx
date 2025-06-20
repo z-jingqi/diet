@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ChefHat, Clock, DollarSign } from "lucide-react";
+import { ThumbsUp, ThumbsDown, ChefHat, Clock, DollarSign } from "lucide-react";
 import type { Recipe } from "@shared/schemas/recipe";
 import { cn } from "@/lib/utils";
 import { MutedText } from "@/components/ui/typography";
@@ -16,10 +16,11 @@ const difficultyMap = {
 interface RecipeCardProps {
   recipe: Recipe;
   onCook?: (recipe: Recipe) => void;
-  onFavorite?: (recipe: Recipe) => void;
+  onLike?: (recipe: Recipe) => void;
+  onDislike?: (recipe: Recipe) => void;
 }
 
-const RecipeCard = ({ recipe, onCook, onFavorite }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, onCook, onLike, onDislike }: RecipeCardProps) => {
   const difficulty = difficultyMap[recipe.difficulty as keyof typeof difficultyMap] || {
     label: recipe.difficulty,
     className: "bg-gray-500"
@@ -54,16 +55,25 @@ const RecipeCard = ({ recipe, onCook, onFavorite }: RecipeCardProps) => {
           </MutedText>
         )}
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onFavorite?.(recipe)}
-          className="text-orange-500 hover:text-orange-600 hover:bg-orange-50"
-        >
-          <Heart className="w-4 h-4 mr-1" />
-          收藏
-        </Button>
+      <CardFooter className="flex justify-between items-center">
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onLike?.(recipe)}
+            className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2"
+          >
+            <ThumbsUp className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDislike?.(recipe)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+          >
+            <ThumbsDown className="w-4 h-4" />
+          </Button>
+        </div>
         <Button
           size="sm"
           onClick={() => onCook?.(recipe)}

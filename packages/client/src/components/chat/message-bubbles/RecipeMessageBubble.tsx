@@ -37,8 +37,11 @@ const RecipeMessageBubble = ({
                 key={recipe.name}
                 recipe={recipe}
                 onCook={onRecipeClick}
-                onFavorite={() => {
-                  /* TODO: 实现收藏功能 */
+                onLike={() => {
+                  /* TODO: 实现点赞功能 */
+                }}
+                onDislike={() => {
+                  /* TODO: 实现不喜欢功能 */
                 }}
               />
             ))}
