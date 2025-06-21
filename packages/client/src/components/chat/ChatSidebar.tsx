@@ -23,6 +23,7 @@ const ChatSidebar = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [allowFocus, setAllowFocus] = useState(false);
   const navigate = useNavigate();
 
   // 检测设备类型
@@ -37,6 +38,15 @@ const ChatSidebar = ({
     return () => {
       window.removeEventListener('resize', checkDevice);
     };
+  }, []);
+
+  // 延迟允许聚焦，避免初始自动聚焦
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAllowFocus(true);
+    }, 1000); // 1秒后允许聚焦
+
+    return () => clearTimeout(timer);
   }, []);
 
   // 模拟数据，按时间分类
@@ -119,6 +129,15 @@ const ChatSidebar = ({
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
             autoFocus={false}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            onFocus={(e) => {
+              if (!allowFocus) {
+                e.target.blur();
+              }
+            }}
           />
         </div>
       </div>

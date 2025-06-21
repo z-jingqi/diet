@@ -38,7 +38,7 @@ const ChatLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[100dvh]">
       {/* Header */}
       <ChatHeader
         onMenuClick={handleMenuClick}

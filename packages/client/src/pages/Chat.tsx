@@ -76,7 +76,7 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-[100dvh]">
       <ChatLayout
         title="新对话"
         onRename={handleRename}
