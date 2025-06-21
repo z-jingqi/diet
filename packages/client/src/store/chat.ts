@@ -13,6 +13,7 @@ import { HealthAdvice } from "@shared/schemas";
 interface ChatState {
   messages: Message[];
   currentTags: Tag[]; // 跟踪当前使用的标签
+  gettingIntent: boolean; // 正在获取意图的状态
   addMessage: (message: Message) => void;
   sendMessage: (content: string, tags?: Tag[]) => Promise<void>;
   getIntent: (
@@ -41,6 +42,7 @@ const useChatStore = create<
 >((set, get) => ({
   messages: [],
   currentTags: [],
+  gettingIntent: false,
   isLoading: false,
   error: null,
   abortController: undefined,
@@ -50,22 +52,27 @@ const useChatStore = create<
   },
 
   getIntent: async (messages) => {
+    set({ gettingIntent: true });
     const controller = new AbortController();
     set({ abortController: controller });
-    const response = await fetch("/api/intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ messages }),
-      signal: controller.signal,
-    });
-    set({ abortController: undefined });
-    if (!response.ok) {
-      throw new Error("Failed to get intent");
+    try {
+      const response = await fetch("/api/intent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+        signal: controller.signal,
+      });
+      set({ abortController: undefined });
+      if (!response.ok) {
+        throw new Error("Failed to get intent");
+      }
+      const { response: intent } = await response.json();
+      return intent as MessageType;
+    } finally {
+      set({ gettingIntent: false });
     }
-    const { response: intent } = await response.json();
-    return intent as MessageType;
   },
 
   sendChatMessage: async (messages) => {
@@ -170,7 +177,7 @@ const useChatStore = create<
     const { abortController } = get();
     if (abortController) {
       abortController.abort();
-      set({ abortController: undefined });
+      set({ abortController: undefined, gettingIntent: false });
       // 标记最后一条AI消息为 abort
       set((state) => ({
         messages: state.messages.map((msg, idx, arr) =>
@@ -267,13 +274,18 @@ const useChatStore = create<
               ),
             }));
           } catch (error) {
-            set((state) => ({
-              messages: state.messages.map((msg) =>
-                msg.id === message.id
-                  ? { ...msg, status: "error", finishedAt: new Date() }
-                  : msg
-              ),
-            }));
+            // 检查是否是因为abort导致的错误
+            const isAbortError = error instanceof Error && error.name === 'AbortError';
+            
+            if (!isAbortError) {
+              set((state) => ({
+                messages: state.messages.map((msg) =>
+                  msg.id === message.id
+                    ? { ...msg, status: "error", finishedAt: new Date() }
+                    : msg
+                ),
+              }));
+            }
             throw error;
           }
         }
@@ -281,38 +293,48 @@ const useChatStore = create<
     } catch (error) {
       console.error("Error:", error);
       
+      // 重置gettingIntent状态
+      set({ gettingIntent: false });
+      
+      // 检查是否是因为abort导致的错误
+      const isAbortError = error instanceof Error && error.name === 'AbortError';
+      
       // 检查是否已经有 AI 消息（可能是在 getIntent 之后添加的）
       const { messages } = get();
       const lastMessage = messages[messages.length - 1];
       
       if (lastMessage && !lastMessage.isUser) {
-        // 如果最后一条是 AI 消息，标记为 error
-        set((state) => ({
-          messages: state.messages.map((msg, idx, arr) =>
-            !msg.isUser && idx === arr.length - 1
-              ? { ...msg, status: "error", finishedAt: new Date() }
-              : msg
-          ),
-        }));
+        // 如果最后一条是 AI 消息，且不是因为abort导致的错误，才标记为 error
+        if (!isAbortError) {
+          set((state) => ({
+            messages: state.messages.map((msg, idx, arr) =>
+              !msg.isUser && idx === arr.length - 1
+                ? { ...msg, status: "error", finishedAt: new Date() }
+                : msg
+            ),
+          }));
+        }
       } else {
-        // 如果没有 AI 消息（比如 getIntent 失败），添加一个错误消息
-        const errorMessage = buildMessage("chat");
-        errorMessage.status = "error";
-        errorMessage.content = "抱歉，处理您的消息时出现了问题，请重试。";
-        errorMessage.finishedAt = new Date();
-        addMessage(errorMessage);
+        // 如果没有 AI 消息（比如 getIntent 失败），且不是因为abort导致的错误，才添加错误消息
+        if (!isAbortError) {
+          const errorMessage = buildMessage("chat");
+          errorMessage.status = "error";
+          errorMessage.content = "抱歉，处理您的消息时出现了问题，请重试。";
+          errorMessage.finishedAt = new Date();
+          addMessage(errorMessage);
+        }
       }
     }
   },
 
   resetMessages: () => {
-    set({ messages: [], currentTags: [] });
+    set({ messages: [], currentTags: [], gettingIntent: false });
   },
 
   canSendMessage: () => {
-    const { messages } = get();
+    const { messages, gettingIntent } = get();
     if (messages.length === 0) {
-      return true;
+      return !gettingIntent;
     }
     const last = messages[messages.length - 1];
     // 如果最后一条是用户消息，说明AI还没回复
@@ -321,6 +343,10 @@ const useChatStore = create<
     }
     // 如果最后一条AI消息还在处理中
     if (last.status === "pending" || last.status === "streaming") {
+      return false;
+    }
+    // 如果正在获取意图，也不能发送消息
+    if (gettingIntent) {
       return false;
     }
     return true;

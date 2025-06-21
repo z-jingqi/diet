@@ -4,6 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Typography, MutedText, ErrorText } from "@/components/ui/typography";
 
+// 创建警告文本组件
+const WarningText = ({ children }: { children: React.ReactNode }) => (
+  <span className="text-orange-600 dark:text-orange-400">{children}</span>
+);
+
 interface HealthAdviceMessageBubbleProps {
   content: string;
   healthAdvice?: HealthAdvice;
@@ -43,7 +48,7 @@ const HealthAdviceMessageBubble = ({
     return <ErrorText>生成健康建议失败，请重试</ErrorText>;
   }
   if (!healthAdvice && status === 'abort') {
-    return <MutedText>生成健康建议已中断</MutedText>;
+    return <WarningText>生成健康建议已中断</WarningText>;
   }
   if (!healthAdvice) {
     return <Typography variant="p">{content}</Typography>;

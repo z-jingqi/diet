@@ -6,7 +6,7 @@ import MessageBubble from "./message-bubbles/MessageBubble";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const ChatMessages = () => {
-  const { messages } = useChatStore();
+  const { messages, gettingIntent } = useChatStore();
   const navigate = useNavigate();
   const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,21 @@ const ChatMessages = () => {
             />
           );
         })}
+        
+        {/* Getting Intent 状态显示 */}
+        {gettingIntent && (
+          <div className="flex w-full justify-start">
+            <div className="max-w-[80%]">
+              <div className="bg-white rounded-lg p-4 flex items-center justify-center">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-3 h-3 bg-gray-400 rounded-full animate-ping opacity-75"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
     </div>

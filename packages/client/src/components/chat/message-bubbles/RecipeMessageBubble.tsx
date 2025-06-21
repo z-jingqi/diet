@@ -3,6 +3,11 @@ import type { Recipe } from "@shared/schemas/recipe";
 import RecipeCard from "./RecipeCard";
 import { MutedText, ErrorText } from "@/components/ui/typography";
 
+// 创建警告文本组件
+const WarningText = ({ children }: { children: React.ReactNode }) => (
+  <span className="text-orange-600 dark:text-orange-400">{children}</span>
+);
+
 /**
  * 菜谱消息气泡
  */
@@ -26,7 +31,7 @@ const RecipeMessageBubble = ({
           ) : status === 'error' && recipes.length === 0 ? (
             <ErrorText>生成菜谱失败，请重试</ErrorText>
           ) : status === 'abort' && recipes.length === 0 ? (
-            <MutedText>生成菜谱已中断</MutedText>
+            <WarningText>生成菜谱已中断</WarningText>
           ) : (
             <Markdown
               content={content}

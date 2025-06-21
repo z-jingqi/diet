@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 const TypingPrompt = () => {
   const prompts = [
     "帮我制定一周的饮食计划",
-    "这个食材有什么营养价值？",
     "如何搭配营养均衡的午餐？",
+    "我想做一道低热量的晚餐",
   ];
 
   const [currentPrompt, setCurrentPrompt] = useState(0);
