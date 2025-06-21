@@ -1,19 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Search, MessageSquare, User, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { Search, MessageSquare, User } from "lucide-react";
+import ChatHistoryItem from "./ChatHistoryItem";
+import ProfileDialog from "@/components/profile/ProfileDialog";
 
 interface ChatSidebarProps {
   onNewChat?: () => void;
   onSelectChat?: (chatId: string) => void;
-  onUserClick?: () => void;
   onRenameChat?: (chatId: string) => void;
   onDeleteChat?: (chatId: string) => void;
 }
@@ -21,15 +17,30 @@ interface ChatSidebarProps {
 const ChatSidebar = ({ 
   onNewChat, 
   onSelectChat, 
-  onUserClick, 
   onRenameChat, 
-  onDeleteChat 
+  onDeleteChat,
 }: ChatSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // 检测设备类型
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < 768); // md断点
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
+  }, []);
 
   // 模拟数据，按时间分类
-  const mockChats = {
+  const mockChatHistories = {
     recent: [
       { id: "1", title: "关于健康饮食的建议", timestamp: "2024-01-15" },
       { id: "2", title: "减肥食谱推荐", timestamp: "2024-01-14" },
@@ -53,26 +64,47 @@ const ChatSidebar = ({
   };
 
   const timeCategories = [
-    { key: "recent", label: "最近", chats: mockChats.recent },
-    { key: "threeDaysAgo", label: "3天前", chats: mockChats.threeDaysAgo },
-    { key: "oneWeekAgo", label: "一周前", chats: mockChats.oneWeekAgo },
-    { key: "oneMonthAgo", label: "一个月前", chats: mockChats.oneMonthAgo },
-    { key: "older", label: "很久的消息", chats: mockChats.older },
+    { key: "recent", label: "最近", chatHistories: mockChatHistories.recent },
+    {
+      key: "threeDaysAgo",
+      label: "3天前",
+      chatHistories: mockChatHistories.threeDaysAgo,
+    },
+    {
+      key: "oneWeekAgo",
+      label: "一周前",
+      chatHistories: mockChatHistories.oneWeekAgo,
+    },
+    {
+      key: "oneMonthAgo",
+      label: "一个月前",
+      chatHistories: mockChatHistories.oneMonthAgo,
+    },
+    {
+      key: "older",
+      label: "很久的消息",
+      chatHistories: mockChatHistories.older,
+    },
   ];
 
-  const filteredCategories = timeCategories.filter(category => 
-    category.chats.some(chat => 
-      chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = timeCategories.filter((category) =>
+    category.chatHistories.some((chatHistory) =>
+      chatHistory.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const handleChatPress = (chatId: string) => {
-    setActiveChatId(activeChatId === chatId ? null : chatId);
-  };
-
   const handleChatSelect = (chatId: string) => {
     onSelectChat?.(chatId);
-    setActiveChatId(null);
+  };
+
+  const handleUserClick = () => {
+    if (isMobile) {
+      // 移动端：打开Profile对话框
+      setProfileDialogOpen(true);
+    } else {
+      // 桌面端：跳转到Profile页面
+      navigate("/profile");
+    }
   };
 
   return (
@@ -98,78 +130,33 @@ const ChatSidebar = ({
               {category.label}
             </MutedText>
             <div className="space-y-1">
-              {category.chats
-                .filter(chat => 
-                  chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+              {category.chatHistories
+                .filter((chatHistory) =>
+                  chatHistory.title
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
                 )
-                .map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="group relative flex items-center w-full p-2 rounded-md hover:bg-accent transition-colors"
-                    onTouchStart={() => handleChatPress(chat.id)}
-                  >
-                    <Button
-                      variant="ghost"
-                      className="flex-1 justify-start h-auto p-0"
-                      onClick={() => handleChatSelect(chat.id)}
-                    >
-                      <div className="flex items-center w-full">
-                        <MessageSquare className="mr-2 h-4 w-4 flex-shrink-0" />
-                        <div className="flex-1 min-w-0 text-left">
-                          <Typography variant="span" className="block truncate text-sm">
-                            {chat.title}
-                          </Typography>
-                          <MutedText className="text-xs">
-                            {chat.timestamp}
-                          </MutedText>
-                        </div>
-                      </div>
-                    </Button>
-                    
-                    {/* Action按钮 - hover时显示，移动端触摸时也显示 */}
-                    <div className={`transition-opacity ml-2 ${
-                      activeChatId === chat.id 
-                        ? 'opacity-100' 
-                        : 'opacity-0 group-hover:opacity-100'
-                    }`}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-32">
-                          <DropdownMenuItem onClick={() => onRenameChat?.(chat.id)}>
-                            <Edit className="mr-2 h-3 w-3" />
-                            <Typography variant="span" className="text-sm">重命名</Typography>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => onDeleteChat?.(chat.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            <Typography variant="span" className="text-sm">删除</Typography>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
+                .map((chatHistory) => (
+                  <ChatHistoryItem
+                    key={chatHistory.id}
+                    chatHistory={chatHistory}
+                    onSelectChat={handleChatSelect}
+                    onRenameChat={onRenameChat}
+                    onDeleteChat={onDeleteChat}
+                  />
                 ))}
             </div>
           </div>
         ))}
         
         {/* 无搜索结果时显示 */}
-        {searchTerm && filteredCategories.every(cat => cat.chats.length === 0) && (
-          <div className="flex flex-col items-center justify-center h-full text-center p-4">
-            <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
-            <MutedText>未找到相关聊天记录</MutedText>
-          </div>
-        )}
+        {searchTerm &&
+          filteredCategories.every((cat) => cat.chatHistories.length === 0) && (
+            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+              <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
+              <MutedText>未找到相关聊天记录</MutedText>
+            </div>
+          )}
       </div>
 
       {/* 用户昵称 */}
@@ -177,7 +164,7 @@ const ChatSidebar = ({
         <Button
           variant="ghost"
           className="w-full justify-start h-auto p-2"
-          onClick={onUserClick}
+          onClick={handleUserClick}
         >
           <div className="flex items-center w-full">
             <User className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -189,8 +176,14 @@ const ChatSidebar = ({
           </div>
         </Button>
       </div>
+
+      {/* Profile对话框 - 移动端 */}
+      <ProfileDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen} 
+      />
     </div>
   );
 };
 
-export default ChatSidebar; 
+export default ChatSidebar;

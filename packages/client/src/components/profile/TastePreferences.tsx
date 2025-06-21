@@ -38,7 +38,7 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
           调整您的口味偏好，AI将根据这些设置为您推荐更符合口味的菜谱
         </MutedText>
       </CardHeader>
-      <CardContent className="space-y-6 flex-1 lg:overflow-y-auto">
+      <CardContent className="space-y-14 flex-1 lg:overflow-y-auto">
         {/* 口味维度设置 */}
         {Object.entries(tasteLabels).map(([key, label]) => {
           const Icon = tasteIcons[key as keyof typeof tasteIcons];
@@ -53,9 +53,9 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
                     {label.name}
                   </Typography>
                 </div>
-                <MutedText className="text-sm">
+                <Typography variant="span" className="text-xs bg-muted px-2 py-1 rounded-md">
                   {label.levels[currentValue]}
-                </MutedText>
+                </Typography>
               </div>
               
               <Slider
@@ -67,11 +67,21 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
                 className="w-full"
               />
               
-              <div className="flex justify-between text-xs text-muted-foreground px-3">
+              <div className="relative w-full">
                 {label.levels.map((level, index) => (
-                  <span key={index} className="text-center flex-1">
-                    {level}
-                  </span>
+                  <div
+                    key={index}
+                    className="absolute transform -translate-x-1/2"
+                    style={{
+                      left: index === 0 ? 'calc(0% + var(--spacing) * 3)' : 
+                           index === label.levels.length - 1 ? 'calc(100% - var(--spacing) * 3)' : 
+                           `${(index / (label.levels.length - 1)) * 100}%`,
+                    }}
+                  >
+                    <MutedText className="text-xs text-center whitespace-nowrap">
+                      {level}
+                    </MutedText>
+                  </div>
                 ))}
               </div>
             </div>

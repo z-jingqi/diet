@@ -83,11 +83,6 @@ const ChatPage = () => {
     console.log("删除对话项:", chatId);
   };
 
-  const handleUserClick = () => {
-    // TODO: 实现用户点击功能
-    console.log("用户点击");
-  };
-
   return (
     <div className="h-full">
       <ChatLayout
@@ -99,7 +94,6 @@ const ChatPage = () => {
         onSelectChat={handleSelectChat}
         onRenameChat={handleRenameChat}
         onDeleteChatItem={handleDeleteChatItem}
-        onUserClick={handleUserClick}
       >
         <div className="flex flex-col h-full items-center justify-center">
           {/* 主要内容区域 */}

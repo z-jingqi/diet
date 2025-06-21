@@ -27,11 +27,11 @@ export const tasteLabels = {
   },
   sweetness: {
     name: "甜度",
-    levels: ["无甜", "微甜", "适中", "偏甜", "很甜"],
+    levels: ["不甜", "微甜", "适中", "偏甜", "很甜"],
   },
   sourness: {
     name: "酸度",
-    levels: ["无酸", "微酸", "适中", "偏酸", "很酸"],
+    levels: ["不酸", "微酸", "适中", "偏酸", "很酸"],
   },
   umami: {
     name: "鲜度",

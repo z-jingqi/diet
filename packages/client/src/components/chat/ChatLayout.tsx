@@ -13,7 +13,6 @@ interface ChatLayoutProps {
   onSelectChat?: (chatId: string) => void;
   onRenameChat?: (chatId: string) => void;
   onDeleteChatItem?: (chatId: string) => void;
-  onUserClick?: () => void;
 }
 
 const ChatLayout = ({
@@ -26,7 +25,6 @@ const ChatLayout = ({
   onSelectChat,
   onRenameChat,
   onDeleteChatItem,
-  onUserClick,
 }: ChatLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -50,9 +48,7 @@ const ChatLayout = ({
       />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0">
-        {children}
-      </div>
+      <div className="flex-1 min-h-0">{children}</div>
 
       {/* Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -74,10 +70,6 @@ const ChatLayout = ({
               onDeleteChatItem?.(chatId);
               handleSidebarClose();
             }}
-            onUserClick={() => {
-              onUserClick?.();
-              handleSidebarClose();
-            }}
           />
         </SheetContent>
       </Sheet>
@@ -85,4 +77,4 @@ const ChatLayout = ({
   );
 };
 
-export default ChatLayout; 
+export default ChatLayout;

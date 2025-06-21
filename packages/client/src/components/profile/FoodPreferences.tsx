@@ -69,7 +69,7 @@ const FoodPreferences = ({ className }: FoodPreferencesProps) => {
             <Typography variant="span" className="text-sm font-medium">
               已设置的不推荐食物：
             </Typography>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               {dislikedFoods.map((foodName) => (
                 <Badge
                   key={foodName}
