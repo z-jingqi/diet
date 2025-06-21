@@ -16,7 +16,7 @@ const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="h-[98vh] max-h-[98vh] rounded-t-xl border-t-2 p-0"
+        className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0"
       >
         <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between">
           <SheetTitle className="text-left text-lg">个人设置</SheetTitle>

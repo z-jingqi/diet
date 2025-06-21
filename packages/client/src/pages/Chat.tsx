@@ -6,13 +6,6 @@ import ChatLayout from "@/components/chat/ChatLayout";
 import useChatStore from "@/store/chat";
 import useTagsStore from "@/store/tags";
 
-const prompts = [
-  "今天想吃什么？",
-  "有什么饮食禁忌吗？",
-  "想了解什么食材？",
-  "需要营养建议吗？",
-];
-
 const ChatPage = () => {
   const {
     messages,
@@ -25,7 +18,6 @@ const ChatPage = () => {
   const { clearTags, selectedTags } = useTagsStore();
 
   const [showTyping, setShowTyping] = useState(true);
-  const [, setIsTyping] = useState(true);
 
   const handleSendMessage = async (content: string) => {
     setShowTyping(false);
@@ -95,19 +87,17 @@ const ChatPage = () => {
         onRenameChat={handleRenameChat}
         onDeleteChatItem={handleDeleteChatItem}
       >
-        <div className="flex flex-col h-full items-center justify-center">
+        <div className="flex flex-col h-full">
           {/* 主要内容区域 */}
-          {showTyping ? (
-            <TypingPrompt
-              prompts={prompts}
-              onStartTyping={() => setIsTyping(true)}
-              onStopTyping={() => setIsTyping(false)}
-            />
-          ) : (
-            <ChatMessages />
-          )}
+          <div className="flex-1 flex items-center justify-center">
+            {showTyping ? (
+              <TypingPrompt />
+            ) : (
+              <ChatMessages />
+            )}
+          </div>
 
-          {/* 输入框区域 - 始终在底部 */}
+          {/* 输入框区域 - 固定在底部 */}
           <div className="w-full max-w-3xl mx-auto p-4">
             <ChatInput
               onSendMessage={handleSendMessage}

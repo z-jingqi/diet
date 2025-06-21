@@ -1,21 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { MutedText } from "@/components/ui/typography";
 import { fetchTagsData } from "@/lib/api/tags";
 import type { Tag } from "@diet/shared";
 import SelectedTagsDisplay from "./SelectedTagsDisplay";
-import TagSearchFilter from "./TagSearchFilter";
-import TagList from "./TagList";
+import TagSelectorDialog from "./TagSelectorDialog";
+import TagSelectorSheet from "./TagSelectorSheet";
 
 interface TagSelectorProps {
   selectedTags: Tag[];
@@ -29,8 +18,21 @@ const TagSelector = ({
   disabled,
 }: TagSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测设备类型
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < 768); // md断点
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
+  }, []);
 
   // 获取标签数据
   const {
@@ -61,17 +63,6 @@ const TagSelector = ({
     refetch();
   };
 
-  // 过滤标签
-  const filteredTags =
-    tagsData?.tags.filter((tag) => {
-      const matchesSearch =
-        tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tag.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory =
-        selectedCategory === "all" || tag.categoryId === selectedCategory;
-      return matchesSearch && matchesCategory;
-    }) || [];
-
   const categories = tagsData?.categories || [];
 
   return (
@@ -84,53 +75,33 @@ const TagSelector = ({
       />
 
       {/* 标签选择弹窗 */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={disabled}
-            className="h-8 w-8 p-0 hover:bg-muted"
-            title="添加标签"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>选择标签</DialogTitle>
-          </DialogHeader>
-
-          {/* 搜索和分类过滤 */}
-          <TagSearchFilter
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            categories={categories}
-          />
-
-          {/* 标签列表 */}
-          <div className="max-h-96 overflow-y-auto">
-            <TagList
-              tags={filteredTags}
-              selectedTags={selectedTags}
-              onTagToggle={handleTagToggle}
-              isLoading={isLoading}
-              error={error}
-              onRetry={handleRetry}
-            />
-          </div>
-
-          <DialogFooter>
-            <div className="flex justify-between items-center w-full">
-              <MutedText>已选择 {selectedTags.length} 个标签</MutedText>
-              <Button onClick={() => setIsOpen(false)}>确定</Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {isMobile ? (
+        <TagSelectorSheet
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          disabled={disabled}
+          tagsData={tagsData}
+          categories={categories}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          isLoading={isLoading}
+          error={error}
+          onRetry={handleRetry}
+        />
+      ) : (
+        <TagSelectorDialog
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          disabled={disabled}
+          tagsData={tagsData}
+          categories={categories}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          isLoading={isLoading}
+          error={error}
+          onRetry={handleRetry}
+        />
+      )}
     </div>
   );
 };

@@ -118,12 +118,13 @@ const ChatSidebar = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
+            autoFocus={false}
           />
         </div>
       </div>
 
       {/* 新聊天按钮 */}
-      <div className="p-4 border-b">
+      <div className="p-4">
         <Button 
           onClick={onNewChat}
           className="w-full justify-start"

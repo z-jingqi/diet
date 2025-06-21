@@ -1,74 +1,52 @@
-import { RefreshCw } from "lucide-react";
-import TagItem from "./TagItem";
-import { MutedText, ErrorText } from "@/components/ui/typography";
-import { Button } from "@/components/ui/button";
-import { TagListSkeleton } from "./TagSkeleton";
-import type { Tag } from "@diet/shared";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/typography";
+import type { Tag, TagCategory } from "@diet/shared";
 
 interface TagListProps {
-  tags: Tag[];
+  categories: TagCategory[];
+  tagsData?: {
+    tags: Tag[];
+    categories: TagCategory[];
+  };
   selectedTags: Tag[];
   onTagToggle: (tag: Tag) => void;
-  isLoading: boolean;
-  error: Error | null;
-  onRetry?: () => void;
 }
 
 const TagList = ({
-  tags,
+  categories,
+  tagsData,
   selectedTags,
   onTagToggle,
-  isLoading,
-  error,
-  onRetry,
 }: TagListProps) => {
-  if (isLoading) {
-    return <TagListSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <div className="flex items-center justify-center gap-3">
-          <ErrorText>加载失败</ErrorText>
-          {onRetry && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRetry}
-              className="flex items-center gap-1 h-auto p-0 text-muted-foreground hover:text-foreground"
-            >
-              <RefreshCw className="w-4 h-4" />
-              重试
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (tags.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <MutedText>没有找到标签</MutedText>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid gap-3">
-      {tags.map((tag) => {
-        const isSelected = selectedTags.some((t) => t.id === tag.id);
-        return (
-          <TagItem
-            key={tag.id}
-            tag={tag}
-            isSelected={isSelected}
-            onToggle={onTagToggle}
-          />
-        );
-      })}
-    </div>
+    <>
+      {categories.map((category) => (
+        <div key={category.id} className="mb-6 flex flex-col gap-1">
+          <Typography variant="span" className="mb-2 text-sm">{category.name}</Typography>
+          <div className="flex flex-wrap gap-2">
+            {tagsData?.tags
+              .filter((tag) => tag.categoryId === category.id)
+              .map((tag) => {
+                const isSelected = selectedTags.some((t) => t.id === tag.id);
+                return (
+                  <Badge
+                    key={tag.id}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`cursor-pointer transition-colors px-4 py-2 text-sm ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-muted"
+                    }`}
+                    onClick={() => onTagToggle(tag)}
+                  >
+                    {tag.name}
+                  </Badge>
+                );
+              })}
+          </div>
+        </div>
+      ))}
+    </>
   );
 };
 
