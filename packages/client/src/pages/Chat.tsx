@@ -89,7 +89,7 @@ const ChatPage = () => {
       >
         <div className="flex flex-col h-full">
           {/* 主要内容区域 */}
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
             {showTyping ? (
               <TypingPrompt />
             ) : (
