@@ -11,16 +11,10 @@ const TypingPrompt = () => {
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentIndexRef = useRef(0);
   const isTypingRef = useRef(true);
-  const promptsRef = useRef(prompts);
-
-  // 更新prompts引用
-  useEffect(() => {
-    promptsRef.current = prompts;
-  }, [prompts]);
 
   // 打字效果
   useEffect(() => {
@@ -33,7 +27,7 @@ const TypingPrompt = () => {
         clearTimeout(pauseTimerRef.current);
       }
 
-      const currentPromptText = promptsRef.current[currentPrompt];
+      const currentPromptText = prompts[currentPrompt];
       currentIndexRef.current = 0;
       setDisplayText("");
       isTypingRef.current = true;
@@ -51,7 +45,7 @@ const TypingPrompt = () => {
           isTypingRef.current = false;
           // 暂停2秒后切换到下一个prompt
           pauseTimerRef.current = setTimeout(() => {
-            setCurrentPrompt((prev) => (prev + 1) % promptsRef.current.length);
+            setCurrentPrompt((prev) => (prev + 1) % prompts.length);
           }, 2000);
         }
       };
@@ -71,7 +65,7 @@ const TypingPrompt = () => {
         clearTimeout(pauseTimerRef.current);
       }
     };
-  }, [currentPrompt]); // 只依赖currentPrompt
+  }, [currentPrompt]);
 
   return (
     <motion.div
