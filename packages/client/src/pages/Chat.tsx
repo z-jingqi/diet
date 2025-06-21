@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
+import ChatLayout from "@/components/chat/ChatLayout";
 import useChatStore from "@/store/chat";
 import useTagsStore from "@/store/tags";
 
@@ -49,18 +49,72 @@ const ChatPage = () => {
       );
     })();
 
+  // 处理header操作
+  const handleRename = () => {
+    // TODO: 实现重命名功能
+    console.log("重命名对话");
+  };
+
+  const handleClearChat = () => {
+    handleReset();
+  };
+
+  const handleDeleteChat = () => {
+    // TODO: 实现删除对话功能
+    console.log("删除对话");
+  };
+
+  const handleNewChat = () => {
+    handleReset();
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    // TODO: 实现选择对话功能
+    console.log("选择对话:", chatId);
+  };
+
+  const handleRenameChat = (chatId: string) => {
+    // TODO: 实现重命名对话功能
+    console.log("重命名对话:", chatId);
+  };
+
+  const handleDeleteChatItem = (chatId: string) => {
+    // TODO: 实现删除对话项功能
+    console.log("删除对话项:", chatId);
+  };
+
+  const handleUserClick = () => {
+    // TODO: 实现用户点击功能
+    console.log("用户点击");
+  };
+
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      {messages.length === 0 ? (
-        <div className="flex flex-1 flex-col justify-center items-center w-full px-4">
-          {showTyping && (
+    <div className="h-full">
+      <ChatLayout
+        title="新对话"
+        onRename={handleRename}
+        onClearChat={handleClearChat}
+        onDeleteChat={handleDeleteChat}
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        onRenameChat={handleRenameChat}
+        onDeleteChatItem={handleDeleteChatItem}
+        onUserClick={handleUserClick}
+      >
+        <div className="flex flex-col h-full items-center justify-center">
+          {/* 主要内容区域 */}
+          {showTyping ? (
             <TypingPrompt
               prompts={prompts}
               onStartTyping={() => setIsTyping(true)}
               onStopTyping={() => setIsTyping(false)}
             />
+          ) : (
+            <ChatMessages />
           )}
-          <div className="w-full max-w-2xl mt-8">
+
+          {/* 输入框区域 - 始终在底部 */}
+          <div className="w-full max-w-3xl mx-auto p-4">
             <ChatInput
               onSendMessage={handleSendMessage}
               disabled={!canSendMessage()}
@@ -69,41 +123,7 @@ const ChatPage = () => {
             />
           </div>
         </div>
-      ) : (
-        <>
-          <div className="flex-1 min-h-0">
-            <div className="max-w-4xl mx-auto w-full px-4 h-full flex flex-col">
-              <div className="flex justify-end pt-4 flex-shrink-0">
-                <button
-                  className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 rounded px-2 py-1 transition-colors"
-                  onClick={handleReset}
-                >
-                  重置会话
-                </button>
-              </div>
-              <div className="flex-1 min-h-0">
-                <ChatMessages />
-              </div>
-            </div>
-          </div>
-          <motion.div
-            layout
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-            }}
-            className="w-full max-w-2xl mx-auto px-4 py-4"
-          >
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              disabled={!canSendMessage()}
-              canAbort={canAbort}
-              onAbort={abortCurrentMessage}
-            />
-          </motion.div>
-        </>
-      )}
+      </ChatLayout>
     </div>
   );
 };

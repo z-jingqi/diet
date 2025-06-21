@@ -13,6 +13,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
+      style={{
+        fontSize: '16px', // 16px是iOS不会自动缩放的最小字体大小
+        transform: 'translateZ(0)', // 启用硬件加速
+      }}
       {...props}
     />
   )

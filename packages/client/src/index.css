@@ -45,7 +45,6 @@
   --sidebar-accent-foreground: #0f172a;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #94a3b8;
-  --bottom-nav-height: 3rem;
 }
 
 .dark {
@@ -127,5 +126,51 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* 防止移动端输入框聚焦时页面缩放 */
+@layer utilities {
+  /* 确保所有输入框和文本域都有足够大的字体大小 */
+  input, textarea, select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  /* 防止iOS Safari自动缩放 */
+  @media screen and (max-width: 768px) {
+    input:focus, textarea:focus, select:focus {
+      font-size: 16px !important;
+      transform: translateZ(0);
+    }
+  }
+}
+
+/* 自定义滚动条样式 */
+@layer utilities {
+  /* Webkit浏览器（Chrome, Safari, Edge） */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+  
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
   }
 }

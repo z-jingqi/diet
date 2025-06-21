@@ -15,7 +15,6 @@ const TypingPrompt = ({
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -30,10 +29,6 @@ const TypingPrompt = ({
         setIsTyping(false);
         onStopTyping?.();
         setTimeout(() => {
-          if (currentPrompt === prompts.length - 1) {
-            setIsComplete(true);
-            return;
-          }
           setCurrentPrompt((prev) => (prev + 1) % prompts.length);
           setDisplayText("");
           setIsTyping(true);
@@ -42,7 +37,7 @@ const TypingPrompt = ({
       }
     };
 
-    if (isTyping && !isComplete) {
+    if (isTyping) {
       onStartTyping?.();
       typeText();
     }
@@ -52,12 +47,7 @@ const TypingPrompt = ({
     prompts,
     onStartTyping,
     onStopTyping,
-    isComplete,
   ]);
-
-  if (!displayText && isComplete) {
-    return null;
-  }
 
   return (
     <motion.div
@@ -66,7 +56,7 @@ const TypingPrompt = ({
       className="text-2xl font-medium bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent min-h-[2rem]"
     >
       {displayText}
-      {isTyping && !isComplete && (
+      {isTyping && (
         <motion.span
           animate={{ opacity: [1, 0] }}
           transition={{ duration: 0.5, repeat: Infinity }}
