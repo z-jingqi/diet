@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useRecipeStore from "@/store/recipe";
 import type { Recipe } from "@shared/schemas/recipe";
 import MessageBubble from "./message-bubbles/MessageBubble";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const ChatMessages = () => {
   const { messages } = useChatStore();
@@ -35,12 +35,12 @@ const ChatMessages = () => {
   };
 
   // 滚动到底部
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (!messagesEndRef.current || !shouldAutoScroll) {
       return;
     }
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [shouldAutoScroll]);
 
   // 监听消息变化
   useEffect(() => {
@@ -72,7 +72,7 @@ const ChatMessages = () => {
     if (!isUserScrollingRef.current) {
       scrollToBottom();
     }
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   const handleRecipeClick = (recipe: Recipe) => {
     setCurrentRecipe(recipe);

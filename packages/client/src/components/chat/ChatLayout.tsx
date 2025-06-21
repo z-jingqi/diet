@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
