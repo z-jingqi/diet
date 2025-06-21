@@ -3,30 +3,28 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
 import ChatSidebar from "./ChatSidebar";
+import useChatStore from "@/store/chat-store";
 
 interface ChatLayoutProps {
   children: React.ReactNode;
   title?: string;
-  onRename?: () => void;
-  onClearChat?: () => void;
-  onDeleteChat?: () => void;
-  onNewChat?: () => void;
-  onSelectChat?: (chatId: string) => void;
-  onRenameChat?: (chatId: string) => void;
-  onDeleteChatItem?: (chatId: string) => void;
+  onClearSession?: (sessionId: string) => void;
+  onCreateNewSession?: () => void;
+  onSelectSession?: (sessionId: string) => void;
+  onRenameSession?: (sessionId: string) => void;
+  onDeleteSession?: (sessionId: string) => void;
 }
 
 const ChatLayout = ({
   children,
   title = "新对话",
-  onRename,
-  onClearChat,
-  onDeleteChat,
-  onNewChat,
-  onSelectChat,
-  onRenameChat,
-  onDeleteChatItem,
+  onClearSession,
+  onCreateNewSession,
+  onSelectSession,
+  onRenameSession,
+  onDeleteSession,
 }: ChatLayoutProps) => {
+  const { sessions, currentSessionId } = useChatStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleMenuClick = () => {
@@ -43,9 +41,9 @@ const ChatLayout = ({
       <ChatHeader
         onMenuClick={handleMenuClick}
         title={title}
-        onRename={onRename}
-        onClearChat={onClearChat}
-        onDeleteChat={onDeleteChat}
+        onRenameSession={() => onRenameSession?.(currentSessionId ?? "")}
+        onClearSession={() => onClearSession?.(currentSessionId ?? "")}
+        onDeleteSession={() => onDeleteSession?.(currentSessionId ?? "")}
       />
 
       {/* Main Content */}
@@ -55,22 +53,22 @@ const ChatLayout = ({
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-80 p-0">
           <ChatSidebar
-            onNewChat={() => {
-              onNewChat?.();
+            sessions={sessions}
+            currentSessionId={currentSessionId ?? ""}
+            onCreateNewSession={onCreateNewSession}
+            onSelectSession={(sessionId) => {
+              onSelectSession?.(sessionId);
               handleSidebarClose();
             }}
-            onSelectChat={(chatId) => {
-              onSelectChat?.(chatId);
+            onRenameSession={(sessionId) => {
+              onRenameSession?.(sessionId);
               handleSidebarClose();
             }}
-            onRenameChat={(chatId) => {
-              onRenameChat?.(chatId);
+            onDeleteSession={(sessionId) => {
+              onDeleteSession?.(sessionId);
               handleSidebarClose();
             }}
-            onDeleteChat={(chatId) => {
-              onDeleteChatItem?.(chatId);
-              handleSidebarClose();
-            }}
+            onCloseSidebar={handleSidebarClose}
           />
         </SheetContent>
       </Sheet>

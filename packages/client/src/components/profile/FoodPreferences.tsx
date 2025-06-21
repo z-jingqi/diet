@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { X, Plus, Utensils } from "lucide-react";
-import usePreferencesStore from "@/store/preferences";
+import usePreferencesStore from "@/store/preferences-store";
 
 interface FoodPreferencesProps {
   className?: string;

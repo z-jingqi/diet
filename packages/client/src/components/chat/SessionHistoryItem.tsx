@@ -7,37 +7,70 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { ChatSession } from "@diet/shared";
 
-interface ChatHistory {
-  id: string;
-  title: string;
-  timestamp: string;
+interface SessionHistoryItemProps {
+  session: ChatSession;
+  isActive?: boolean;
+  onSelectChat: (sessionId: string) => void;
+  onRenameChat?: (sessionId: string) => void;
+  onDeleteChat?: (sessionId: string) => void;
 }
 
-interface ChatHistoryItemProps {
-  chatHistory: ChatHistory;
-  onSelectChat: (chatId: string) => void;
-  onRenameChat?: (chatId: string) => void;
-  onDeleteChat?: (chatId: string) => void;
-}
-
-const ChatHistoryItem = ({
-  chatHistory,
+const SessionHistoryItem = ({
+  session,
+  isActive = false,
   onSelectChat,
   onRenameChat,
   onDeleteChat,
-}: ChatHistoryItemProps) => {
+}: SessionHistoryItemProps) => {
+  // 格式化时间
+  const formatTime = (date: Date) => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    if (diff < oneDay) {
+      return date.toLocaleTimeString("zh-CN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } else if (diff < 7 * oneDay) {
+      return date.toLocaleDateString("zh-CN", {
+        month: "numeric",
+        day: "numeric",
+      });
+    } else {
+      return date.toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      });
+    }
+  };
+
   return (
-    <div className="group relative flex items-center w-full px-2 py-1 rounded-md hover:bg-accent transition-colors">
+    <div
+      className={`group relative flex items-center w-full px-2 py-1 rounded-md transition-colors ${
+        isActive ? "bg-accent/50 border border-accent" : "hover:bg-accent"
+      }`}
+    >
       <Button
         variant="ghost"
         className="flex-1 justify-start h-auto p-0"
-        onClick={() => onSelectChat(chatHistory.id)}
+        onClick={() => onSelectChat(session.id)}
       >
         <div className="flex items-center w-full">
           <div className="flex-1 min-w-0 text-left">
             <Typography variant="span" className="block truncate text-sm">
-              {chatHistory.title}
+              {session.title}
+            </Typography>
+            <Typography
+              variant="span"
+              className="block truncate text-xs text-muted-foreground"
+            >
+              {formatTime(session.updatedAt)}
             </Typography>
           </div>
         </div>
@@ -52,14 +85,14 @@ const ChatHistoryItem = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={() => onRenameChat?.(chatHistory.id)}>
+            <DropdownMenuItem onClick={() => onRenameChat?.(session.id)}>
               <Edit className="mr-2 h-3 w-3" />
               <Typography variant="span" className="text-sm">
                 重命名
               </Typography>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onDeleteChat?.(chatHistory.id)}
+              onClick={() => onDeleteChat?.(session.id)}
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-3 w-3" />
@@ -74,4 +107,4 @@ const ChatHistoryItem = ({
   );
 };
 
-export default ChatHistoryItem;
+export default SessionHistoryItem;

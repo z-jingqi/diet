@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTagsData } from "@/lib/api/tags";
+import { fetchTagsData } from "@/lib/api/tags-api";
 import type { Tag } from "@diet/shared";
 import SelectedTagsDisplay from "./SelectedTagsDisplay";
 import TagSelectorDialog from "./TagSelectorDialog";
@@ -47,16 +47,16 @@ const TagSelector = ({
   });
 
   const handleTagToggle = (tag: Tag) => {
-    const isSelected = selectedTags.some((t) => t.id === tag.id);
+    const isSelected = selectedTags.some((t: Tag) => t.id === tag.id);
     if (isSelected) {
-      onTagsChange(selectedTags.filter((t) => t.id !== tag.id));
+      onTagsChange(selectedTags.filter((t: Tag) => t.id !== tag.id));
     } else {
       onTagsChange([...selectedTags, tag]);
     }
   };
 
   const handleRemoveTag = (tagId: string) => {
-    onTagsChange(selectedTags.filter((t) => t.id !== tagId));
+    onTagsChange(selectedTags.filter((t: Tag) => t.id !== tagId));
   };
 
   const handleRetry = () => {

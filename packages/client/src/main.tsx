@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
+import { ConfirmDialogProvider } from "@/components/providers/ConfirmDialogProvider.tsx";
 
 // 防止移动端输入框聚焦时页面缩放
 const preventZoomOnFocus = () => {
@@ -44,7 +45,9 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ConfirmDialogProvider>
+        <App />
+      </ConfirmDialogProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

@@ -4,27 +4,37 @@ import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MessageSquare, User, Plus } from "lucide-react";
-import ChatHistoryItem from "./ChatHistoryItem";
+import SessionHistoryItem from "./SessionHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
+import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
+import { ChatSession } from "@diet/shared";
 
 interface ChatSidebarProps {
-  onNewChat?: () => void;
-  onSelectChat?: (chatId: string) => void;
-  onRenameChat?: (chatId: string) => void;
-  onDeleteChat?: (chatId: string) => void;
+  sessions: ChatSession[];
+  currentSessionId: string;
+  onCreateNewSession?: () => void;
+  onSelectSession?: (sessionId: string) => void;
+  onRenameSession?: (sessionId: string) => void;
+  onDeleteSession?: (sessionId: string) => void;
+  onCloseSidebar?: () => void;
 }
 
-const ChatSidebar = ({ 
-  onNewChat, 
-  onSelectChat, 
-  onRenameChat, 
-  onDeleteChat,
+const ChatSidebar = ({
+  sessions,
+  currentSessionId,
+  onCreateNewSession,
+  onSelectSession,
+  onRenameSession,
+  onDeleteSession,
+  onCloseSidebar,
 }: ChatSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [allowFocus, setAllowFocus] = useState(false);
   const navigate = useNavigate();
+
+  const confirm = useConfirmDialog();
 
   // 检测设备类型
   useEffect(() => {
@@ -33,10 +43,10 @@ const ChatSidebar = ({
     };
 
     checkDevice();
-    window.addEventListener('resize', checkDevice);
+    window.addEventListener("resize", checkDevice);
 
     return () => {
-      window.removeEventListener('resize', checkDevice);
+      window.removeEventListener("resize", checkDevice);
     };
   }, []);
 
@@ -49,62 +59,107 @@ const ChatSidebar = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // 模拟数据，按时间分类
-  const mockChatHistories = {
-    recent: [
-      { id: "1", title: "关于健康饮食的建议", timestamp: "2024-01-15" },
-      { id: "2", title: "减肥食谱推荐", timestamp: "2024-01-14" },
-    ],
-    threeDaysAgo: [
-      { id: "3", title: "营养搭配咨询", timestamp: "2024-01-12" },
-      { id: "4", title: "早餐搭配建议", timestamp: "2024-01-11" },
-    ],
-    oneWeekAgo: [
-      { id: "5", title: "运动饮食计划", timestamp: "2024-01-08" },
-      { id: "6", title: "素食营养咨询", timestamp: "2024-01-07" },
-    ],
-    oneMonthAgo: [
-      { id: "7", title: "糖尿病饮食指导", timestamp: "2023-12-15" },
-      { id: "8", title: "孕期营养建议", timestamp: "2023-12-10" },
-    ],
-    older: [
-      { id: "9", title: "儿童营养搭配", timestamp: "2023-11-20" },
-      { id: "10", title: "老年人饮食建议", timestamp: "2023-10-15" },
-    ],
+  // 按时间分类会话
+  const categorizeSessions = (sessions: any[]) => {
+    const now = new Date();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const threeDays = 3 * oneDay;
+    const oneWeek = 7 * oneDay;
+    const oneMonth = 30 * oneDay;
+
+    const categorized = {
+      recent: [] as any[],
+      threeDaysAgo: [] as any[],
+      oneWeekAgo: [] as any[],
+      oneMonthAgo: [] as any[],
+      older: [] as any[],
+    };
+
+    sessions.forEach((session) => {
+      const timeDiff = now.getTime() - session.updatedAt.getTime();
+
+      if (timeDiff <= oneDay) {
+        categorized.recent.push(session);
+      } else if (timeDiff <= threeDays) {
+        categorized.threeDaysAgo.push(session);
+      } else if (timeDiff <= oneWeek) {
+        categorized.oneWeekAgo.push(session);
+      } else if (timeDiff <= oneMonth) {
+        categorized.oneMonthAgo.push(session);
+      } else {
+        categorized.older.push(session);
+      }
+    });
+
+    return categorized;
   };
 
+  const categorizedSessions = categorizeSessions(sessions);
+
   const timeCategories = [
-    { key: "recent", label: "最近", chatHistories: mockChatHistories.recent },
+    { key: "recent", label: "最近", sessions: categorizedSessions.recent },
     {
       key: "threeDaysAgo",
       label: "3天前",
-      chatHistories: mockChatHistories.threeDaysAgo,
+      sessions: categorizedSessions.threeDaysAgo,
     },
     {
       key: "oneWeekAgo",
       label: "一周前",
-      chatHistories: mockChatHistories.oneWeekAgo,
+      sessions: categorizedSessions.oneWeekAgo,
     },
     {
       key: "oneMonthAgo",
       label: "一个月前",
-      chatHistories: mockChatHistories.oneMonthAgo,
+      sessions: categorizedSessions.oneMonthAgo,
     },
-    {
-      key: "older",
-      label: "很久的消息",
-      chatHistories: mockChatHistories.older,
-    },
+    { key: "older", label: "很久的消息", sessions: categorizedSessions.older },
   ];
 
   const filteredCategories = timeCategories.filter((category) =>
-    category.chatHistories.some((chatHistory) =>
-      chatHistory.title.toLowerCase().includes(searchTerm.toLowerCase())
+    category.sessions.some((session) =>
+      session.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const handleChatSelect = (chatId: string) => {
-    onSelectChat?.(chatId);
+  const handleChatSelect = (sessionId: string) => {
+    onSelectSession?.(sessionId);
+  };
+
+  const handleNewChat = () => {
+    // 检查当前会话是否有消息
+    const currentSession = sessions.find(
+      (session) => session.id === currentSessionId
+    );
+
+    if (currentSession && currentSession.messages.length === 0) {
+      // 如果当前会话没有消息，只关闭侧边栏
+      onCloseSidebar?.();
+      return;
+    }
+
+    onCreateNewSession?.();
+  };
+
+  const handleRenameChat = (sessionId: string) => {
+    // TODO: 实现重命名功能，可能需要弹出一个输入框
+    const newTitle = prompt("请输入新的标题:");
+    if (newTitle) {
+      onRenameSession?.(sessionId);
+    }
+  };
+
+  const handleDeleteChatItem = async (sessionId: string) => {
+    const ok = await confirm({
+      title: "确定要删除这个对话吗？",
+      description: "此操作无法撤销，删除后对话将永久丢失。",
+      confirmText: "删除",
+      cancelText: "取消",
+      confirmVariant: "destructive",
+    });
+    if (ok) {
+      onDeleteSession?.(sessionId);
+    }
   };
 
   const handleUserClick = () => {
@@ -144,8 +199,8 @@ const ChatSidebar = ({
 
       {/* 新聊天按钮 */}
       <div className="p-4">
-        <Button 
-          onClick={onNewChat}
+        <Button
+          onClick={handleNewChat}
           className="w-full justify-start"
           variant="outline"
         >
@@ -161,29 +216,28 @@ const ChatSidebar = ({
             <MutedText className="text-xs font-medium mb-2 block">
               {category.label}
             </MutedText>
-            <div>
-              {category.chatHistories
-                .filter((chatHistory) =>
-                  chatHistory.title
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
+            <div className="flex flex-col gap-2">
+              {category.sessions
+                .filter((session) =>
+                  session.title.toLowerCase().includes(searchTerm.toLowerCase())
                 )
-                .map((chatHistory) => (
-                  <ChatHistoryItem
-                    key={chatHistory.id}
-                    chatHistory={chatHistory}
+                .map((session) => (
+                  <SessionHistoryItem
+                    key={session.id}
+                    session={session}
+                    isActive={session.id === currentSessionId}
                     onSelectChat={handleChatSelect}
-                    onRenameChat={onRenameChat}
-                    onDeleteChat={onDeleteChat}
+                    onRenameChat={handleRenameChat}
+                    onDeleteChat={handleDeleteChatItem}
                   />
                 ))}
             </div>
           </div>
         ))}
-        
+
         {/* 无搜索结果时显示 */}
         {searchTerm &&
-          filteredCategories.every((cat) => cat.chatHistories.length === 0) && (
+          filteredCategories.every((cat) => cat.sessions.length === 0) && (
             <div className="flex flex-col items-center justify-center h-full text-center p-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
               <MutedText>未找到相关聊天记录</MutedText>
@@ -210,9 +264,9 @@ const ChatSidebar = ({
       </div>
 
       {/* Profile对话框 - 移动端 */}
-      <ProfileDialog 
-        open={profileDialogOpen} 
-        onOpenChange={setProfileDialogOpen} 
+      <ProfileDialog
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
       />
     </div>
   );

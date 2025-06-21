@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Square, Send } from "lucide-react";
 import TagSelector from "@/components/chat/tag-selector/TagSelector";
 import { Textarea } from "@/components/ui/textarea";
-import useTagsStore from "@/store/tags";
+import useChatStore from "@/store/chat-store";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -19,7 +19,9 @@ const ChatInput = ({
   canAbort,
 }: ChatInputProps) => {
   const [input, setInput] = useState("");
-  const { selectedTags, setSelectedTags } = useTagsStore();
+  const { getCurrentSession, updateSessionTags } = useChatStore();
+  const currentSession = getCurrentSession();
+  const selectedTags = currentSession?.currentTags || [];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 自动调整textarea高度
@@ -50,6 +52,10 @@ const ChatInput = ({
       onSendMessage(input);
       setInput("");
     }
+  };
+
+  const handleTagsChange = (tags: any[]) => {
+    updateSessionTags(tags);
   };
 
   const isEmpty = !input.trim();
@@ -98,7 +104,7 @@ const ChatInput = ({
           <div className="flex justify-between items-center mt-4">
             <TagSelector
               selectedTags={selectedTags}
-              onTagsChange={setSelectedTags}
+              onTagsChange={handleTagsChange}
               disabled={disabled}
             />
 

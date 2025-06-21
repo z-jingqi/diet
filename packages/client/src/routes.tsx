@@ -1,10 +1,10 @@
 import {
   createBrowserRouter,
 } from "react-router-dom";
-import ChatPage from '@/pages/Chat';
-import RecipePage from '@/pages/Recipe';
-import ProfilePage from '@/pages/Profile';
-import KitchenToolsPage from '@/pages/KitchenTools';
+import ChatPage from '@/pages/ChatPage';
+import RecipePage from '@/pages/RecipePage';
+import ProfilePage from '@/pages/ProfilePage';
+import KitchenToolsPage from '@/pages/KitchenToolsPage';
 import Layout from '@/components/layout/Layout';
 
 export const router = createBrowserRouter([

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import useRecipeStore from '@/store/recipe';
+import useRecipeStore from '@/store/recipe-store';
 import RecipeBasicInfo from '@/components/recipe/RecipeBasicInfo';
 import RecipeIngredients from '@/components/recipe/RecipeIngredients';
 import RecipeSteps from '@/components/recipe/RecipeSteps';

@@ -1,12 +1,13 @@
-import useChatStore from "@/store/chat";
+import useChatStore from "@/store/chat-store";
 import { useNavigate } from "react-router-dom";
-import useRecipeStore from "@/store/recipe";
+import useRecipeStore from "@/store/recipe-store";
 import type { Recipe } from "@shared/schemas/recipe";
 import MessageBubble from "./message-bubbles/MessageBubble";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const ChatMessages = () => {
-  const { messages, gettingIntent } = useChatStore();
+  const { getCurrentMessages, gettingIntent } = useChatStore();
+  const messages = getCurrentMessages();
   const navigate = useNavigate();
   const setCurrentRecipe = useRecipeStore((state) => state.setCurrentRecipe);
   const messagesEndRef = useRef<HTMLDivElement>(null);

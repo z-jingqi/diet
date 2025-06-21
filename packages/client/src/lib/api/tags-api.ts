@@ -1,6 +1,5 @@
 import type { Tag, TagCategory, TagsResponse } from "@diet/shared";
-
-const API_BASE = import.meta.env.DEV ? "http://localhost:8787/api" : "/api";
+import { API_BASE } from "@/lib/constants";
 
 // 获取所有标签和分类数据
 export const fetchTagsData = async (): Promise<TagsResponse> => {

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MutedText } from "@/components/ui/typography";
 import { ChefHat } from "lucide-react";
-import usePreferencesStore from "@/store/preferences";
+import usePreferencesStore from "@/store/preferences-store";
 import { cuisineOptions } from "@/data/taste-preferences";
 
 interface CuisinePreferencesProps {

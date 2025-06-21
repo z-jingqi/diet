@@ -1,4 +1,4 @@
-import { HealthAdvice, Recipe } from "../schemas";
+import { HealthAdvice, Recipe, Tag } from "../schemas";
 
 /**
  * 消息类型
@@ -8,7 +8,12 @@ export type MessageType = "chat" | "recipe" | "health_advice";
 /**
  * 消息状态
  */
-export type MessageStatus = "pending" | "streaming" | "done" | "error" | "abort";
+export type MessageStatus =
+  | "pending"
+  | "streaming"
+  | "done"
+  | "error"
+  | "abort";
 
 /**
  * 聊天消息
@@ -32,4 +37,13 @@ export interface Message {
   healthAdvice?: HealthAdvice;
   /** 消息状态 */
   status?: MessageStatus;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  currentTags: Tag[];
+  createdAt: Date;
+  updatedAt: Date;
 }

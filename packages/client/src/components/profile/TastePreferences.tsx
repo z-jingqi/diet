@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Flame, Droplet, Heart, Zap, Star } from "lucide-react";
-import usePreferencesStore from "@/store/preferences";
+import usePreferencesStore from "@/store/preferences-store";
 import { tasteLabels, type TastePreference } from "@/data/taste-preferences";
 
 interface TastePreferencesProps {

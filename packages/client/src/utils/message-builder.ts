@@ -1,14 +1,12 @@
-import type { Message, MessageType } from "@shared/types/chat";
+import type { Message, MessageType } from "@diet/shared";
+import { nanoid } from "nanoid";
 
 /**
  * 生成随机ID
  * @returns 随机ID字符串
  */
 const generateRandomId = (): string => {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
+  return nanoid();
 };
 
 /**

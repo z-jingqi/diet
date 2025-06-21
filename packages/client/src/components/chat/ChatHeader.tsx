@@ -12,17 +12,17 @@ import {
 interface ChatHeaderProps {
   onMenuClick: () => void;
   title?: string;
-  onRename?: () => void;
-  onClearChat?: () => void;
-  onDeleteChat?: () => void;
+  onRenameSession?: () => void;
+  onClearSession?: () => void;
+  onDeleteSession?: () => void;
 }
 
 const ChatHeader = ({
   onMenuClick,
   title = "新对话",
-  onRename,
-  onClearChat,
-  onDeleteChat,
+  onRenameSession,
+  onClearSession,
+  onDeleteSession,
 }: ChatHeaderProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -53,14 +53,23 @@ const ChatHeader = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center" className="w-32">
-            <DropdownMenuItem onClick={onRename}>
-              <Typography variant="span" className="text-sm">重命名</Typography>
+            <DropdownMenuItem onClick={onRenameSession}>
+              <Typography variant="span" className="text-sm">
+                重命名
+              </Typography>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onClearChat}>
-              <Typography variant="span" className="text-sm">清空聊天</Typography>
+            <DropdownMenuItem onClick={onClearSession}>
+              <Typography variant="span" className="text-sm">
+                清空聊天
+              </Typography>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDeleteChat} className="text-destructive">
-              <Typography variant="span" className="text-sm">删除聊天</Typography>
+            <DropdownMenuItem
+              onClick={onDeleteSession}
+              className="text-destructive"
+            >
+              <Typography variant="span" className="text-sm">
+                删除聊天
+              </Typography>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -72,4 +81,4 @@ const ChatHeader = ({
   );
 };
 
-export default ChatHeader; 
+export default ChatHeader;
