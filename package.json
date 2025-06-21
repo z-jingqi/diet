@@ -11,7 +11,9 @@
     "local": "wrangler dev",
     "put-model": "wrangler secret put CLOUDFLARE_MODEL",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "type-check": "turbo run type-check",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "2.0.1",
@@ -34,6 +36,7 @@
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "husky": "^9.0.11",
     "prettier": "^3.2.5",
     "tsup": "^8.5.0",
     "tsx": "^4.20.0",

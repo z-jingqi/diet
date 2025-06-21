@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "watch": "tsup src/index.ts --format esm --dts --watch",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@diet/shared": "file:../shared",
