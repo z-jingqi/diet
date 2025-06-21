@@ -142,7 +142,7 @@ const ChatSidebar = ({
             <MutedText className="text-xs font-medium mb-2 block">
               {category.label}
             </MutedText>
-            <div className="space-y-1">
+            <div>
               {category.chatHistories
                 .filter((chatHistory) =>
                   chatHistory.title

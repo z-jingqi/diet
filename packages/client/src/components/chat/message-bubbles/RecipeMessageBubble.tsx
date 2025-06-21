@@ -25,6 +25,8 @@ const RecipeMessageBubble = ({
             <MutedText className="animate-pulse">生成菜谱中...</MutedText>
           ) : status === 'error' && recipes.length === 0 ? (
             <ErrorText>生成菜谱失败，请重试</ErrorText>
+          ) : status === 'abort' && recipes.length === 0 ? (
+            <MutedText>生成菜谱已中断</MutedText>
           ) : (
             <Markdown
               content={content}

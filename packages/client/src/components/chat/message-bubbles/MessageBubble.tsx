@@ -37,7 +37,7 @@ const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
         />
       );
     default:
-      return <ChatMessageBubble content={message.content} />;
+      return <ChatMessageBubble content={message.content} status={message.status} />;
   }
 };
 

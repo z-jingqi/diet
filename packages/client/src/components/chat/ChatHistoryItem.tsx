@@ -1,4 +1,4 @@
-import { Typography, MutedText } from "@/components/ui/typography";
+import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MessageSquare, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 
 interface ChatHistory {
   id: string;
@@ -28,19 +28,17 @@ const ChatHistoryItem = ({
   onDeleteChat,
 }: ChatHistoryItemProps) => {
   return (
-    <div className="group relative flex items-center w-full p-2 rounded-md hover:bg-accent transition-colors">
+    <div className="group relative flex items-center w-full px-2 py-1 rounded-md hover:bg-accent transition-colors">
       <Button
         variant="ghost"
         className="flex-1 justify-start h-auto p-0"
         onClick={() => onSelectChat(chatHistory.id)}
       >
         <div className="flex items-center w-full">
-          <MessageSquare className="mr-2 h-4 w-4 flex-shrink-0" />
           <div className="flex-1 min-w-0 text-left">
             <Typography variant="span" className="block truncate text-sm">
               {chatHistory.title}
             </Typography>
-            <MutedText className="text-xs">{chatHistory.timestamp}</MutedText>
           </div>
         </div>
       </Button>

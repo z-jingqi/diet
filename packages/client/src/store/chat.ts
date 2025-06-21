@@ -171,11 +171,11 @@ const useChatStore = create<
     if (abortController) {
       abortController.abort();
       set({ abortController: undefined });
-      // 标记最后一条AI消息为 error
+      // 标记最后一条AI消息为 abort
       set((state) => ({
         messages: state.messages.map((msg, idx, arr) =>
           !msg.isUser && idx === arr.length - 1
-            ? { ...msg, status: "error", finishedAt: new Date() }
+            ? { ...msg, status: "abort", finishedAt: new Date() }
             : msg
         ),
       }));

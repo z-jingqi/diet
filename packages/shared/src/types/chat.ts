@@ -8,7 +8,7 @@ export type MessageType = "chat" | "recipe" | "health_advice";
 /**
  * 消息状态
  */
-export type MessageStatus = "pending" | "streaming" | "done" | "error";
+export type MessageStatus = "pending" | "streaming" | "done" | "error" | "abort";
 
 /**
  * 聊天消息

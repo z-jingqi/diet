@@ -42,6 +42,9 @@ const HealthAdviceMessageBubble = ({
   if (!healthAdvice && status === 'error') {
     return <ErrorText>生成健康建议失败，请重试</ErrorText>;
   }
+  if (!healthAdvice && status === 'abort') {
+    return <MutedText>生成健康建议已中断</MutedText>;
+  }
   if (!healthAdvice) {
     return <Typography variant="p">{content}</Typography>;
   }
