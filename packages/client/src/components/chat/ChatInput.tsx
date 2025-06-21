@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Square, Send } from "lucide-react";
 import TagSelector from "@/components/chat/tag-selector/TagSelector";
@@ -20,6 +20,19 @@ const ChatInput = ({
 }: ChatInputProps) => {
   const [input, setInput] = useState("");
   const { selectedTags, setSelectedTags } = useTagsStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 自动调整textarea高度
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // 重置高度以获取正确的scrollHeight
+      textarea.style.height = 'auto';
+      // 设置新高度，但不超过最大高度
+      const newHeight = Math.min(textarea.scrollHeight, 96);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [input]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,22 +56,24 @@ const ChatInput = ({
 
   return (
     <div className="relative rounded-lg border bg-background p-2">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit}>
         {/* Message Input - Top Section */}
         <Textarea
+          ref={textareaRef}
           value={input}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             setInput(e.target.value)
           }
           onKeyDown={handleKeyDown}
           placeholder="有什么想问我的吗？比如：今天想吃什么？"
-          className="min-h-[60px] h-[60px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
           enterKeyHint="enter"
+          rows={1}
         />
 
         {/* Bottom Section - Tags and Send Button */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-4">
           <TagSelector
             selectedTags={selectedTags}
             onTagsChange={setSelectedTags}
