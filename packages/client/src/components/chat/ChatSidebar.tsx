@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MessageSquare, User } from "lucide-react";
+import { Search, MessageSquare, User, Plus } from "lucide-react";
 import ChatHistoryItem from "./ChatHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
 
@@ -120,6 +120,18 @@ const ChatSidebar = ({
             className="pl-10"
           />
         </div>
+      </div>
+
+      {/* 新聊天按钮 */}
+      <div className="p-4 border-b">
+        <Button 
+          onClick={onNewChat}
+          className="w-full justify-start"
+          variant="outline"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          新聊天
+        </Button>
       </div>
 
       {/* 聊天记录列表 - 可滚动 */}
