@@ -1,3 +1,4 @@
+import React from "react";
 import { Markdown } from "@/components/ui/markdown";
 import type { Recipe } from "@shared/schemas/recipe";
 import RecipeCard from "./RecipeCard";
