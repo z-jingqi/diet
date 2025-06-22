@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+
 // 检测消息是否包含菜谱推荐（通过特殊标记）
 export const isRecipeMessage = (content: string): boolean => {
   return content.includes("<recipe_suggestions>");
@@ -36,6 +38,7 @@ export const extractRecipeNames = (content: string): string[] => {
 
 // 从菜谱消息中提取菜品详细信息
 export const extractRecipeDetails = (content: string): Array<{
+  id: string;
   name: string;
   servings?: string;
   tools?: string;
@@ -45,6 +48,7 @@ export const extractRecipeDetails = (content: string): Array<{
 }> => {
   const section = extractRecipeSection(content);
   const recipes: Array<{
+    id: string;
     name: string;
     servings?: string;
     tools?: string;
@@ -59,13 +63,17 @@ export const extractRecipeDetails = (content: string): Array<{
     const recipeName = match[1].trim();
     const recipeContent = match[2];
     const recipe: {
+      id: string;
       name: string;
       servings?: string;
       tools?: string;
       cost?: string;
       difficulty?: string;
       features?: string;
-    } = { name: recipeName };
+    } = { 
+      id: nanoid(),
+      name: recipeName 
+    };
     // 提取适用人数
     const servingsMatch = recipeContent.match(/适用人数：([^\n]+)/);
     if (servingsMatch) {

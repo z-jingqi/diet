@@ -1,122 +1,73 @@
-import React from "react";
-import type { HealthAdvice } from "@shared/schemas/health-advice";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { Message } from "@diet/shared";
+import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
+import { Typography } from "@/components/ui/typography";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Typography, MutedText, ErrorText } from "@/components/ui/typography";
 
-// 创建警告文本组件
-const WarningText = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-orange-600 dark:text-orange-400">{children}</span>
-);
-
-interface HealthAdviceMessageBubbleProps {
-  content: string;
-  healthAdvice?: HealthAdvice;
-  status?: string;
+interface StreamingHealthMessageBubbleProps {
+  message: Message;
+  onSave?: (content: string) => void;
 }
 
-const statusMap = {
-  recommended: { label: "推荐", className: "bg-green-500" },
-  moderate: { label: "适量", className: "bg-yellow-500" },
-  not_recommended: { label: "不建议", className: "bg-orange-500" },
-  forbidden: { label: "禁止", className: "bg-red-500" },
-};
-
-const typeMap = {
-  diet: "饮食",
-  exercise: "运动",
-  lifestyle: "生活方式",
-  mental: "心理",
-  environment: "环境",
-  social: "社交",
-  seasonal: "季节",
-  other: "其他",
-};
-
-/**
- * 健康建议消息气泡组件
- */
 const HealthAdviceMessageBubble = ({
-  content,
-  healthAdvice,
-  status,
-}: HealthAdviceMessageBubbleProps) => {
-  if (!healthAdvice && status === 'pending') {
-    return <MutedText className="animate-pulse">生成健康建议中...</MutedText>;
-  }
-  if (!healthAdvice && status === 'error') {
-    return <ErrorText>生成健康建议失败，请重试</ErrorText>;
-  }
-  if (!healthAdvice && status === 'abort') {
-    return <WarningText>生成健康建议已中断</WarningText>;
-  }
-  if (!healthAdvice) {
-    return <Typography variant="p">{content}</Typography>;
-  }
+  message,
+  onSave,
+}: StreamingHealthMessageBubbleProps) => {
+  const [content, setContent] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const statusObj = statusMap[healthAdvice.status];
-  const type = typeMap[healthAdvice.type];
+  useEffect(() => {
+    setContent(message.content);
+  }, [message.content]);
+
+  const handleSave = () => {
+    if (onSave && content) {
+      onSave(content);
+      setSaved(true);
+    }
+  };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{healthAdvice.title}</CardTitle>
-          <div className="flex gap-2">
-            <Badge variant="outline">{type}</Badge>
-            <Badge className={cn("text-white", statusObj.className)}>
-              {statusObj.label}
-            </Badge>
+    <div className="flex w-full justify-start">
+      <div className="max-w-[80%]">
+        <div className="bg-white rounded-lg p-4">
+          {/* 健康建议内容 */}
+          <div className="mb-4">
+            <Markdown
+              content={content}
+              className="max-w-none"
+            />
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* 原因分析 */}
-          {healthAdvice.reasons.length > 0 && (
-            <div>
-              <Typography variant="h4" className="mb-2">原因分析</Typography>
-              <ul className="list-disc pl-4 space-y-1">
-                {healthAdvice.reasons.map((reason, index) => (
-                  <li key={index}>
-                    <MutedText>{reason.description}</MutedText>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
 
-          {/* 具体建议 */}
-          {healthAdvice.suggestions.length > 0 && (
-            <div>
-              <Typography variant="h4" className="mb-2">具体建议</Typography>
-              <ul className="list-disc pl-4 space-y-1">
-                {healthAdvice.suggestions.map((suggestion, index) => (
-                  <li key={index}>
-                    <MutedText>{suggestion.description}</MutedText>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* 适用场景 */}
-          {healthAdvice.scenarios.length > 0 && (
-            <div>
-              <Typography variant="h4" className="mb-2">适用场景</Typography>
-              <ul className="list-disc pl-4 space-y-1">
-                {healthAdvice.scenarios.map((scenario, index) => (
-                  <li key={index}>
-                    <MutedText>{scenario.condition}</MutedText>
-                  </li>
-                ))}
-              </ul>
+          {/* 操作按钮 - 只在生成完成后显示 */}
+          {message.status === "done" && (
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+                disabled={saved}
+                className={cn(
+                  "flex items-center gap-1",
+                  saved && "text-green-600"
+                )}
+              >
+                {saved ? (
+                  <BookmarkCheck className="w-4 h-4" />
+                ) : (
+                  <Bookmark className="w-4 h-4" />
+                )}
+                <Typography variant="span" className="text-sm">
+                  {saved ? "已保存" : "保存建议"}
+                </Typography>
+              </Button>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

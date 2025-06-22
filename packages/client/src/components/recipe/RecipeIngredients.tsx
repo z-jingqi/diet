@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import type { RecipeIngredient } from "@shared/schemas/recipe";
+import type { RecipeIngredient } from "@diet/shared";
 import ExpandableCard from "./ExpandableCard";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Flame, Scale, Droplet } from "lucide-react";

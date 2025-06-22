@@ -1,14 +1,16 @@
 import { create } from "zustand";
 import { buildMessage, buildUserMessage } from "@/utils/message-builder";
 import { toAIMessages } from "@/utils/chat-utils";
-import type { Message, ChatSession, Tag, MessageStatus } from "@diet/shared";
+import type { Message, ChatSession, Tag, MessageStatus, RecipeDetail } from "@diet/shared";
 import {
   getIntent,
   sendChatMessage,
   sendRecipeChatMessage,
   sendHealthAdviceChatMessage,
 } from "@/lib/api/chat-api";
+import { extractRecipeDetails } from "@/utils/recipe-parser";
 import { nanoid } from "nanoid";
+import { ChatCompletionMessageParam } from "openai/resources";
 
 interface ChatState {
   sessions: ChatSession[];
@@ -31,17 +33,17 @@ interface ChatState {
   getCurrentSession: () => ChatSession | null;
   getCurrentMessages: () => Message[];
   getSessions: () => ChatSession[];
+  // 消息更新方法
+  updateMessageRecipeDetails: (messageId: string, recipeDetails: RecipeDetail[]) => void;
   // 私有方法（重构后的内部方法）
   handleUserMessage: (content: string) => void;
   handleRecipeChatIntent: (
-    AIMessages: { role: string; content: string }[]
+    AIMessages: ChatCompletionMessageParam[]
   ) => Promise<void>;
   handleHealthAdviceChatIntent: (
-    AIMessages: { role: string; content: string }[]
+    AIMessages: ChatCompletionMessageParam[]
   ) => Promise<void>;
-  handleChatIntent: (
-    AIMessages: { role: string; content: string }[]
-  ) => Promise<void>;
+  handleChatIntent: (AIMessages: ChatCompletionMessageParam[]) => Promise<void>;
   handleError: (error: unknown, addMessage: (message: Message) => void) => void;
 }
 
@@ -218,7 +220,7 @@ const useChatStore = create<
 
     // 处理菜谱聊天意图
     handleRecipeChatIntent: async (
-      AIMessages: { role: string; content: string }[]
+      AIMessages: ChatCompletionMessageParam[]
     ) => {
       const { addMessage } = get();
       const message = buildMessage("recipe");
@@ -263,9 +265,11 @@ const useChatStore = create<
 
         set({ abortController: undefined });
 
-        // 使用公共方法更新消息状态为完成
+        // 使用公共方法更新消息状态为完成，并添加recipeDetails
+        const recipeDetails = extractRecipeDetails(result);
         messageUtils.updateMessageStatus(message.id, "done", {
           finishedAt: new Date(),
+          recipeDetails: recipeDetails,
         });
       } catch (error) {
         set({ abortController: undefined });
@@ -285,7 +289,7 @@ const useChatStore = create<
 
     // 处理健康建议聊天意图
     handleHealthAdviceChatIntent: async (
-      AIMessages: { role: string; content: string }[]
+      AIMessages: ChatCompletionMessageParam[]
     ) => {
       const { addMessage } = get();
       const message = buildMessage("health_advice");
@@ -351,9 +355,7 @@ const useChatStore = create<
     },
 
     // 处理聊天意图
-    handleChatIntent: async (
-      AIMessages: { role: string; content: string }[]
-    ) => {
+    handleChatIntent: async (AIMessages: ChatCompletionMessageParam[]) => {
       const { addMessage } = get();
       const message = buildMessage("chat");
       message.status = "streaming";
@@ -641,6 +643,23 @@ const useChatStore = create<
         currentTags: tags,
         updatedAt: new Date(),
       }));
+    },
+
+    updateMessageRecipeDetails: (messageId: string, recipeDetails: RecipeDetail[]) => {
+      set((state) => {
+        const currentMessages = get().getCurrentMessages();
+        const updatedMessages = currentMessages.map((msg) =>
+          msg.id === messageId ? { ...msg, recipeDetails } : msg
+        );
+
+        return {
+          sessions: state.sessions.map((session) =>
+            session.id === state.currentSessionId
+              ? { ...session, messages: updatedMessages }
+              : session
+          ),
+        };
+      });
     },
   };
 });

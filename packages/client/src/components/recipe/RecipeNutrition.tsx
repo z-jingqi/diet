@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Droplet, Flame, Scale } from "lucide-react";
-import type { Recipe } from '@shared/schemas/recipe';
+import type { GeneratedRecipe } from '@diet/shared';
 import { MutedText } from '@/components/ui/typography';
 
 interface RecipeNutritionProps {
-  nutrition: Recipe["nutrition"];
+  nutrition: GeneratedRecipe["nutrition"];
 }
 
 const RecipeNutrition = ({ nutrition }: RecipeNutritionProps) => {

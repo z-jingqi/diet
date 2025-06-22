@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Clock, Users, DollarSign } from "lucide-react";
-import type { Recipe } from '@shared/schemas/recipe';
-import { MutedText } from '@/components/ui/typography';
+import type { GeneratedRecipe } from "@diet/shared";
+import { MutedText } from "@/components/ui/typography";
 
 interface RecipeBasicInfoProps {
-  recipe: Recipe;
+  recipe: GeneratedRecipe;
 }
 
 const RecipeBasicInfo = ({ recipe }: RecipeBasicInfoProps) => {
@@ -46,4 +46,4 @@ const RecipeBasicInfo = ({ recipe }: RecipeBasicInfoProps) => {
   );
 };
 
-export default RecipeBasicInfo; 
+export default RecipeBasicInfo;

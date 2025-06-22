@@ -40,14 +40,13 @@ export const RecipeSchema = z.object({
   servings: z.number().describe('可供食用的人数')
 }).describe('菜谱信息');
 
-export const RecipeRecommendationSchema = z.object({
-  description: z.string().describe('菜谱推荐的总体描述，包括推荐理由、适合人群等'),
-  recipes: z.array(RecipeSchema).describe('推荐的菜谱列表')
-}).describe('菜谱推荐响应');
+// 生成的菜谱类型，包含本地唯一ID
+export interface GeneratedRecipe extends Recipe {
+  id: string;
+}
 
 export type Recipe = z.infer<typeof RecipeSchema>;
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
 export type RecipeStep = z.infer<typeof RecipeStepSchema>;
 export type RecipeCost = z.infer<typeof RecipeCostSchema>;
-export type KitchenTool = z.infer<typeof KitchenToolSchema>;
-export type RecipeRecommendation = z.infer<typeof RecipeRecommendationSchema>; 
+export type KitchenTool = z.infer<typeof KitchenToolSchema>; 

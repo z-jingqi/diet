@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
         element: <ChatPage />,
       },
       {
-        path: "recipe",
+        path: "recipe/:id",
         element: <RecipePage />,
       },
       {

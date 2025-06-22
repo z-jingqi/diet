@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Bindings } from "../index";
-import { TagsQuerySchema, TagsResponseSchema } from "@shared/schemas";
+import { TagsQuerySchema, TagsResponseSchema } from "@diet/shared";
 
 const tags = new Hono<{ Bindings: Bindings }>();
 
@@ -91,7 +91,8 @@ tags.get("/", async (c) => {
 tags.get("/all", async (c) => {
   try {
     // 获取分类
-    const { results: categories } = await c.env.DB.prepare(`
+    const { results: categories } = await c.env.DB.prepare(
+      `
       SELECT 
         id,
         name,
@@ -102,10 +103,12 @@ tags.get("/all", async (c) => {
       FROM tag_categories 
       WHERE is_active = true 
       ORDER BY sort_order ASC
-    `).all();
+    `
+    ).all();
 
     // 获取标签
-    const { results: tags } = await c.env.DB.prepare(`
+    const { results: tags } = await c.env.DB.prepare(
+      `
       SELECT 
         id,
         name,
@@ -120,7 +123,8 @@ tags.get("/all", async (c) => {
       FROM tags 
       WHERE is_active = true 
       ORDER BY sort_order ASC, name ASC
-    `).all();
+    `
+    ).all();
 
     // 处理数据，将数字布尔值转换为布尔值
     const processedCategories = categories.map((category: any) => ({
@@ -130,7 +134,10 @@ tags.get("/all", async (c) => {
 
     const processedTags = tags.map((tag: any) => ({
       ...tag,
-      restrictions: tag.restrictions && typeof tag.restrictions === 'string' ? JSON.parse(tag.restrictions) : [],
+      restrictions:
+        tag.restrictions && typeof tag.restrictions === "string"
+          ? JSON.parse(tag.restrictions)
+          : [],
       isActive: Boolean(tag.isActive),
     }));
 
@@ -182,7 +189,10 @@ tags.get("/:id", async (c) => {
     const tag = results[0];
     const processedTag = {
       ...tag,
-      restrictions: tag.restrictions && typeof tag.restrictions === 'string' ? JSON.parse(tag.restrictions) : [],
+      restrictions:
+        tag.restrictions && typeof tag.restrictions === "string"
+          ? JSON.parse(tag.restrictions)
+          : [],
     };
 
     return c.json({ tag: processedTag });

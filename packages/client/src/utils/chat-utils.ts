@@ -1,4 +1,5 @@
 import type { Message, Tag } from "@diet/shared";
+import { ChatCompletionMessageParam } from "openai/resources";
 
 /**
  * 增强用户消息，添加标签信息
@@ -26,18 +27,20 @@ const enhanceUserMessages = (
 
   // 检查之前的用户消息，看是否已经包含了相同的饮食限制条件
   const currentTagInfo = currentTags.map((tag) => tag.aiPrompt).join("\n");
-  
+
   // 从最后一条用户消息往前查找，直到找到第一个包含饮食限制条件的消息
   for (let i = lastUserMessageIndex - 1; i >= 0; i--) {
     const message = messages[i];
     if (!message.isUser) {
       continue; // 跳过AI消息
     }
-    
+
     // 检查这条消息是否包含饮食限制条件
     if (message.content.includes("用户饮食限制条件：")) {
       // 提取这条消息中的饮食限制条件
-      const match = message.content.match(/用户饮食限制条件：\n([\s\S]*?)\n\n用户问题：/);
+      const match = message.content.match(
+        /用户饮食限制条件：\n([\s\S]*?)\n\n用户问题：/
+      );
       if (match) {
         const previousTagInfo = match[1];
         // 如果饮食限制条件相同，则不重复添加
@@ -73,35 +76,18 @@ const enhanceUserMessages = (
 export const toAIMessages = (
   messages: Message[],
   currentTags?: Tag[]
-): { role: string; content: string }[] => {
+): ChatCompletionMessageParam[] => {
   // 第一步：增强用户消息（添加标签信息）
   const enhancedMessages = enhanceUserMessages(messages, currentTags);
 
   // 第二步：转换为 AI 格式
-  const result: { role: string; content: string }[] = [];
-
-  for (const msg of enhancedMessages) {
+  const result: ChatCompletionMessageParam[] = enhancedMessages.map((msg) => {
     if (msg.isUser) {
-      // 用户消息直接添加
-      result.push({ role: "user", content: msg.content });
+      return { role: "user", content: msg.content };
     } else {
-      // assistant 消息：如果是 recipe/health_advice，序列化为字符串
-      if (msg.type === "recipe" && msg.recipes) {
-        result.push({
-          role: "assistant",
-          content: `以下是推荐菜谱数据：\n${JSON.stringify({ description: msg.content, recipes: msg.recipes }, null, 2)}`,
-        });
-      } else if (msg.type === "health_advice" && msg.healthAdvice) {
-        result.push({
-          role: "assistant",
-          content: `以下是健康建议数据：\n${JSON.stringify(msg.healthAdvice, null, 2)}`,
-        });
-      } else {
-        // 普通 assistant 消息
-        result.push({ role: "assistant", content: msg.content });
-      }
+      return { role: "assistant", content: msg.content };
     }
-  }
+  });
 
   return result;
 };

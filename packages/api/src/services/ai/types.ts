@@ -1,4 +1,4 @@
-import { HealthAdvice, RecipeRecommendation } from "@shared/schemas";
+import { HealthAdvice, Recipe } from "@diet/shared";
 
 export interface Message {
   role: "user" | "assistant" | "system";
@@ -31,5 +31,5 @@ export const DEFAULT_MODELS = {
   qwen: "qwen-turbo",
 } as const;
 
-export type RecipeResponse = RecipeRecommendation;
+export type RecipeResponse = Recipe;
 export type HealthAdviceResponse = HealthAdvice;

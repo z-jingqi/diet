@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Clock, Timer } from "lucide-react";
-import type { RecipeStep } from "@shared/schemas/recipe";
+import type { RecipeStep } from "@diet/shared";
 import ExpandableCard from "./ExpandableCard";
 import { Typography, MutedText } from "@/components/ui/typography";
 
@@ -52,7 +52,7 @@ const RecipeSteps = ({ steps }: RecipeStepsProps) => {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <MutedText>{step.time}秒</MutedText>
+              <MutedText>{step.time} 分钟</MutedText>
             </div>
             {step.tips && <MutedText className="pl-6">小贴士：{step.tips}</MutedText>}
           </li>
