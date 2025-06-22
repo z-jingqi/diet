@@ -1,43 +1,73 @@
-import { D1Database } from '@cloudflare/workers-types';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
-// 读取SQL文件内容
-async function readSqlFile(path: string): Promise<string> {
-  const response = await fetch(path);
-  return await response.text();
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// 执行SQL语句
-async function executeSql(db: D1Database, sql: string): Promise<void> {
-  try {
-    const result = await db.prepare(sql).run();
-    console.log('SQL executed successfully:', result);
-  } catch (error) {
-    console.error('Error executing SQL:', error);
-    throw error;
+// 检查是否要执行到远程数据库
+const isRemote = process.argv.includes('--remote');
+
+// 数据库初始化脚本 - 分别执行每个 SQL 文件
+async function initDatabase(): Promise<void> {
+  const schemaDir = path.join(__dirname, '../schema');
+  
+  // 定义要执行的 SQL 文件及其执行顺序
+  const sqlFiles: string[] = [
+    'users.sql',
+    'tags.sql'
+    // 可以继续添加更多文件
+  ];
+
+  console.log(`🚀 开始初始化数据库... ${isRemote ? '(远程)' : '(本地)'}\n`);
+
+  for (const file of sqlFiles) {
+    const filePath = path.join(schemaDir, file);
+    
+    // 检查文件是否存在
+    if (!fs.existsSync(filePath)) {
+      console.error(`❌ 文件不存在: ${file}`);
+      continue;
+    }
+
+    try {
+      console.log(`📄 执行文件: ${file}`);
+      
+      // 构建命令，根据是否远程添加 --remote 标志
+      const remoteFlag = isRemote ? ' --remote' : '';
+      const command = `npx wrangler d1 execute DB --file=${filePath}${remoteFlag}`;
+      
+      const result = execSync(command, { 
+        cwd: path.join(__dirname, '..'),
+        encoding: 'utf8',
+        stdio: 'pipe'
+      });
+      
+      console.log(`✅ ${file} 执行成功`);
+      console.log(result);
+      console.log('---\n');
+      
+    } catch (error) {
+      console.error(`❌ ${file} 执行失败:`);
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error(error);
+      }
+      console.log('---\n');
+      
+      // 可以选择是否继续执行其他文件
+      // 如果希望一个文件失败就停止，可以在这里 break
+      // break;
+    }
   }
+
+  console.log('🎉 数据库初始化完成！');
 }
 
-// 初始化数据库
-export async function initDatabase(db: D1Database): Promise<void> {
-  console.log('Starting database initialization...');
-
-  try {
-    // 读取并执行用户表SQL
-    const usersSql = await readSqlFile('./schema/users.sql');
-    await executeSql(db, usersSql);
-    console.log('Users tables created successfully');
-
-    // 读取并执行标签表SQL
-    const tagsSql = await readSqlFile('./schema/tags.sql');
-    await executeSql(db, tagsSql);
-    console.log('Tags tables created successfully');
-
-    console.log('Database initialization completed successfully');
-  } catch (error) {
-    console.error('Database initialization failed:', error);
-    throw error;
-  }
-}
+// 执行初始化
+initDatabase().catch(console.error);
 
 // 如果直接运行此脚本
 if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
