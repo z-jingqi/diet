@@ -36,7 +36,7 @@ const ChatLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="flex flex-col h-[100dvh] w-full overflow-hidden">
       {/* Header */}
       <ChatHeader
         onMenuClick={handleMenuClick}
@@ -47,7 +47,7 @@ const ChatLayout = ({
       />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0">{children}</div>
+      <div className="flex-1 min-h-0 w-full">{children}</div>
 
       {/* Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>

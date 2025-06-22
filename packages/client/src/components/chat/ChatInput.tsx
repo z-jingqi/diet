@@ -63,7 +63,7 @@ const ChatInput = ({
   return (
     <div className="space-y-3">
       {/* 终止按钮 - 居中显示 */}
-      {canAbort && (
+      {!canAbort && (
         <div className="flex justify-center">
           <div className="relative">
             {/* 公转圆弧 */}
@@ -74,9 +74,9 @@ const ChatInput = ({
               variant="ghost"
               onClick={onAbort}
               size="sm"
-              className="relative h-6 w-6 rounded-full p-0 hover:bg-primary/10"
+              className="relative h-6 w-6 rounded-full p-0 hover:bg-primary/10 !px-[5px] !py-0"
             >
-              <Square size={12} className="w-3 h-3" />
+              <Square size={24} />
             </Button>
           </div>
         </div>

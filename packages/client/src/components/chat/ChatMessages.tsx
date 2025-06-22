@@ -73,7 +73,7 @@ const ChatMessages = () => {
   return (
     <div
       ref={containerRef}
-      className="h-full overflow-y-auto w-full"
+      className="h-full overflow-y-auto w-full scrollbar-hide"
       onScroll={handleScroll}
     >
       <div className="py-6 space-y-6 max-w-3xl mx-auto w-full px-4">

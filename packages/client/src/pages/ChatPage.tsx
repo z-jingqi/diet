@@ -101,7 +101,7 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="h-[100dvh]">
+    <div className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout
         title="新对话"
         onClearSession={handleClearSession}
@@ -110,9 +110,9 @@ const ChatPage = () => {
         onSelectSession={handleSelectSession}
         onRenameSession={handleRenameSession}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full w-full">
           {/* 主要内容区域 */}
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
+          <div className="flex-1 flex items-center justify-center overflow-hidden w-full">
             {messages.length === 0 ? <TypingPrompt /> : <ChatMessages />}
           </div>
 
