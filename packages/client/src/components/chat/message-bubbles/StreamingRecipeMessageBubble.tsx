@@ -142,7 +142,7 @@ const StreamingRecipeMessageBubble = ({
           <div className="bg-white rounded-lg p-4">
             <Markdown
               content={message.content}
-              className="prose dark:prose-invert max-w-none"
+              className="max-w-none"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ const StreamingRecipeMessageBubble = ({
             <div className="bg-white rounded-lg p-4">
               <Markdown
                 content={beforeText}
-                className="prose dark:prose-invert max-w-none"
+                className="max-w-none"
               />
             </div>
           )}
@@ -263,7 +263,7 @@ const StreamingRecipeMessageBubble = ({
             <div className="bg-white rounded-lg p-4">
               <Markdown
                 content={afterText}
-                className="prose dark:prose-invert max-w-none"
+                className="max-w-none"
               />
             </div>
           )}

@@ -37,7 +37,7 @@ const StreamingHealthMessageBubble = ({
           <div className="mb-4">
             <Markdown
               content={content}
-              className="prose dark:prose-invert max-w-none"
+              className="max-w-none"
             />
           </div>
 

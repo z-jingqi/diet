@@ -15,7 +15,7 @@ const ChatMessageBubble = ({
         <div className="bg-white rounded-lg">
           <Markdown
             content={content}
-            className="prose dark:prose-invert max-w-none"
+            className="max-w-none"
           />
         </div>
       </div>
