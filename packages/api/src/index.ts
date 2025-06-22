@@ -52,47 +52,9 @@ app.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
-// 获取用户意图接口
-app.post("/intent", async (c) => {
-  try {
-    // 打印请求头，用于调试
-    const headers: Record<string, string> = {};
-    c.req.raw.headers.forEach((value, key) => {
-      headers[key] = value;
-    });
-
-    // 获取请求体
-    const body = await c.req.json();
-
-    if (!body.messages || !Array.isArray(body.messages)) {
-      return c.json({ error: "Missing or invalid messages in request body" }, 400);
-    }
-
-    // 根据配置选择 AI 服务
-    const aiService = AIServiceFactory.create(
-      {
-        type: c.env.AI_SERVICE || "cloudflare",
-      },
-      c.env
-    );
-
-    const result = await aiService.getIntent(body.messages);
-    return c.json({ response: result });
-  } catch (error) {
-    console.error("Intent Error:", error);
-    return c.json({ error: "Failed to process intent" }, 500);
-  }
-});
-
-// 聊天接口
+// 聊天接口 - 直接使用QwenService的chat方法
 app.post("/chat", async (c) => {
   try {
-    // 打印请求头，用于调试
-    const headers: Record<string, string> = {};
-    c.req.raw.headers.forEach((value, key) => {
-      headers[key] = value;
-    });
-
     // 获取请求体
     const body = await c.req.json();
 
@@ -100,19 +62,15 @@ app.post("/chat", async (c) => {
       return c.json({ error: "Missing or invalid messages in request body" }, 400);
     }
 
-    if (!body.intent) {
-      return c.json({ error: "Missing intent in request body" }, 400);
-    }
-
     // 根据配置选择 AI 服务
     const aiService = AIServiceFactory.create(
       {
-        type: c.env.AI_SERVICE || "cloudflare",
+        type: c.env.AI_SERVICE || "qwen",
       },
       c.env
     );
 
-    const result = await aiService.chat(body.messages, body.intent, body.format);
+    const result = await aiService.chat(body.messages, body.format);
 
     // 如果是流式响应，直接返回流
     if (result instanceof ReadableStream) {

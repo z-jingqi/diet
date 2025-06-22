@@ -7,6 +7,7 @@ import {
   sendChatMessage,
   sendRecipeMessage,
   sendHealthAdviceMessage,
+  sendRecipeChatMessage,
 } from "@/lib/api/chat-api";
 import { nanoid } from "nanoid";
 
@@ -34,6 +35,9 @@ interface ChatState {
   // 私有方法（重构后的内部方法）
   handleUserMessage: (content: string) => void;
   handleRecipeIntent: (
+    AIMessages: { role: string; content: string }[]
+  ) => Promise<void>;
+  handleRecipeChatIntent: (
     AIMessages: { role: string; content: string }[]
   ) => Promise<void>;
   handleHealthAdviceIntent: (
@@ -240,6 +244,71 @@ const useChatStore = create<
       }
     },
 
+    // 处理菜谱聊天意图
+    handleRecipeChatIntent: async (AIMessages: { role: string; content: string }[]) => {
+      const { addMessage } = get();
+      const message = buildMessage("recipe");
+      message.status = "streaming";
+      addMessage(message);
+
+      const newController = new AbortController();
+      set({ abortController: newController });
+
+      let result = "";
+
+      try {
+        await sendRecipeChatMessage(
+          AIMessages,
+          (data) => {
+            // 检查流是否结束
+            if (data.done) {
+              set({ abortController: undefined });
+              return;
+            }
+
+            if (data.response !== null && data.response !== undefined) {
+              result += data.response;
+              
+              // 使用公共方法更新消息内容
+              messageUtils.updateCurrentSessionMessages(messages => 
+                messages.map((msg) => {
+                  if (msg.id === message.id) {
+                    return { ...msg, content: result };
+                  }
+                  return msg;
+                })
+              );
+            }
+          },
+          (error: Error) => {
+            set({ abortController: undefined });
+            throw error;
+          },
+          newController.signal
+        );
+
+        set({ abortController: undefined });
+        
+        // 使用公共方法更新消息状态为完成
+        messageUtils.updateMessageStatus(message.id, "done", {
+          finishedAt: new Date()
+        });
+      } catch (error) {
+        set({ abortController: undefined });
+        // 检查是否是因为abort导致的错误
+        const isAbortError =
+          error instanceof Error && error.name === "AbortError";
+
+        if (!isAbortError) {
+          // 使用公共方法更新最后一条AI消息状态为错误
+          messageUtils.updateLastAIMessageStatus("error", {
+            finishedAt: new Date()
+          });
+        }
+        throw error;
+      }
+    },
+
     // 处理健康建议意图
     handleHealthAdviceIntent: async (
       AIMessages: { role: string; content: string }[]
@@ -295,6 +364,7 @@ const useChatStore = create<
 
             if (data.response !== null && data.response !== undefined) {
               result += data.response;
+              
               // 使用公共方法更新消息内容
               messageUtils.updateCurrentSessionMessages(messages => 
                 messages.map((msg) => {
@@ -314,6 +384,7 @@ const useChatStore = create<
         );
 
         set({ abortController: undefined });
+        
         // 使用公共方法更新消息状态为完成
         messageUtils.updateMessageStatus(message.id, "done", {
           finishedAt: new Date()
@@ -373,7 +444,7 @@ const useChatStore = create<
         handleUserMessage,
         getCurrentMessages,
         getCurrentSession,
-        handleRecipeIntent,
+        handleRecipeChatIntent,
         handleHealthAdviceIntent,
         handleChatIntent,
         handleError,
@@ -400,7 +471,7 @@ const useChatStore = create<
         // 5. 根据意图处理消息
         switch (intent) {
           case "recipe":
-            await handleRecipeIntent(AIMessages);
+            await handleRecipeChatIntent(AIMessages);
             break;
           case "health_advice":
             await handleHealthAdviceIntent(AIMessages);

@@ -1,43 +1,36 @@
-import type { Message, Recipe } from "@diet/shared";
-import ChatMessageBubble from "./ChatMessageBubble";
-import RecipeMessageBubble from "./RecipeMessageBubble";
+import type { Message } from "@diet/shared";
+import StreamingMessageBubble from "./StreamingMessageBubble";
 import UserMessageBubble from "./UserMessageBubble";
-import HealthAdviceMessageBubble from "./HealthAdviceMessageBubble";
+import ChatMessageBubble from "./ChatMessageBubble";
 
 interface MessageBubbleProps {
   message: Message;
-  onRecipeClick?: (recipe: Recipe) => void;
+  onStartCooking?: (recipeName: string) => void;
+  onLike?: (recipeName: string) => void;
+  onDislike?: (recipeName: string) => void;
 }
 
 /**
  * 消息气泡组件
  */
-const MessageBubble = ({ message, onRecipeClick }: MessageBubbleProps) => {
+const MessageBubble = ({ message, onStartCooking, onLike, onDislike }: MessageBubbleProps) => {
   if (message.isUser) {
     return <UserMessageBubble content={message.content} />;
   }
 
-  switch (message.type) {
-    case "recipe":
-      return (
-        <RecipeMessageBubble
-          content={message.content}
-          recipes={message.recipes || []}
-          status={message.status}
-          onRecipeClick={onRecipeClick}
-        />
-      );
-    case "health_advice":
-      return (
-        <HealthAdviceMessageBubble
-          content={message.content}
-          healthAdvice={message.healthAdvice}
-          status={message.status}
-        />
-      );
-    default:
-      return <ChatMessageBubble content={message.content} />;
+  if (message.type === "recipe") {
+    return (
+      <StreamingMessageBubble
+        message={message}
+        onStartCooking={onStartCooking}
+        onLike={onLike}
+        onDislike={onDislike}
+      />
+    );
   }
+
+  // 普通chat消息
+  return <ChatMessageBubble content={message.content} />;
 };
 
 export default MessageBubble;

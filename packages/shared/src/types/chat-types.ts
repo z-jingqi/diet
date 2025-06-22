@@ -16,6 +16,18 @@ export type MessageStatus =
   | "abort";
 
 /**
+ * 菜谱详细信息
+ */
+export interface RecipeDetail {
+  name: string;
+  servings?: string;
+  tools?: string;
+  cost?: string;
+  difficulty?: string;
+  features?: string;
+}
+
+/**
  * 聊天消息
  */
 export interface Message {
@@ -35,6 +47,10 @@ export interface Message {
   recipes?: Recipe[];
   /** 健康建议查询结果（仅当 type 为 health_advice 时有效） */
   healthAdvice?: HealthAdvice;
+  /** 菜谱名称列表（用于菜谱推荐消息） */
+  recipeNames?: string[];
+  /** 菜谱详细信息列表（用于菜谱推荐消息） */
+  recipeDetails?: RecipeDetail[];
   /** 消息状态 */
   status?: MessageStatus;
 }
