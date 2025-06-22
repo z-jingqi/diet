@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RecipeDetail } from "@diet/shared";
+import useAuthStore from "@/store/auth-store";
+import { toast } from "sonner";
 
 interface RecipeCardProps {
   recipeDetail: RecipeDetail;
@@ -41,10 +43,55 @@ const RecipeCard = ({
   onGenerateRecipe,
   onStartCooking,
 }: RecipeCardProps) => {
+  const { canUseFeatures } = useAuthStore();
   const difficulty = difficultyMap[
     recipeDetail.difficulty as keyof typeof difficultyMap
   ] || { className: "bg-gray-500" };
   const isGenerated = !!recipeDetail.generatedAt;
+
+  const handleGenerateRecipe = async () => {
+    if (!canUseFeatures()) {
+      toast.error("请先登录后使用此功能", {
+        description: "登录后可以生成详细菜谱",
+        action: {
+          label: "去登录",
+          onClick: () => {
+            // 这里可以添加导航到登录页的逻辑
+            window.location.href = "/login";
+          },
+        },
+      });
+      return;
+    }
+    
+    try {
+      await onGenerateRecipe(recipeDetail);
+      toast.success("菜谱生成成功！");
+    } catch (error) {
+      toast.error("菜谱生成失败", {
+        description: error instanceof Error ? error.message : "请稍后重试",
+      });
+    }
+  };
+
+  const handleStartCooking = () => {
+    if (!canUseFeatures()) {
+      toast.error("请先登录后使用此功能", {
+        description: "登录后可以开始烹饪",
+        action: {
+          label: "去登录",
+          onClick: () => {
+            window.location.href = "/login";
+          },
+        },
+      });
+      return;
+    }
+    onStartCooking(recipeDetail?.recipeId ?? "");
+    toast.success("开始烹饪！", {
+      description: `正在准备 ${recipeDetail.name}`,
+    });
+  };
 
   return (
     <div
@@ -124,7 +171,7 @@ const RecipeCard = ({
         {isGenerated ? (
           <Button
             size="sm"
-            onClick={() => onStartCooking(recipeDetail?.recipeId ?? "")}
+            onClick={handleStartCooking}
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             <ChefHat className="w-4 h-4 mr-1" />
@@ -133,7 +180,7 @@ const RecipeCard = ({
         ) : (
           <Button
             size="sm"
-            onClick={() => onGenerateRecipe(recipeDetail)}
+            onClick={handleGenerateRecipe}
             disabled={isGenerating}
             className="bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50"
           >

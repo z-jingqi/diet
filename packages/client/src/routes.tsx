@@ -5,6 +5,7 @@ import ChatPage from '@/pages/ChatPage';
 import RecipePage from '@/pages/RecipePage';
 import ProfilePage from '@/pages/ProfilePage';
 import KitchenToolsPage from '@/pages/KitchenToolsPage';
+import LoginPage from '@/pages/LoginPage';
 import Layout from '@/components/layout/Layout';
 
 export const router = createBrowserRouter([
@@ -33,5 +34,9 @@ export const router = createBrowserRouter([
         element: <KitchenToolsPage />,
       },
     ],
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
 ]);

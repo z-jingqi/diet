@@ -29,9 +29,20 @@ export interface UserSession {
   id: string;
   user_id: string;
   session_token: string;
-  expires_at: string;
+  refresh_token: string;
+  session_expires_at: string;
+  refresh_expires_at: string;
   ip_address?: string;
   user_agent?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CsrfToken {
+  id: string;
+  user_id: string;
+  token: string;
+  expires_at: string;
   created_at: string;
 }
 
@@ -55,6 +66,24 @@ export interface WechatLoginRequest {
 export interface LoginResponse {
   user: User;
   session_token: string;
+  refresh_token: string;
+  session_expires_at: string;
+  refresh_expires_at: string;
+  csrf_token: string;
+}
+
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
+export interface RefreshTokenResponse {
+  session_token: string;
+  session_expires_at: string;
+  csrf_token: string;
+}
+
+export interface CsrfTokenResponse {
+  csrf_token: string;
   expires_at: string;
 }
 

@@ -29,14 +29,26 @@ CREATE TABLE IF NOT EXISTS oauth_accounts (
   UNIQUE(provider, provider_user_id)
 );
 
--- 用户会话表
+-- 用户会话表（支持 refresh token）
 CREATE TABLE IF NOT EXISTS user_sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   session_token TEXT UNIQUE NOT NULL,
-  expires_at DATETIME NOT NULL,
+  refresh_token TEXT UNIQUE NOT NULL,
+  session_expires_at DATETIME NOT NULL, -- session token 过期时间（短期）
+  refresh_expires_at DATETIME NOT NULL, -- refresh token 过期时间（长期）
   ip_address TEXT,
   user_agent TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CSRF Token 表
+CREATE TABLE IF NOT EXISTS csrf_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT UNIQUE NOT NULL,
+  expires_at DATETIME NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -48,4 +60,9 @@ CREATE INDEX IF NOT EXISTS idx_oauth_user_id ON oauth_accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_oauth_provider_user ON oauth_accounts(provider, provider_user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_token ON user_sessions(session_token);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(expires_at); 
+CREATE INDEX IF NOT EXISTS idx_sessions_refresh_token ON user_sessions(refresh_token);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON user_sessions(session_expires_at);
+CREATE INDEX IF NOT EXISTS idx_sessions_refresh_expires ON user_sessions(refresh_expires_at);
+CREATE INDEX IF NOT EXISTS idx_csrf_user_id ON csrf_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_csrf_token ON csrf_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_csrf_expires ON csrf_tokens(expires_at); 

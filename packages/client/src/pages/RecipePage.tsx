@@ -8,45 +8,79 @@ import RecipeIngredients from '@/components/recipe/RecipeIngredients';
 import RecipeSteps from '@/components/recipe/RecipeSteps';
 import RecipeNutrition from '@/components/recipe/RecipeNutrition';
 import RecipeNotes from '@/components/recipe/RecipeNotes';
+import useAuthStore from "@/store/auth-store";
+import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChefHat, LogIn } from "lucide-react";
 
 const RecipePage = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { currentRecipe, setCurrentRecipeById } = useRecipeStore();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const { setCurrentRecipeById, currentRecipe } = useRecipeStore();
 
-  // 当组件加载时，根据ID设置当前菜谱
   useEffect(() => {
+    if (!isAuthenticated) {
+      toast("请先登录后查看菜谱详情");
+      navigate("/");
+      return;
+    }
+
     if (id) {
       setCurrentRecipeById(id);
     }
-  }, [id, setCurrentRecipeById]);
+  }, [id, isAuthenticated, setCurrentRecipeById, navigate]);
 
-  // 如果ID不存在，显示错误页面
-  if (!id) {
+  // 未登录状态
+  if (!isAuthenticated) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">菜谱ID不存在</h1>
-          <p className="text-muted-foreground">请检查URL是否正确</p>
+      <div className="flex flex-col flex-1 min-h-0 p-4">
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <ChefHat className="w-6 h-6 text-gray-600" />
+              </div>
+              <CardTitle>需要登录</CardTitle>
+              <CardDescription>
+                请先登录后查看菜谱详情
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                className="w-full" 
+                onClick={() => navigate("/login")}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                去登录
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
-  // 如果菜谱不存在，显示错误页面
   if (!currentRecipe) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">菜谱不存在</h1>
-          <p className="text-muted-foreground">未找到ID为 {id} 的菜谱</p>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="mt-4"
-          >
-            返回上一页
-          </Button>
+      <div className="flex flex-col flex-1 min-h-0 p-4">
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <CardTitle>菜谱不存在</CardTitle>
+              <CardDescription>
+                未找到指定的菜谱
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full" 
+                onClick={() => navigate("/")}
+              >
+                返回首页
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

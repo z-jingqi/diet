@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { AuthService } from '../services/auth';
 import { LoginRequest, RegisterRequest, WechatLoginRequest } from '@diet/shared';
 import { Bindings } from '../types/bindings';
@@ -28,6 +29,18 @@ auth.post("/register", async (c) => {
     const authService = new AuthService(c.env.DB);
     const user = await authService.register(body);
     
+    // 注册成功后创建会话
+    const session = await authService.createSession(user.id);
+    
+    // 设置 httpOnly cookie
+    setCookie(c, 'session_token', session.session_token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      secure: true,
+      expires: new Date(session.session_expires_at)
+    });
+    
     return c.json({
       success: true,
       message: '注册成功',
@@ -50,12 +63,28 @@ auth.post("/login", async (c) => {
     }
 
     const authService = new AuthService(c.env.DB);
-    const loginResponse = await authService.login(body);
+    const { user, session_token, refresh_token, session_expires_at, refresh_expires_at } = await authService.login(body);
+    
+    // 设置 httpOnly cookie
+    setCookie(c, 'session_token', session_token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      secure: true,
+      expires: new Date(session_expires_at)
+    });
+    setCookie(c, 'refresh_token', refresh_token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      secure: true,
+      expires: new Date(refresh_expires_at)
+    });
     
     return c.json({
       success: true,
       message: '登录成功',
-      ...loginResponse
+      user
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : '登录失败';
@@ -73,12 +102,15 @@ auth.post("/wechat-login", async (c) => {
     }
 
     const authService = new AuthService(c.env.DB);
-    const loginResponse = await authService.wechatLogin(body.code);
+    const { user, session_token } = await authService.wechatLogin(body.code);
+    
+    // 设置 httpOnly cookie
+    c.header('Set-Cookie', `session_token=${session_token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
     
     return c.json({
       success: true,
       message: '微信登录成功',
-      ...loginResponse
+      user
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : '微信登录失败';
@@ -86,54 +118,59 @@ auth.post("/wechat-login", async (c) => {
   }
 });
 
+// 刷新 session token
+auth.post('/refresh', async (c) => {
+  const refreshToken = getCookie(c, 'refresh_token');
+  if (!refreshToken) {
+    return c.json({ error: '未提供 refresh token' }, 401);
+  }
+  const authService = new AuthService(c.env.DB);
+  try {
+    const { session_token, session_expires_at } = await authService.refreshSession(refreshToken);
+    setCookie(c, 'session_token', session_token, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      secure: true,
+      expires: new Date(session_expires_at)
+    });
+    return c.json({ session_token, session_expires_at });
+  } catch {
+    // refresh token 失效，清除 cookie
+    deleteCookie(c, 'session_token');
+    deleteCookie(c, 'refresh_token');
+    return c.json({ error: 'refresh token 无效或已过期' }, 401);
+  }
+});
+
 // 用户注销
 auth.post("/logout", async (c) => {
-  try {
-    const authHeader = c.req.header('Authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return c.json({ success: false, message: '未提供有效的会话令牌' }, 401);
-    }
-
-    const sessionToken = authHeader.substring(7);
-    const authService = new AuthService(c.env.DB);
+  const sessionToken = getCookie(c, 'session_token');
+  const refreshToken = getCookie(c, 'refresh_token');
+  const authService = new AuthService(c.env.DB);
+  if (sessionToken) {
     await authService.logout(sessionToken);
-    
-    return c.json({
-      success: true,
-      message: '注销成功'
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '注销失败';
-    return c.json({ success: false, message }, 400);
   }
+  if (refreshToken) {
+    await authService.logoutByRefreshToken(refreshToken);
+  }
+  deleteCookie(c, 'session_token');
+  deleteCookie(c, 'refresh_token');
+  return c.json({ success: true });
 });
 
 // 获取当前用户信息
 auth.get("/me", async (c) => {
-  try {
-    const authHeader = c.req.header('Authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return c.json({ success: false, message: '未提供有效的会话令牌' }, 401);
-    }
-
-    const sessionToken = authHeader.substring(7);
-    const authService = new AuthService(c.env.DB);
-    const authContext = await authService.validateSession(sessionToken);
-
-    if (!authContext) {
-      return c.json({ success: false, message: '会话已过期' }, 401);
-    }
-    
-    return c.json({
-      success: true,
-      user: authContext.user
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '获取用户信息失败';
-    return c.json({ success: false, message }, 400);
+  const sessionToken = getCookie(c, 'session_token');
+  if (!sessionToken) {
+    return c.json({ error: '未登录' }, 401);
   }
+  const authService = new AuthService(c.env.DB);
+  const authContext = await authService.validateSession(sessionToken);
+  if (!authContext) {
+    return c.json({ error: '登录已过期' }, 401);
+  }
+  return c.json({ user: authContext.user });
 });
 
 export default auth; 
