@@ -1,9 +1,12 @@
 import type { Tag, TagCategory, TagsResponse } from "@diet/shared";
 import { API_BASE } from "@/lib/constants";
+import { getAuthHeaders } from "./auth-api";
 
 // 获取所有标签和分类数据
 export const fetchTagsData = async (): Promise<TagsResponse> => {
-  const response = await fetch(`${API_BASE}/tags/all`);
+  const response = await fetch(`${API_BASE}/tags/all`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch tags data");
   }
@@ -12,7 +15,9 @@ export const fetchTagsData = async (): Promise<TagsResponse> => {
 
 // 获取标签分类
 export const fetchTagCategories = async (): Promise<TagCategory[]> => {
-  const response = await fetch(`${API_BASE}/tags/categories`);
+  const response = await fetch(`${API_BASE}/tags/categories`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch tag categories");
   }
@@ -34,7 +39,9 @@ export const fetchTags = async (params?: {
   }
 
   const url = `${API_BASE}/tags${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch tags");
   }
@@ -44,7 +51,9 @@ export const fetchTags = async (params?: {
 
 // 根据 ID 获取标签详情
 export const fetchTagById = async (id: string): Promise<Tag> => {
-  const response = await fetch(`${API_BASE}/tags/${id}`);
+  const response = await fetch(`${API_BASE}/tags/${id}`, {
+    headers: getAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch tag");
   }

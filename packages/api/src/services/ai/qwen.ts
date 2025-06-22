@@ -1,5 +1,5 @@
 import { AIConfig, ResponseFormat, DEFAULT_MODELS } from "./types";
-import { Bindings } from "@/index";
+import { Bindings } from "../../types/bindings";
 import OpenAI from "openai";
 import {
   ChatCompletion,

@@ -4,6 +4,7 @@ import {
 } from "@microsoft/fetch-event-source";
 import { API_BASE } from "@/lib/constants";
 import { ChatCompletionMessageParam } from "openai/resources";
+import { getAuthHeaders } from "./auth-api";
 
 // 定义 sendMessage 的参数接口
 interface SendMessageParams {
@@ -29,6 +30,9 @@ export const sendMessage = async ({
     ...messages,
   ];
 
+  // 获取认证头
+  const authHeaders = getAuthHeaders();
+
   if (format === "stream") {
     return new Promise<void>((resolve, reject) => {
       fetchEventSource(`${API_BASE}/chat`, {
@@ -36,6 +40,7 @@ export const sendMessage = async ({
         headers: {
           "Content-Type": "text/event-stream",
           Accept: "text/event-stream",
+          ...authHeaders,
         },
         body: JSON.stringify({
           messages: messagesWithPrompt,
@@ -65,6 +70,7 @@ export const sendMessage = async ({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders,
     },
     body: JSON.stringify({
       messages: messagesWithPrompt,

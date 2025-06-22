@@ -1,6 +1,6 @@
 import { AIConfig } from "./types";
 import { QwenService } from "./qwen";
-import { Bindings } from "@/index";
+import { Bindings } from "../../types/bindings";
 
 export const AIServiceFactory = {
   create: (config: AIConfig, env: Bindings): QwenService => {
