@@ -1,14 +1,4 @@
-import {
-  AIConfig,
-  ResponseFormat,
-  DEFAULT_MODELS,
-  RecipeResponse,
-  HealthAdviceResponse,
-} from "./types";
-import { INTENT_PROMPT } from "./prompts/intent-prompt";
-import { CHAT_PROMPT } from "./prompts/chat-prompt";
-import { RECIPE_PROMPT } from "./prompts/recipe-prompt";
-import { HEALTH_ADVICE_PROMPT } from "./prompts/health-advice-prompt";
+import { AIConfig, ResponseFormat, DEFAULT_MODELS } from "./types";
 import { Bindings } from "@/index";
 import OpenAI from "openai";
 import {
@@ -37,39 +27,19 @@ export class QwenService {
     });
   }
 
-  // 兼容 OpenAI 格式的消息
-  private toOpenAIMessages(messages: { role: string; content: string }[]) {
-    return messages.map((msg) => ({ role: msg.role, content: msg.content }));
-  }
-
   async chat(
-    messages: { role: string; content: string }[],
-    intent: string,
+    messages: ChatCompletionMessageParam[],
     format: ResponseFormat = "stream"
-  ): Promise<string | ReadableStream | RecipeResponse | HealthAdviceResponse> {
-    // 根据 intent 选择 system prompt
-    let systemPrompt = CHAT_PROMPT;
-    switch (intent) {
-      case "recipe":
-        systemPrompt = RECIPE_PROMPT;
-        break;
-      case "health_advice":
-        systemPrompt = HEALTH_ADVICE_PROMPT;
-        break;
-    }
-    const isStream = format === "stream" && intent === "chat";
-    // 拼接 system prompt
-    const messagesWithPrompt = [
-      { role: "system", content: systemPrompt },
-      ...this.toOpenAIMessages(messages),
-    ] as ChatCompletionMessageParam[];
+  ): Promise<string | ReadableStream> {
+    const isStream = format === "stream";
 
     const completion = await this.openai.chat.completions.create({
       model: this.model,
-      messages: messagesWithPrompt,
+      messages,
       response_format: isStream ? undefined : { type: "json_object" },
       stream: isStream,
     });
+
     if (isStream) {
       const stream = completion as Stream<ChatCompletionChunk>;
       return new ReadableStream({
@@ -78,13 +48,13 @@ export class QwenService {
             for await (const chunk of stream) {
               const content = chunk.choices[0]?.delta?.content || "";
               const finishReason = chunk.choices[0]?.finish_reason;
-              
+
               if (content) {
                 // 格式化为 SSE 格式
                 const sseData = `data: ${JSON.stringify({ response: content })}\n\n`;
                 controller.enqueue(new TextEncoder().encode(sseData));
               }
-              
+
               // 检查流是否结束
               if (finishReason) {
                 // 发送结束标记，包含结束原因
@@ -100,35 +70,7 @@ export class QwenService {
         },
       });
     }
+
     return (completion as ChatCompletion).choices[0].message.content || "";
-  }
-
-  async getIntent(
-    messages: { role: string; content: string }[]
-  ): Promise<string> {
-    // intent prompt
-    const messagesWithPrompt = [
-      { role: "system", content: INTENT_PROMPT },
-      ...this.toOpenAIMessages(messages),
-    ] as ChatCompletionMessageParam[];
-    const completion = await this.openai.chat.completions.create({
-      model: this.model,
-      messages: messagesWithPrompt,
-      response_format: { type: "json_object" },
-    });
-
-    try {
-      const content = completion.choices[0].message.content || "";
-      const parsed = JSON.parse(content);
-      const intent = parsed.intent?.trim()?.toLowerCase();
-
-      if (!["chat", "recipe", "health_advice"].includes(intent)) {
-        return "chat";
-      }
-      return intent;
-    } catch (error) {
-      console.error("Failed to parse intent response:", error);
-      return "chat";
-    }
   }
 }

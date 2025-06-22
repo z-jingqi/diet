@@ -21,9 +21,7 @@ export type AIProvider = "openai" | "anthropic" | "qwen" | "cloudflare";
 export interface AIConfig {
   type: AIProvider;
   apiKey?: string; // Optional for Cloudflare
-  accountId?: string; // For Cloudflare AI
   model?: string; // Model name/ID for the AI service
-  baseUrl?: string;
   defaultResponseFormat?: ResponseFormat;
 }
 
