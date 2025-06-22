@@ -63,7 +63,7 @@ const ChatInput = ({
   return (
     <div className="space-y-3">
       {/* 终止按钮 - 居中显示 */}
-      {!canAbort && (
+      {canAbort && (
         <div className="flex justify-center">
           <div className="relative">
             {/* 公转圆弧 */}
