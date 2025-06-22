@@ -87,6 +87,7 @@ export const RECIPE_CHAT_PROMPT = `
 - 常见基础厨具（如菜刀、砧板、炒锅、锅铲、碗、盘子、筷子等）不要列出。
 - 如果没有特殊关键厨具，可以写"无"或不写。
 - <recipe_suggestions>标签前后都可以有文字markdown内容，让回答更自然和丰富。
+- 直接返回markdown内容，不要用\`\`\`markdown代码块包装内容。
 
 回答格式示例：
 <recipe_suggestions>

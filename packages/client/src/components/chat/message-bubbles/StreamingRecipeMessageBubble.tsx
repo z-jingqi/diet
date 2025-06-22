@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { Markdown } from "@/components/ui/markdown";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChefHat, Users, Utensils, ThumbsUp, ThumbsDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { MutedText, ErrorText, Typography } from "@/components/ui/typography";
-import { isRecipeMessage } from "@/lib/api/chat-api";
-import { 
-  extractRecipeDetails, 
-  extractBeforeRecipeSection, 
-  extractAfterRecipeSection 
+import {
+  isRecipeMessage,
+  extractRecipeDetails,
+  extractBeforeRecipeSection,
+  extractAfterRecipeSection,
 } from "@/utils/recipe-parser";
+import { Markdown } from "@/components/ui/markdown";
+import { Typography, MutedText, ErrorText } from "@/components/ui/typography";
+import { ThumbsDown, ThumbsUp, Users, Utensils, ChefHat } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RecipeDetail {
   name: string;

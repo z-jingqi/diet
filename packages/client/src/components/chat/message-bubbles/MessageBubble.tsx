@@ -1,5 +1,6 @@
 import type { Message } from "@diet/shared";
-import StreamingMessageBubble from "./StreamingMessageBubble";
+import StreamingMessageBubble from "./StreamingRecipeMessageBubble";
+import StreamingHealthMessageBubble from "./StreamingHealthMessageBubble";
 import UserMessageBubble from "./UserMessageBubble";
 import ChatMessageBubble from "./ChatMessageBubble";
 
@@ -8,12 +9,19 @@ interface MessageBubbleProps {
   onStartCooking?: (recipeName: string) => void;
   onLike?: (recipeName: string) => void;
   onDislike?: (recipeName: string) => void;
+  onSaveHealthAdvice?: (content: string) => void;
 }
 
 /**
  * 消息气泡组件
  */
-const MessageBubble = ({ message, onStartCooking, onLike, onDislike }: MessageBubbleProps) => {
+const MessageBubble = ({ 
+  message, 
+  onStartCooking, 
+  onLike, 
+  onDislike,
+  onSaveHealthAdvice,
+}: MessageBubbleProps) => {
   if (message.isUser) {
     return <UserMessageBubble content={message.content} />;
   }
@@ -25,6 +33,15 @@ const MessageBubble = ({ message, onStartCooking, onLike, onDislike }: MessageBu
         onStartCooking={onStartCooking}
         onLike={onLike}
         onDislike={onDislike}
+      />
+    );
+  }
+
+  if (message.type === "health_advice") {
+    return (
+      <StreamingHealthMessageBubble
+        message={message}
+        onSave={onSaveHealthAdvice}
       />
     );
   }

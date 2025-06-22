@@ -5,9 +5,8 @@ import type { Message, ChatSession, Tag, MessageStatus } from "@diet/shared";
 import {
   getIntent,
   sendChatMessage,
-  sendRecipeMessage,
-  sendHealthAdviceMessage,
   sendRecipeChatMessage,
+  sendHealthAdviceChatMessage,
 } from "@/lib/api/chat-api";
 import { nanoid } from "nanoid";
 
@@ -34,13 +33,10 @@ interface ChatState {
   getSessions: () => ChatSession[];
   // 私有方法（重构后的内部方法）
   handleUserMessage: (content: string) => void;
-  handleRecipeIntent: (
-    AIMessages: { role: string; content: string }[]
-  ) => Promise<void>;
   handleRecipeChatIntent: (
     AIMessages: { role: string; content: string }[]
   ) => Promise<void>;
-  handleHealthAdviceIntent: (
+  handleHealthAdviceChatIntent: (
     AIMessages: { role: string; content: string }[]
   ) => Promise<void>;
   handleChatIntent: (
@@ -58,15 +54,17 @@ const useChatStore = create<
   // 消息更新工具方法
   const messageUtils = {
     // 更新指定消息的状态和属性
-    updateMessageStatus: (messageId: string, status: MessageStatus, additionalProps: Partial<Message> = {}) => {
+    updateMessageStatus: (
+      messageId: string,
+      status: MessageStatus,
+      additionalProps: Partial<Message> = {}
+    ) => {
       set((state) => {
         const currentMessages = get().getCurrentMessages();
         const updatedMessages = currentMessages.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, status, ...additionalProps }
-            : msg
+          msg.id === messageId ? { ...msg, status, ...additionalProps } : msg
         );
-        
+
         return {
           sessions: state.sessions.map((session) =>
             session.id === state.currentSessionId
@@ -78,7 +76,10 @@ const useChatStore = create<
     },
 
     // 更新最后一条AI消息的状态和属性
-    updateLastAIMessageStatus: (status: MessageStatus, additionalProps: Partial<Message> = {}) => {
+    updateLastAIMessageStatus: (
+      status: MessageStatus,
+      additionalProps: Partial<Message> = {}
+    ) => {
       set((state) => {
         const currentMessages = get().getCurrentMessages();
         const updatedMessages = currentMessages.map((msg, idx, arr) =>
@@ -86,7 +87,7 @@ const useChatStore = create<
             ? { ...msg, status, ...additionalProps }
             : msg
         );
-        
+
         return {
           sessions: state.sessions.map((session) =>
             session.id === state.currentSessionId
@@ -98,11 +99,13 @@ const useChatStore = create<
     },
 
     // 更新当前会话的消息
-    updateCurrentSessionMessages: (updater: (messages: Message[]) => Message[]) => {
+    updateCurrentSessionMessages: (
+      updater: (messages: Message[]) => Message[]
+    ) => {
       set((state) => {
         const currentMessages = get().getCurrentMessages();
         const updatedMessages = updater(currentMessages);
-        
+
         return {
           sessions: state.sessions.map((session) =>
             session.id === state.currentSessionId
@@ -117,12 +120,13 @@ const useChatStore = create<
   // 会话管理工具方法
   const sessionUtils = {
     // 更新指定会话
-    updateSession: (sessionId: string, updater: (session: ChatSession) => ChatSession) => {
+    updateSession: (
+      sessionId: string,
+      updater: (session: ChatSession) => ChatSession
+    ) => {
       set((state) => ({
         sessions: state.sessions.map((session) =>
-          session.id === sessionId
-            ? updater(session)
-            : session
+          session.id === sessionId ? updater(session) : session
         ),
       }));
     },
@@ -131,9 +135,7 @@ const useChatStore = create<
     updateCurrentSession: (updater: (session: ChatSession) => ChatSession) => {
       set((state) => ({
         sessions: state.sessions.map((session) =>
-          session.id === state.currentSessionId
-            ? updater(session)
-            : session
+          session.id === state.currentSessionId ? updater(session) : session
         ),
       }));
     },
@@ -181,9 +183,7 @@ const useChatStore = create<
         updatedAt: new Date(),
         // 如果是临时会话且这是第一条用户消息，更新标题
         title:
-          isTemporarySession &&
-          message.isUser &&
-          session.messages.length === 0
+          isTemporarySession && message.isUser && session.messages.length === 0
             ? "新聊天" // TODO: 根据消息内容生成合适的标题
             : session.title,
       }));
@@ -199,10 +199,10 @@ const useChatStore = create<
       if (abortController) {
         abortController.abort();
         set({ abortController: undefined, gettingIntent: false });
-        
+
         // 使用公共方法更新最后一条AI消息状态
         messageUtils.updateLastAIMessageStatus("abort", {
-          finishedAt: new Date()
+          finishedAt: new Date(),
         });
       }
     },
@@ -216,36 +216,10 @@ const useChatStore = create<
       addMessage(userMessage);
     },
 
-    // 处理菜谱意图
-    handleRecipeIntent: async (
+    // 处理菜谱聊天意图
+    handleRecipeChatIntent: async (
       AIMessages: { role: string; content: string }[]
     ) => {
-      const { addMessage } = get();
-      const message = buildMessage("recipe");
-      message.status = "pending";
-      addMessage(message);
-
-      const newController = new AbortController();
-      set({ abortController: newController });
-
-      try {
-        const result = await sendRecipeMessage(AIMessages, newController.signal);
-        set({ abortController: undefined });
-
-        // 使用公共方法更新消息状态
-        messageUtils.updateMessageStatus(message.id, "done", {
-          recipes: result.recipes,
-          content: result.description,
-          finishedAt: new Date(),
-        });
-      } catch (error) {
-        set({ abortController: undefined });
-        throw error;
-      }
-    },
-
-    // 处理菜谱聊天意图
-    handleRecipeChatIntent: async (AIMessages: { role: string; content: string }[]) => {
       const { addMessage } = get();
       const message = buildMessage("recipe");
       message.status = "streaming";
@@ -268,9 +242,9 @@ const useChatStore = create<
 
             if (data.response !== null && data.response !== undefined) {
               result += data.response;
-              
+
               // 使用公共方法更新消息内容
-              messageUtils.updateCurrentSessionMessages(messages => 
+              messageUtils.updateCurrentSessionMessages((messages) =>
                 messages.map((msg) => {
                   if (msg.id === message.id) {
                     return { ...msg, content: result };
@@ -288,10 +262,10 @@ const useChatStore = create<
         );
 
         set({ abortController: undefined });
-        
+
         // 使用公共方法更新消息状态为完成
         messageUtils.updateMessageStatus(message.id, "done", {
-          finishedAt: new Date()
+          finishedAt: new Date(),
         });
       } catch (error) {
         set({ abortController: undefined });
@@ -302,46 +276,84 @@ const useChatStore = create<
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
           messageUtils.updateLastAIMessageStatus("error", {
-            finishedAt: new Date()
+            finishedAt: new Date(),
           });
         }
         throw error;
       }
     },
 
-    // 处理健康建议意图
-    handleHealthAdviceIntent: async (
+    // 处理健康建议聊天意图
+    handleHealthAdviceChatIntent: async (
       AIMessages: { role: string; content: string }[]
     ) => {
       const { addMessage } = get();
       const message = buildMessage("health_advice");
-      message.status = "pending";
+      message.status = "streaming";
       addMessage(message);
 
       const newController = new AbortController();
       set({ abortController: newController });
 
+      let result = "";
+
       try {
-        const result = await sendHealthAdviceMessage(
+        await sendHealthAdviceChatMessage(
           AIMessages,
+          (data) => {
+            // 检查流是否结束
+            if (data.done) {
+              set({ abortController: undefined });
+              return;
+            }
+
+            if (data.response !== null && data.response !== undefined) {
+              result += data.response;
+
+              // 使用公共方法更新消息内容
+              messageUtils.updateCurrentSessionMessages((messages) =>
+                messages.map((msg) => {
+                  if (msg.id === message.id) {
+                    return { ...msg, content: result };
+                  }
+                  return msg;
+                })
+              );
+            }
+          },
+          (error: Error) => {
+            set({ abortController: undefined });
+            throw error;
+          },
           newController.signal
         );
+
         set({ abortController: undefined });
 
-        // 使用公共方法更新消息状态
+        // 使用公共方法更新消息状态为完成
         messageUtils.updateMessageStatus(message.id, "done", {
-          healthAdvice: result,
-          content: result.title,
           finishedAt: new Date(),
         });
       } catch (error) {
         set({ abortController: undefined });
+        // 检查是否是因为abort导致的错误
+        const isAbortError =
+          error instanceof Error && error.name === "AbortError";
+
+        if (!isAbortError) {
+          // 使用公共方法更新最后一条AI消息状态为错误
+          messageUtils.updateLastAIMessageStatus("error", {
+            finishedAt: new Date(),
+          });
+        }
         throw error;
       }
     },
 
     // 处理聊天意图
-    handleChatIntent: async (AIMessages: { role: string; content: string }[]) => {
+    handleChatIntent: async (
+      AIMessages: { role: string; content: string }[]
+    ) => {
       const { addMessage } = get();
       const message = buildMessage("chat");
       message.status = "streaming";
@@ -364,9 +376,9 @@ const useChatStore = create<
 
             if (data.response !== null && data.response !== undefined) {
               result += data.response;
-              
+
               // 使用公共方法更新消息内容
-              messageUtils.updateCurrentSessionMessages(messages => 
+              messageUtils.updateCurrentSessionMessages((messages) =>
                 messages.map((msg) => {
                   if (msg.id === message.id) {
                     return { ...msg, content: result };
@@ -384,10 +396,10 @@ const useChatStore = create<
         );
 
         set({ abortController: undefined });
-        
+
         // 使用公共方法更新消息状态为完成
         messageUtils.updateMessageStatus(message.id, "done", {
-          finishedAt: new Date()
+          finishedAt: new Date(),
         });
       } catch (error) {
         set({ abortController: undefined });
@@ -398,7 +410,7 @@ const useChatStore = create<
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
           messageUtils.updateLastAIMessageStatus("error", {
-            finishedAt: new Date()
+            finishedAt: new Date(),
           });
         }
         throw error;
@@ -411,7 +423,8 @@ const useChatStore = create<
       set({ gettingIntent: false, abortController: undefined });
 
       // 检查是否是因为abort导致的错误
-      const isAbortError = error instanceof Error && error.name === "AbortError";
+      const isAbortError =
+        error instanceof Error && error.name === "AbortError";
 
       // 检查是否已经有 AI 消息（可能是在 getIntent 之后添加的）
       const { getCurrentMessages } = get();
@@ -423,7 +436,7 @@ const useChatStore = create<
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
           messageUtils.updateLastAIMessageStatus("error", {
-            finishedAt: new Date()
+            finishedAt: new Date(),
           });
         }
       } else {
@@ -445,7 +458,7 @@ const useChatStore = create<
         getCurrentMessages,
         getCurrentSession,
         handleRecipeChatIntent,
-        handleHealthAdviceIntent,
+        handleHealthAdviceChatIntent,
         handleChatIntent,
         handleError,
       } = get();
@@ -474,7 +487,7 @@ const useChatStore = create<
             await handleRecipeChatIntent(AIMessages);
             break;
           case "health_advice":
-            await handleHealthAdviceIntent(AIMessages);
+            await handleHealthAdviceChatIntent(AIMessages);
             break;
           default:
             await handleChatIntent(AIMessages);

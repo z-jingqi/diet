@@ -1,3 +1,8 @@
+// 检测消息是否包含菜谱推荐（通过特殊标记）
+export const isRecipeMessage = (content: string): boolean => {
+  return content.includes("<recipe_suggestions>");
+};
+
 // 提取 <recipe_suggestions> 标签内的内容
 export const extractRecipeSection = (content: string): string => {
   const match = content.match(/<recipe_suggestions>([\s\S]*?)<\/recipe_suggestions>/);
