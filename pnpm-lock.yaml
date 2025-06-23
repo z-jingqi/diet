@@ -67,7 +67,7 @@ importers:
   packages/api:
     dependencies:
       '@diet/shared':
-        specifier: file:../shared
+        specifier: workspace:*
         version: link:../shared
       '@hono/node-server':
         specifier: 1.14.4
