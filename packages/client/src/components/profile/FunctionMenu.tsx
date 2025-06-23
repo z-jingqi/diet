@@ -1,15 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Typography, MutedText } from "@/components/ui/typography";
-import { useNavigate } from "@tanstack/react-router";
 import { Heart, XCircle, Utensils, Settings } from "lucide-react";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 interface FunctionMenuProps {
   className?: string;
 }
 
 const FunctionMenu = ({ className }: FunctionMenuProps) => {
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
 
   const handleFavorites = () => {
     // TODO: 实现收藏菜谱页面
@@ -22,7 +22,7 @@ const FunctionMenu = ({ className }: FunctionMenuProps) => {
   };
 
   const handleKitchenTools = () => {
-    navigate({ to: "/kitchen-tools" });
+    authNavigate({ to: "/kitchen-tools" });
   };
 
   const handleSettings = () => {

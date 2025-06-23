@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import useRecipeStore from '@/store/recipe-store';
 import RecipeBasicInfo from '@/components/recipe/RecipeBasicInfo';
@@ -12,24 +12,25 @@ import useAuthStore from "@/store/auth-store";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChefHat, LogIn } from "lucide-react";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const RecipePage = () => {
   const { id } = useParams({ from: '/recipe/$id' });
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
   const { isAuthenticated } = useAuthStore();
   const { setCurrentRecipeById, currentRecipe } = useRecipeStore();
 
   useEffect(() => {
     if (!isAuthenticated) {
       toast("请先登录后查看菜谱详情");
-      navigate({ to: "/" });
+      authNavigate({ to: "/" });
       return;
     }
 
     if (id) {
       setCurrentRecipeById(id);
     }
-  }, [id, isAuthenticated, setCurrentRecipeById, navigate]);
+  }, [id, isAuthenticated, setCurrentRecipeById, authNavigate]);
 
   // 未登录状态
   if (!isAuthenticated) {
@@ -49,7 +50,7 @@ const RecipePage = () => {
             <CardContent className="space-y-4">
               <Button 
                 className="w-full" 
-                onClick={() => navigate({ to: "/login" })}
+                onClick={() => authNavigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 去登录
@@ -75,7 +76,7 @@ const RecipePage = () => {
             <CardContent>
               <Button 
                 className="w-full" 
-                onClick={() => navigate({ to: "/" })}
+                onClick={() => authNavigate({ to: "/" })}
               >
                 返回首页
               </Button>
@@ -95,7 +96,7 @@ const RecipePage = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => authNavigate({ to: "/" })}
               className="hover:bg-accent"
             >
               <ArrowLeft className="h-5 w-5" />

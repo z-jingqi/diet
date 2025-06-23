@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Lock, Mail, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useAuthStore from "@/store/auth-store";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -70,7 +70,7 @@ const LoginPage = () => {
       } else {
         await register(formData.username, formData.email, formData.password, formData.nickname);
       }
-      navigate({ to: "/" });
+      authNavigate({ to: "/" });
     } catch (error) {
       console.error("操作失败，请重试", error);
     }
@@ -78,7 +78,7 @@ const LoginPage = () => {
 
   const handleGuestMode = () => {
     enableGuest();
-    navigate({ to: "/" });
+    authNavigate({ to: "/" });
   };
 
   const handleInputChange = (field: string, value: string) => {

@@ -3,12 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { ArrowLeft, Save } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import KitchenToolsList from "@/components/kitchen-tools/KitchenToolsList";
 import CustomToolInput from "@/components/kitchen-tools/CustomToolInput";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const KitchenToolsPage = () => {
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [customTools, setCustomTools] = useState<string[]>([]);
 
@@ -37,11 +37,11 @@ const KitchenToolsPage = () => {
     localStorage.setItem("kitchenTools", JSON.stringify(allTools));
     
     // 返回上一页
-    navigate({ to: "/" });
+    authNavigate({ to: "/" });
   };
 
   const handleBack = () => {
-    navigate({ to: "/" });
+    authNavigate({ to: "/" });
   };
 
   return (
