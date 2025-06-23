@@ -47,4 +47,4 @@ storybook-static
 .dev.vars.*
 
 # TanStack Router generated file
-packages/client/src/routeTree.gen.ts
+# packages/client/src/routeTree.gen.ts
