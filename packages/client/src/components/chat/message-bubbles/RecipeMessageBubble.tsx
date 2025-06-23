@@ -1,6 +1,5 @@
 import { Markdown } from "@/components/ui/markdown";
 import { Message, RecipeDetail } from "@diet/shared";
-import { useNavigate } from "react-router-dom";
 import RecipeList from "./RecipeList";
 import {
   useRecipeDetails,
@@ -9,6 +8,7 @@ import {
   useRecipeInteractions,
 } from "./hooks";
 import useChatStore from "@/store/chat-store";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 interface StreamingRecipeMessageBubbleProps {
   message: Message;
@@ -21,7 +21,7 @@ const RecipeMessageBubble = ({
   onLike,
   onDislike,
 }: StreamingRecipeMessageBubbleProps) => {
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
   const { updateMessageRecipeDetails } = useChatStore();
 
   // 使用分离的 hooks
@@ -64,7 +64,7 @@ const RecipeMessageBubble = ({
   };
 
   const handleStartCooking = (recipeId: string) => {
-    navigate(`/recipe/${recipeId}`);
+    authNavigate({ to: `/recipe/${recipeId}` as any });
   };
 
   // 流式过程中显示 Markdown

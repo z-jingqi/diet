@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,9 @@ import SessionHistoryItem from "./SessionHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import { ChatSession } from "@diet/shared";
+import { useAuthNavigate } from "@/hooks";
+import { createAuthCheck } from "@/utils/auth-utils";
+import useAuthStore from "@/store/auth-store";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -32,7 +34,12 @@ const ChatSidebar = ({
   const [isMobile, setIsMobile] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [allowFocus, setAllowFocus] = useState(false);
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
+  const { requireAuth } = useAuthStore();
+  const authCheck = createAuthCheck(
+    () => authNavigate({ to: "/login" }),
+    requireAuth
+  );
 
   const confirm = useConfirmDialog();
 
@@ -163,13 +170,15 @@ const ChatSidebar = ({
   };
 
   const handleUserClick = () => {
-    if (isMobile) {
-      // 移动端：打开Profile对话框
-      setProfileDialogOpen(true);
-    } else {
-      // 桌面端：跳转到Profile页面
-      navigate("/profile");
-    }
+    authCheck.checkAuth(() => {
+      if (isMobile) {
+        // 移动端：打开Profile对话框
+        setProfileDialogOpen(true);
+      } else {
+        // 桌面端：使用认证导航跳转到Profile页面
+        authNavigate({ to: "/profile" });
+      }
+    });
   };
 
   return (

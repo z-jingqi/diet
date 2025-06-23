@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
 import { User, LogIn } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const ProfilePage = () => {
   const { isAuthenticated, isGuestMode } = useAuthStore();
-  const navigate = useNavigate();
+  const authNavigate = useAuthNavigate();
   
   // 桌面端Card高度配置
   const desktopCardHeight = "lg:h-[600px] lg:flex lg:flex-col";
@@ -37,7 +37,7 @@ const ProfilePage = () => {
             <CardContent className="space-y-4">
               <Button 
                 className="w-full" 
-                onClick={() => navigate("/login")}
+                onClick={() => authNavigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 去登录

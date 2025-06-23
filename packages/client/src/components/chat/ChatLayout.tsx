@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
 import ChatSidebar from "./ChatSidebar";
 import useChatStore from "@/store/chat-store";
@@ -52,6 +52,7 @@ const ChatLayout = ({
       {/* Sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-80 p-0">
+          <SheetTitle className="sr-only"></SheetTitle>
           <ChatSidebar
             sessions={sessions}
             currentSessionId={currentSessionId ?? ""}
