@@ -45,3 +45,6 @@ storybook-static
 # Cloudflare dev vars
 .dev.vars
 .dev.vars.*
+
+# TanStack Router generated file
+packages/client/src/routeTree.gen.ts

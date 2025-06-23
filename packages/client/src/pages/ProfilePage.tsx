@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
 import { User, LogIn } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 const ProfilePage = () => {
   const { isAuthenticated, isGuestMode } = useAuthStore();
@@ -37,7 +37,7 @@ const ProfilePage = () => {
             <CardContent className="space-y-4">
               <Button 
                 className="w-full" 
-                onClick={() => navigate("/login")}
+                onClick={() => navigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 去登录

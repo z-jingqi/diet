@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { ArrowLeft, Save } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import KitchenToolsList from "@/components/kitchen-tools/KitchenToolsList";
 import CustomToolInput from "@/components/kitchen-tools/CustomToolInput";
 
@@ -37,11 +37,11 @@ const KitchenToolsPage = () => {
     localStorage.setItem("kitchenTools", JSON.stringify(allTools));
     
     // 返回上一页
-    navigate(-1);
+    navigate({ to: "/" });
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate({ to: "/" });
   };
 
   return (

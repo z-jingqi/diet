@@ -1,6 +1,6 @@
-import { RouterProvider } from "react-router-dom";
+import { RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { router } from "./routes";
+import { router } from "./router";
 import useAuthStore from "@/store/auth-store";
 
 const App = () => {

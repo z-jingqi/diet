@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,7 +168,7 @@ const ChatSidebar = ({
       setProfileDialogOpen(true);
     } else {
       // 桌面端：跳转到Profile页面
-      navigate("/profile");
+      navigate({ to: "/profile" });
     }
   };
 

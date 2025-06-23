@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Typography, MutedText } from "@/components/ui/typography";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Heart, XCircle, Utensils, Settings } from "lucide-react";
 
 interface FunctionMenuProps {
@@ -22,7 +22,7 @@ const FunctionMenu = ({ className }: FunctionMenuProps) => {
   };
 
   const handleKitchenTools = () => {
-    navigate("/kitchen-tools");
+    navigate({ to: "/kitchen-tools" });
   };
 
   const handleSettings = () => {

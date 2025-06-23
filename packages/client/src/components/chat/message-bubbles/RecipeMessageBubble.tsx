@@ -1,6 +1,6 @@
 import { Markdown } from "@/components/ui/markdown";
 import { Message, RecipeDetail } from "@diet/shared";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import RecipeList from "./RecipeList";
 import {
   useRecipeDetails,
@@ -64,7 +64,7 @@ const RecipeMessageBubble = ({
   };
 
   const handleStartCooking = (recipeId: string) => {
-    navigate(`/recipe/${recipeId}`);
+    navigate({ to: `/recipe/${recipeId}` });
   };
 
   // 流式过程中显示 Markdown

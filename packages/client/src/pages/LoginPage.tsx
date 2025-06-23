@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +70,7 @@ const LoginPage = () => {
       } else {
         await register(formData.username, formData.email, formData.password, formData.nickname);
       }
-      navigate("/");
+      navigate({ to: "/" });
     } catch (error) {
       console.error("操作失败，请重试", error);
     }
@@ -78,7 +78,7 @@ const LoginPage = () => {
 
   const handleGuestMode = () => {
     enableGuest();
-    navigate("/");
+    navigate({ to: "/" });
   };
 
   const handleInputChange = (field: string, value: string) => {

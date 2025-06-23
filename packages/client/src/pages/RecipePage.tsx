@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import useRecipeStore from '@/store/recipe-store';
 import RecipeBasicInfo from '@/components/recipe/RecipeBasicInfo';
@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChefHat, LogIn } from "lucide-react";
 
 const RecipePage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ from: '/recipe/$id' });
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { setCurrentRecipeById, currentRecipe } = useRecipeStore();
@@ -22,7 +22,7 @@ const RecipePage = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       toast("请先登录后查看菜谱详情");
-      navigate("/");
+      navigate({ to: "/" });
       return;
     }
 
@@ -49,7 +49,7 @@ const RecipePage = () => {
             <CardContent className="space-y-4">
               <Button 
                 className="w-full" 
-                onClick={() => navigate("/login")}
+                onClick={() => navigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 去登录
@@ -75,7 +75,7 @@ const RecipePage = () => {
             <CardContent>
               <Button 
                 className="w-full" 
-                onClick={() => navigate("/")}
+                onClick={() => navigate({ to: "/" })}
               >
                 返回首页
               </Button>
@@ -95,7 +95,7 @@ const RecipePage = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate({ to: "/" })}
               className="hover:bg-accent"
             >
               <ArrowLeft className="h-5 w-5" />
