@@ -1,29 +1,32 @@
-import { toast } from 'sonner';
-import useAuthStore from '@/store/auth-store';
+import { toast } from "sonner";
 
 // 统一的认证提示函数
-export const showAuthPrompt = (navigateToLogin: () => void, options?: {
-  message?: string;
-  description?: string;
-}) => {
+export const showAuthPrompt = (
+  navigateToLogin: () => void,
+  options?: {
+    message?: string;
+    description?: string;
+  }
+) => {
   const {
-    message = '需要登录才能访问此功能',
-    description = '请先登录您的账户'
+    message = "需要登录才能访问此功能",
+    description = "请先登录您的账户",
   } = options || {};
 
   toast(message, {
     description,
     action: {
-      label: '去登录',
+      label: "去登录",
       onClick: navigateToLogin,
     },
     duration: 5000,
   });
 };
 
-export const createAuthCheck = (navigateToLogin: () => void) => {
-  const { requireAuth } = useAuthStore();
-  
+export const createAuthCheck = (
+  navigateToLogin: () => void,
+  requireAuth: () => boolean
+) => {
   return {
     checkAuth: (
       action: () => void,
@@ -35,8 +38,8 @@ export const createAuthCheck = (navigateToLogin: () => void) => {
     ) => {
       const {
         showToast = true,
-        toastMessage = '需要登录才能访问此功能',
-        toastDescription = '请先登录您的账户'
+        toastMessage = "需要登录才能访问此功能",
+        toastDescription = "请先登录您的账户",
       } = options || {};
 
       // 检查是否需要认证
@@ -44,17 +47,17 @@ export const createAuthCheck = (navigateToLogin: () => void) => {
         if (showToast) {
           showAuthPrompt(navigateToLogin, {
             message: toastMessage,
-            description: toastDescription
+            description: toastDescription,
           });
         }
-        
+
         // 不执行操作
         return false;
       }
-      
+
       // 执行操作
       action();
       return true;
-    }
+    },
   };
-}; 
+};

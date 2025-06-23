@@ -3,7 +3,6 @@ import { useAuthCheck } from '@/hooks/useAuthCheck';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  fallback?: React.ReactNode;
   showToast?: boolean;
   toastMessage?: string;
   toastDescription?: string;
@@ -11,7 +10,6 @@ interface AuthGuardProps {
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
-  fallback = null,
   showToast = true,
   toastMessage = '需要登录才能访问此功能',
   toastDescription = '请先登录您的账户'

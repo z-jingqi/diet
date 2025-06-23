@@ -9,6 +9,7 @@ import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import { ChatSession } from "@diet/shared";
 import { useAuthNavigate } from "@/hooks";
 import { createAuthCheck } from "@/utils/auth-utils";
+import useAuthStore from "@/store/auth-store";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -34,7 +35,11 @@ const ChatSidebar = ({
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [allowFocus, setAllowFocus] = useState(false);
   const authNavigate = useAuthNavigate();
-  const authCheck = createAuthCheck(() => authNavigate({ to: '/login' }));
+  const { requireAuth } = useAuthStore();
+  const authCheck = createAuthCheck(
+    () => authNavigate({ to: "/login" }),
+    requireAuth
+  );
 
   const confirm = useConfirmDialog();
 
