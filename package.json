@@ -44,5 +44,6 @@
         "typescript"
       ]
     }
-  }
+  },
+  "packageManager": "pnpm@10.12.2"
 }
