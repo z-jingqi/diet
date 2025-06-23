@@ -101,7 +101,7 @@ importers:
   packages/client:
     dependencies:
       '@diet/shared':
-        specifier: file:../shared
+        specifier: workspace:*
         version: link:../shared
       '@hookform/resolvers':
         specifier: ^5.0.1
