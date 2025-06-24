@@ -32,32 +32,32 @@ INSERT OR REPLACE INTO tags (id, name, description, category_id, restrictions, a
 ('blood-sugar-control', '控糖', '控制血糖水平', 'health-objectives', '["低GI食物", "定时定量", "控制碳水"]', '用户需要控制血糖，建议选择低GI食物，定时定量进餐，控制碳水化合物摄入。优先选择全谷物、蔬菜、瘦肉等。', 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('heart-health', '护心', '保护心血管健康', 'health-objectives', '["低盐低脂", "omega-3", "抗氧化"]', '用户以保护心血管健康为目标，建议低盐低脂饮食，多食用富含omega-3的鱼类、坚果，以及富含抗氧化物质的水果蔬菜。', 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('gut-health', '护肠', '维护肠道健康', 'health-objectives', '["益生菌", "膳食纤维", "易消化"]', '用户以维护肠道健康为目标，建议多食用富含膳食纤维的食物，如全谷物、蔬菜、水果，以及酸奶等益生菌食物。', 1, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('energy-boost', '提神', '提升精力和活力', 'health-objectives', '["复合碳水", "优质蛋白", "维生素B族"]', '用户需要提升精力，建议选择复合碳水化合物、优质蛋白质和富含维生素B族的食物，如全谷物、瘦肉、蛋类等。', 1, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- 饮食偏好类
-('vegetarian', '素食', '植物性饮食', 'dietary-preferences', '["植物性食物", "避免肉类"]', '用户选择素食饮食，避免所有肉类。建议通过豆类、坚果、全谷物等补充蛋白质和必需营养素。', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('keto', '生酮', '低碳水高脂肪饮食', 'dietary-preferences', '["低碳水", "高脂肪", "适量蛋白"]', '用户选择生酮饮食，大幅减少碳水化合物摄入，增加健康脂肪摄入，保持适量蛋白质。建议选择橄榄油、坚果、鱼类等健康脂肪。', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('vegetarian', '素食', '素食主义饮食', 'dietary-preferences', '["无肉类", "植物蛋白"]', '用户选择素食饮食，需要确保蛋白质、铁、维生素B12等营养素的摄入。建议多食用豆类、坚果、全谷物、绿叶蔬菜等。', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('quick-meals', '快手菜', '快速制作的简单菜品', 'dietary-preferences', '["制作简单", "时间短", "营养均衡"]', '用户需要快速制作的菜品，建议选择制作简单、时间短的食谱，同时保证营养均衡。可以使用预制食材或简单烹饪方法。', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('budget-friendly', '经济实惠', '经济实惠的食材选择', 'dietary-preferences', '["成本控制", "性价比高", "营养均衡"]', '用户需要经济实惠的饮食方案，建议选择性价比高的食材，如鸡蛋、豆类、应季蔬菜等，同时保证营养均衡。', 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('low-calorie', '低卡', '控制总热量摄入', 'dietary-preferences', '["控制热量", "高纤维", "饱腹感"]', '用户需要低卡路里饮食，控制总热量摄入。优先选择高纤维、低脂肪的食物，如蔬菜、瘦肉、全谷物等，增加饱腹感。', 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- 特殊需求类
-('pregnancy', '孕期', '孕期营养需求', 'special-needs', '["叶酸", "铁质", "钙质", "蛋白质"]', '用户处于孕期，需要额外补充叶酸、铁质、钙质和蛋白质。建议选择富含这些营养素的食物，避免生食和酒精。', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('elderly', '老年', '老年人营养需求', 'special-needs', '["易消化", "高蛋白", "维生素D", "钙质"]', '用户为老年人，需要易消化的高蛋白食物，以及充足的维生素D和钙质。建议选择瘦肉、鱼类、奶制品、蔬菜等。', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('athlete', '运动', '运动人群营养需求', 'special-needs', '["高蛋白", "复合碳水", "电解质"]', '用户为运动人群，需要高蛋白质和复合碳水化合物，以及充足的电解质。建议运动前后适量补充蛋白质和碳水。', 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('children', '儿童', '儿童生长发育期营养需求', 'special-needs', '["均衡营养", "优质蛋白", "钙质", "维生素"]', '用户为儿童，需要均衡的营养摄入以支持生长发育。建议多食用优质蛋白质、钙质丰富的食物，以及新鲜蔬菜水果。注意食物安全和适量原则。', 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('kid-friendly', '儿童友好', '适合儿童的饮食', 'special-needs', '["营养丰富", "口感好", "色彩丰富"]', '用户需要适合儿童的饮食，建议选择营养丰富、口感好、色彩丰富的食物，避免过于辛辣或刺激性食物。', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('elderly-friendly', '老年友好', '适合老年人的饮食', 'special-needs', '["易消化", "营养丰富", "软烂适中"]', '用户需要适合老年人的饮食，建议选择易消化、营养丰富的食物，如蒸蛋、粥类、软烂的蔬菜等，注意补充钙质和蛋白质。', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('pregnancy-friendly', '孕期友好', '适合孕妇的饮食', 'special-needs', '["叶酸", "铁质", "蛋白质", "避免生食"]', '用户需要适合孕妇的饮食，建议多食用富含叶酸、铁质、蛋白质的食物，如绿叶蔬菜、瘦肉、蛋类等，避免生食和刺激性食物。', 1, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 插入标签冲突关系
 INSERT OR REPLACE INTO tag_conflicts (id, tag_id_1, tag_id_2, conflict_type, description, created_at) VALUES
 -- 互斥关系
-('conflict-1', 'low-protein', 'high-protein', 'mutual_exclusive', '低蛋白和高蛋白标签互斥', CURRENT_TIMESTAMP),
-('conflict-2', 'low-fat', 'keto', 'mutual_exclusive', '低脂和生酮标签互斥', CURRENT_TIMESTAMP),
-('conflict-3', 'low-sugar', 'keto', 'warning', '低糖和生酮标签可能冲突', CURRENT_TIMESTAMP),
-('conflict-4', 'dairy-free', 'high-calcium', 'warning', '无乳制品和高钙标签可能冲突', CURRENT_TIMESTAMP),
-('conflict-5', 'gluten-free', 'high-fiber', 'warning', '无麸质和高纤维标签可能冲突', CURRENT_TIMESTAMP),
-('conflict-6', 'vegetarian', 'high-omega3', 'warning', '素食和高omega-3标签可能冲突', CURRENT_TIMESTAMP),
-('conflict-7', 'low-salt', 'heart-health', 'compatible', '低盐和护心标签兼容', CURRENT_TIMESTAMP),
-('conflict-8', 'low-sugar', 'blood-sugar-control', 'compatible', '低糖和控糖标签兼容', CURRENT_TIMESTAMP),
-('conflict-9', 'high-protein', 'muscle-gain', 'compatible', '高蛋白和增肌标签兼容', CURRENT_TIMESTAMP),
-('conflict-10', 'high-fiber', 'gut-health', 'compatible', '高纤维和护肠标签兼容', CURRENT_TIMESTAMP),
-('conflict-11', 'high-omega3', 'heart-health', 'compatible', '高omega-3和护心标签兼容', CURRENT_TIMESTAMP),
-('conflict-12', 'low-fat', 'weight-loss', 'compatible', '低脂和减重标签兼容', CURRENT_TIMESTAMP),
-('conflict-13', 'high-protein', 'weight-loss', 'compatible', '高蛋白和减重标签兼容', CURRENT_TIMESTAMP),
-('conflict-14', 'high-calcium', 'children', 'compatible', '高钙和儿童标签兼容', CURRENT_TIMESTAMP),
-('conflict-15', 'high-protein', 'children', 'compatible', '高蛋白和儿童标签兼容', CURRENT_TIMESTAMP); 
+('conflict-1', 'low-protein', 'high-protein', 'mutual_exclusive', '低蛋白和高蛋白目标相反，不能同时选择', CURRENT_TIMESTAMP),
+('conflict-2', 'weight-loss', 'muscle-gain', 'mutual_exclusive', '减重和增肌目标相反，建议选择其中一个', CURRENT_TIMESTAMP),
+('conflict-3', 'low-calorie', 'muscle-gain', 'mutual_exclusive', '低卡饮食不利于增肌，目标冲突', CURRENT_TIMESTAMP),
+
+-- 警告类冲突
+('conflict-4', 'low-fat', 'high-omega3', 'warning', '低脂饮食可能限制omega-3摄入，需要特别注意', CURRENT_TIMESTAMP),
+('conflict-5', 'dairy-free', 'high-calcium', 'warning', '无乳制品饮食需要其他钙源补充', CURRENT_TIMESTAMP),
+('conflict-6', 'vegetarian', 'high-protein', 'warning', '素食高蛋白需要更多植物蛋白来源', CURRENT_TIMESTAMP),
+('conflict-7', 'low-sugar', 'energy-boost', 'warning', '低糖饮食需要选择复合碳水化合物来提神', CURRENT_TIMESTAMP),
+('conflict-8', 'gluten-free', 'high-fiber', 'warning', '无麸质饮食需要其他高纤维食物来源', CURRENT_TIMESTAMP),
+('conflict-9', 'low-potassium', 'high-vitamin-c', 'warning', '低钾饮食需要避免高钾水果，可能限制维生素C摄入', CURRENT_TIMESTAMP),
+('conflict-10', 'quick-meals', 'high-fiber', 'warning', '快手菜可能缺乏足够的膳食纤维，需要特别注意', CURRENT_TIMESTAMP),
+('conflict-11', 'budget-friendly', 'high-omega3', 'warning', '经济实惠的食材可能限制omega-3摄入，需要寻找替代方案', CURRENT_TIMESTAMP); 

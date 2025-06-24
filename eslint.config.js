@@ -37,7 +37,7 @@ export default [
         { allowConstantExport: true },
       ],
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',

@@ -14,9 +14,15 @@
     "type-check": "tsc --noEmit",
     "deploy": "wrangler deploy",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:check-migrations": "tsx scripts/check-migrations.ts",
+    "db:migrate:local": "drizzle-kit migrate",
+    "db:migrate:remote": "drizzle-kit migrate --remote",
+    "db:seed:local": "tsx scripts/seed-db.ts",
+    "db:reset:local": "npm run db:migrate:local && npm run db:seed:local",
+    "db:status:local": "wrangler d1 execute DB --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
+    "db:status:remote": "wrangler d1 execute DB --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\""
   },
   "dependencies": {
     "@diet/shared": "workspace:*",

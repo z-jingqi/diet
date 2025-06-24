@@ -1,14 +1,6 @@
 import { createDB } from './index';
 import { tagCategories, tags, tagConflicts } from './schema';
-
-// Cloudflare D1 数据库类型
-declare global {
-  interface D1Database {
-    prepare: (query: string) => any;
-    batch: (statements: any[]) => Promise<any[]>;
-    exec: (query: string) => Promise<any>;
-  }
-}
+import type { D1Database } from '@cloudflare/workers-types';
 
 // 种子数据 - 重新设计的标签体系
 const seedTagCategories = [
@@ -27,7 +19,7 @@ const seedTags = [
     description: '控制盐分摄入，适合关注血压健康',
     categoryId: 'medical-restrictions',
     restrictions: JSON.stringify(['限制钠摄入', '避免咸菜腌制品', '控制调味料']),
-    aiPrompt: '用户需要低盐饮食，每日盐分摄入不超过3g。避免咸菜、腌制品、加工食品、酱油等高钠食物。建议使用天然香料调味，如柠檬、醋、香草等。',
+    aiPrompt: '用户需要低盐饮食，控制盐分摄入。避免咸菜、腌制品、加工食品、酱油等高钠食物。建议使用天然香料调味，如柠檬、醋、香草等。',
     sortOrder: 1,
   },
   {
@@ -101,7 +93,7 @@ const seedTags = [
     description: '增加膳食纤维摄入',
     categoryId: 'nutritional-focus',
     restrictions: JSON.stringify(['增加纤维', '全谷物']),
-    aiPrompt: '用户需要高纤维饮食，建议每日摄入25-30g膳食纤维。多选择全谷物、蔬菜、水果、豆类等高纤维食物。',
+    aiPrompt: '用户需要高纤维饮食，多选择全谷物、蔬菜、水果、豆类等高纤维食物。有助于肠道健康和饱腹感。',
     sortOrder: 2,
   },
   {
@@ -110,7 +102,7 @@ const seedTags = [
     description: '增加钙质摄入',
     categoryId: 'nutritional-focus',
     restrictions: JSON.stringify(['增加钙质', '钙补充']),
-    aiPrompt: '用户需要高钙饮食，建议每日摄入800-1000mg钙。多食用奶制品、豆制品、绿叶蔬菜、坚果等富含钙质的食物。',
+    aiPrompt: '用户需要高钙饮食，多食用奶制品、豆制品、绿叶蔬菜、坚果等富含钙质的食物。有助于骨骼健康。',
     sortOrder: 3,
   },
   {
@@ -166,7 +158,7 @@ const seedTags = [
     description: '以增肌为目标的饮食',
     categoryId: 'health-objectives',
     restrictions: JSON.stringify(['高蛋白', '适量碳水', '健康脂肪']),
-    aiPrompt: '用户以增肌为目标，需要高蛋白质饮食配合适量碳水化合物。建议蛋白质1.2-1.6g/kg体重，选择瘦肉、鱼类、蛋类等优质蛋白。',
+    aiPrompt: '用户以增肌为目标，需要高蛋白质饮食配合适量碳水化合物。建议选择瘦肉、鱼类、蛋类等优质蛋白，适当增加蛋白质摄入。',
     sortOrder: 2,
   },
   {
@@ -240,7 +232,7 @@ const seedTags = [
     description: '控制总热量摄入',
     categoryId: 'dietary-preferences',
     restrictions: JSON.stringify(['控制热量', '高纤维', '饱腹感']),
-    aiPrompt: '用户需要低卡路里饮食，每餐热量控制在300-400卡路里。优先选择高纤维、低脂肪的食物，如蔬菜、瘦肉、全谷物等，增加饱腹感。',
+    aiPrompt: '用户需要低卡路里饮食，控制总热量摄入。优先选择高纤维、低脂肪的食物，如蔬菜、瘦肉、全谷物等，增加饱腹感。',
     sortOrder: 4,
   },
 
@@ -335,56 +327,26 @@ const seedTagConflicts = [
     conflictType: 'warning',
     description: '无麸质饮食需要其他高纤维食物来源',
   },
-
-  // 信息类冲突 - 提供建议
   {
     id: 'conflict-9',
-    tagId1: 'low-salt',
-    tagId2: 'heart-health',
-    conflictType: 'info',
-    description: '低盐饮食有助于护心，两者可以配合',
+    tagId1: 'low-potassium',
+    tagId2: 'high-vitamin-c',
+    conflictType: 'warning',
+    description: '低钾饮食需要避免高钾水果，可能限制维生素C摄入',
   },
   {
     id: 'conflict-10',
-    tagId1: 'high-fiber',
-    tagId2: 'gut-health',
-    conflictType: 'info',
-    description: '高纤维饮食有助于护肠，两者可以配合',
+    tagId1: 'quick-meals',
+    tagId2: 'high-fiber',
+    conflictType: 'warning',
+    description: '快手菜可能缺乏足够的膳食纤维，需要特别注意',
   },
   {
     id: 'conflict-11',
-    tagId1: 'high-omega3',
-    tagId2: 'heart-health',
-    conflictType: 'info',
-    description: '高omega-3饮食有助于护心，两者可以配合',
-  },
-  {
-    id: 'conflict-12',
-    tagId1: 'high-vitamin-c',
-    tagId2: 'high-iron',
-    conflictType: 'info',
-    description: '高维C有助于铁吸收，两者可以配合',
-  },
-  {
-    id: 'conflict-13',
-    tagId1: 'high-vitamin-d',
-    tagId2: 'high-calcium',
-    conflictType: 'info',
-    description: '高维D有助于钙吸收，两者可以配合',
-  },
-  {
-    id: 'conflict-14',
-    tagId1: 'pregnancy-friendly',
-    tagId2: 'high-iron',
-    conflictType: 'info',
-    description: '孕期需要更多铁质，两者可以配合',
-  },
-  {
-    id: 'conflict-15',
-    tagId1: 'elderly-friendly',
-    tagId2: 'high-calcium',
-    conflictType: 'info',
-    description: '老年人需要更多钙质，两者可以配合',
+    tagId1: 'budget-friendly',
+    tagId2: 'high-omega3',
+    conflictType: 'warning',
+    description: '经济实惠的食材可能限制omega-3摄入，需要寻找替代方案',
   },
 ];
 

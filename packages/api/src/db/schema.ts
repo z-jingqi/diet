@@ -99,7 +99,7 @@ export const tagConflicts = sqliteTable('tag_conflicts', {
   conflictType: text('conflict_type').notNull(), // 'mutual_exclusive', 'warning', 'info'
   description: text('description'), // 冲突描述
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-}, (table) => ({
-  // 确保 tagId1 < tagId2 避免重复
-  uniquePair: uniqueIndex('tag_conflicts_unique_pair').on(table.tagId1, table.tagId2),
-})); 
+});
+
+// 创建唯一索引
+export const tagConflictsUniquePair = uniqueIndex('tag_conflicts_unique_pair').on(tagConflicts.tagId1, tagConflicts.tagId2); 

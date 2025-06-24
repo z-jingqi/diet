@@ -1,14 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './schema';
-
-// Cloudflare D1 数据库类型
-declare global {
-  interface D1Database {
-    prepare: (query: string) => any;
-    batch: (statements: any[]) => Promise<any[]>;
-    exec: (query: string) => Promise<any>;
-  }
-}
+import type { D1Database } from '@cloudflare/workers-types';
 
 // 数据库连接函数
 export function createDB(d1: D1Database) {
