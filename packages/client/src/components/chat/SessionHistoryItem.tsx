@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { ChatSession } from "@diet/shared";
+import { formatSessionTime } from "@/utils/time-utils";
 
 interface SessionHistoryItemProps {
   session: ChatSession;
@@ -24,31 +25,7 @@ const SessionHistoryItem = ({
   onRenameChat,
   onDeleteChat,
 }: SessionHistoryItemProps) => {
-  // 格式化时间
-  const formatTime = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
 
-    if (diff < oneDay) {
-      return date.toLocaleTimeString("zh-CN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-    } else if (diff < 7 * oneDay) {
-      return date.toLocaleDateString("zh-CN", {
-        month: "numeric",
-        day: "numeric",
-      });
-    } else {
-      return date.toLocaleDateString("zh-CN", {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-      });
-    }
-  };
 
   return (
     <div
@@ -70,7 +47,7 @@ const SessionHistoryItem = ({
               variant="span"
               className="block truncate text-xs text-muted-foreground"
             >
-              {formatTime(session.updatedAt)}
+              {formatSessionTime(session.updatedAt)}
             </Typography>
           </div>
         </div>

@@ -24,8 +24,9 @@ const ChatLayout = ({
   onRenameSession,
   onDeleteSession,
 }: ChatLayoutProps) => {
-  const { sessions, currentSessionId } = useChatStore();
+  const { getSessions, currentSessionId } = useChatStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sessions = getSessions();
 
   const handleMenuClick = () => {
     setIsSidebarOpen(true);

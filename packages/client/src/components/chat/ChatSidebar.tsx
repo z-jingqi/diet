@@ -10,6 +10,7 @@ import { ChatSession } from "@diet/shared";
 import { useAuthNavigate } from "@/hooks";
 import { createAuthCheck } from "@/utils/auth-utils";
 import useAuthStore from "@/store/auth-store";
+import { categorizeSessions } from "@/utils/time-utils";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -66,40 +67,7 @@ const ChatSidebar = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // 按时间分类会话
-  const categorizeSessions = (sessions: any[]) => {
-    const now = new Date();
-    const oneDay = 24 * 60 * 60 * 1000;
-    const threeDays = 3 * oneDay;
-    const oneWeek = 7 * oneDay;
-    const oneMonth = 30 * oneDay;
 
-    const categorized = {
-      recent: [] as any[],
-      threeDaysAgo: [] as any[],
-      oneWeekAgo: [] as any[],
-      oneMonthAgo: [] as any[],
-      older: [] as any[],
-    };
-
-    sessions.forEach((session) => {
-      const timeDiff = now.getTime() - session.updatedAt.getTime();
-
-      if (timeDiff <= oneDay) {
-        categorized.recent.push(session);
-      } else if (timeDiff <= threeDays) {
-        categorized.threeDaysAgo.push(session);
-      } else if (timeDiff <= oneWeek) {
-        categorized.oneWeekAgo.push(session);
-      } else if (timeDiff <= oneMonth) {
-        categorized.oneMonthAgo.push(session);
-      } else {
-        categorized.older.push(session);
-      }
-    });
-
-    return categorized;
-  };
 
   const categorizedSessions = categorizeSessions(sessions);
 
