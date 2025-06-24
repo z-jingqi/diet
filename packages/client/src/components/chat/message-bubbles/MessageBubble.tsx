@@ -44,7 +44,7 @@ const MessageBubble = ({
   }
 
   // 普通chat消息
-  return <ChatMessageBubble content={message.content} />;
+  return <ChatMessageBubble message={message} />;
 };
 
 export default MessageBubble;

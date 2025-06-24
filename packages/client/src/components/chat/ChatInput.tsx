@@ -10,6 +10,7 @@ interface ChatInputProps {
   disabled?: boolean;
   onAbort?: () => void;
   canAbort?: boolean;
+  placeholder?: string;
 }
 
 const ChatInput = ({
@@ -17,6 +18,7 @@ const ChatInput = ({
   disabled,
   onAbort,
   canAbort,
+  placeholder = "有什么想问我的吗？比如：今天想吃什么？",
 }: ChatInputProps) => {
   const [input, setInput] = useState("");
   const { getCurrentSession, updateSessionTags } = useChatStore();
@@ -93,7 +95,7 @@ const ChatInput = ({
               setInput(e.target.value)
             }
             onKeyDown={handleKeyDown}
-            placeholder="有什么想问我的吗？比如：今天想吃什么？"
+            placeholder={placeholder}
             className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             disabled={disabled}
             enterKeyHint="enter"

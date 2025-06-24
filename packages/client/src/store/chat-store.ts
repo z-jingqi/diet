@@ -38,12 +38,17 @@ interface ChatState {
   // 私有方法（重构后的内部方法）
   handleUserMessage: (content: string) => void;
   handleRecipeChatIntent: (
-    AIMessages: ChatCompletionMessageParam[]
+    AIMessages: ChatCompletionMessageParam[],
+    isGuestMode?: boolean
   ) => Promise<void>;
   handleHealthAdviceChatIntent: (
-    AIMessages: ChatCompletionMessageParam[]
+    AIMessages: ChatCompletionMessageParam[],
+    isGuestMode?: boolean
   ) => Promise<void>;
-  handleChatIntent: (AIMessages: ChatCompletionMessageParam[]) => Promise<void>;
+  handleChatIntent: (
+    AIMessages: ChatCompletionMessageParam[],
+    isGuestMode?: boolean
+  ) => Promise<void>;
   handleError: (error: unknown, addMessage: (message: Message) => void) => void;
 }
 
@@ -220,7 +225,8 @@ const useChatStore = create<
 
     // 处理菜谱聊天意图
     handleRecipeChatIntent: async (
-      AIMessages: ChatCompletionMessageParam[]
+      AIMessages: ChatCompletionMessageParam[],
+      isGuestMode = false
     ) => {
       const { addMessage } = get();
       const message = buildMessage("recipe");
@@ -260,7 +266,8 @@ const useChatStore = create<
             set({ abortController: undefined });
             throw error;
           },
-          newController.signal
+          newController.signal,
+          isGuestMode
         );
 
         set({ abortController: undefined });
@@ -289,7 +296,8 @@ const useChatStore = create<
 
     // 处理健康建议聊天意图
     handleHealthAdviceChatIntent: async (
-      AIMessages: ChatCompletionMessageParam[]
+      AIMessages: ChatCompletionMessageParam[],
+      isGuestMode = false
     ) => {
       const { addMessage } = get();
       const message = buildMessage("health_advice");
@@ -329,7 +337,8 @@ const useChatStore = create<
             set({ abortController: undefined });
             throw error;
           },
-          newController.signal
+          newController.signal,
+          isGuestMode
         );
 
         set({ abortController: undefined });
@@ -355,7 +364,10 @@ const useChatStore = create<
     },
 
     // 处理聊天意图
-    handleChatIntent: async (AIMessages: ChatCompletionMessageParam[]) => {
+    handleChatIntent: async (
+      AIMessages: ChatCompletionMessageParam[],
+      isGuestMode = false
+    ) => {
       const { addMessage } = get();
       const message = buildMessage("chat");
       message.status = "streaming";
@@ -394,7 +406,8 @@ const useChatStore = create<
             set({ abortController: undefined });
             throw error;
           },
-          newController.signal
+          newController.signal,
+          isGuestMode
         );
 
         set({ abortController: undefined });
@@ -463,7 +476,17 @@ const useChatStore = create<
         handleHealthAdviceChatIntent,
         handleChatIntent,
         handleError,
+        canSendMessage,
       } = get();
+
+      // 防重复调用保护
+      if (!canSendMessage()) {
+        console.warn('Message sending is currently disabled or already in progress');
+        return;
+      }
+
+      // 获取游客模式状态
+      const { isGuestMode } = await import("@/store/auth-store").then(m => m.default.getState());
 
       // 1. 处理用户消息和标签更新
       handleUserMessage(content);
@@ -480,19 +503,19 @@ const useChatStore = create<
       try {
         // 4. 获取意图
         set({ gettingIntent: true });
-        const intent = await getIntent(AIMessages, controller.signal);
+        const intent = await getIntent(AIMessages, controller.signal, isGuestMode);
         set({ gettingIntent: false, abortController: undefined });
 
         // 5. 根据意图处理消息
         switch (intent) {
           case "recipe":
-            await handleRecipeChatIntent(AIMessages);
+            await handleRecipeChatIntent(AIMessages, isGuestMode);
             break;
           case "health_advice":
-            await handleHealthAdviceChatIntent(AIMessages);
+            await handleHealthAdviceChatIntent(AIMessages, isGuestMode);
             break;
           default:
-            await handleChatIntent(AIMessages);
+            await handleChatIntent(AIMessages, isGuestMode);
         }
       } catch (error) {
         handleError(error, addMessage);
