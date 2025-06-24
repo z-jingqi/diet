@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { AIServiceFactory } from "../services/ai/factory";
 import { AuthService } from "../services/auth";
-import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth";
+import { authMiddleware } from "../middleware/auth";
 import { Bindings } from "../types/bindings";
 
 const chat = new Hono<{ Bindings: Bindings }>();
@@ -9,10 +9,6 @@ const chat = new Hono<{ Bindings: Bindings }>();
 // 游客聊天接口 - 允许未认证用户使用，功能与认证用户相同
 chat.post("/guest", async (c) => {
   try {
-    // 使用可选认证中间件
-    const authService = new AuthService(c.env.DB);
-    const req = await optionalAuthMiddleware(c.req.raw, authService);
-
     // 获取请求体
     const body = await c.req.json();
 
