@@ -62,6 +62,23 @@
   line-height: 1.75;
 }
 
+/* 移除最后一个块元素的下边距 */
+.markdown-content p:last-child,
+.markdown-content ul:last-child,
+.markdown-content ol:last-child,
+.markdown-content blockquote:last-child,
+.markdown-content pre:last-child,
+.markdown-content table:last-child,
+.markdown-content img:last-child,
+.markdown-content h1:last-child,
+.markdown-content h2:last-child,
+.markdown-content h3:last-child,
+.markdown-content h4:last-child,
+.markdown-content h5:last-child,
+.markdown-content h6:last-child {
+  margin-bottom: 0;
+}
+
 /* 列表样式 */
 .markdown-content ul {
   margin-bottom: 1rem;
