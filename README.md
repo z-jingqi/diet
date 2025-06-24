@@ -80,7 +80,7 @@
 | 动画 | Framer Motion | 页面过渡和交互动画 |
 | 路由 | React Router | 客户端路由管理 |
 | 构建工具 | Vite | 快速的开发服务器和构建工具 |
-| API 服务 | Express | 后端 API 服务 |
+| API 服务 | Hono | 高性能现代 Web 框架 |
 | 部署 | Cloudflare Workers | Serverless 部署方案 |
 
 ## 📁 项目结构

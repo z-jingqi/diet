@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth';
 
 // CSRF 保护中间件
 export const csrfProtection = async (c: Context, next: Next) => {
-  const authService = new AuthService(c.get('db'));
+  const authService = new AuthService(c.env.DB);
   
   // 获取 session token
   const sessionToken = getCookie(c, 'session_token');
@@ -40,7 +40,7 @@ export const csrfProtection = async (c: Context, next: Next) => {
 
 // 可选的 CSRF 保护（仅在有 token 时验证）
 export const optionalCsrfProtection = async (c: Context, next: Next) => {
-  const authService = new AuthService(c.get('db'));
+  const authService = new AuthService(c.env.DB);
   
   // 获取 session token
   const sessionToken = getCookie(c, 'session_token');
@@ -72,4 +72,6 @@ export const optionalCsrfProtection = async (c: Context, next: Next) => {
   c.set('session', authContext.session);
   
   await next();
-}; 
+};
+
+export default { csrfProtection, optionalCsrfProtection }; 

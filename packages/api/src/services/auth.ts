@@ -23,22 +23,109 @@ export class AuthService {
     this.csrfService = new CsrfService(db);
   }
 
-  // 密码加密（使用简单的哈希，生产环境建议使用bcrypt）
+  // 密码加密（使用PBKDF2和随机盐值）
   private async hashPassword(password: string): Promise<string> {
     const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    const passwordData = encoder.encode(password);
+    
+    // 生成随机盐值（16字节）
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    
+    // 使用PBKDF2进行哈希
+    const key = await crypto.subtle.importKey(
+      'raw',
+      passwordData,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    
+    const hashBuffer = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000, // 10万次迭代
+        hash: 'SHA-256'
+      },
+      key,
+      256 // 32字节 = 256位
+    );
+    
+    // 将盐值和哈希值组合存储
+    const hashArray = new Uint8Array(hashBuffer);
+    const combined = new Uint8Array(salt.length + hashArray.length);
+    combined.set(salt);
+    combined.set(hashArray, salt.length);
+    
+    // 转换为hex字符串
+    return Array.from(combined)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   }
 
   // 验证密码
   private async verifyPassword(
     password: string,
-    hash: string
+    storedHash: string
   ): Promise<boolean> {
-    const passwordHash = await this.hashPassword(password);
-    return passwordHash === hash;
+    try {
+      const encoder = new TextEncoder();
+      const passwordData = encoder.encode(password);
+      
+      // 从存储的哈希中提取盐值和哈希值
+      const combined = new Uint8Array(
+        storedHash.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
+      );
+      
+      if (combined.length < 48) { // 16字节盐值 + 32字节哈希值
+        return false;
+      }
+      
+      const salt = combined.slice(0, 16);
+      const hash = combined.slice(16);
+      
+      // 使用相同的参数重新计算哈希
+      const key = await crypto.subtle.importKey(
+        'raw',
+        passwordData,
+        { name: 'PBKDF2' },
+        false,
+        ['deriveBits']
+      );
+      
+      const hashBuffer = await crypto.subtle.deriveBits(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        key,
+        256
+      );
+      
+      const newHash = new Uint8Array(hashBuffer);
+      
+      // 时间安全的比较
+      return this.constantTimeCompare(hash, newHash);
+    } catch (error) {
+      console.error('密码验证失败:', error);
+      return false;
+    }
+  }
+
+  // 时间安全的字节数组比较
+  private constantTimeCompare(a: Uint8Array, b: Uint8Array): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+      result |= a[i] ^ b[i];
+    }
+    
+    return result === 0;
   }
 
   // 生成会话token

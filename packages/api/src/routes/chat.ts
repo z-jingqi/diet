@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { AIServiceFactory } from "../services/ai/factory";
-import { AuthService } from "../services/auth";
-import { authMiddleware } from "../middleware/auth";
+import { csrfProtection } from "../middleware/csrf";
 import { Bindings } from "../types/bindings";
 
 const chat = new Hono<{ Bindings: Bindings }>();
@@ -50,20 +49,8 @@ chat.post("/guest", async (c) => {
   }
 });
 
-// 认证用户聊天接口 - 需要认证，无功能限制
-chat.use("/authenticated/*", async (c, next) => {
-  try {
-    const authService = new AuthService(c.env.DB);
-    await authMiddleware(c.req.raw, authService);
-    await next();
-  } catch (error) {
-    if (error instanceof Response && error.status === 401) {
-      return error;
-    }
-    return c.json({ error: "Authentication failed" }, 401);
-  }
-});
-
+// 认证用户聊天接口 - 需要CSRF保护
+chat.use("/authenticated/*", csrfProtection);
 chat.post("/authenticated", async (c) => {
   try {
     // 获取请求体
@@ -107,7 +94,7 @@ chat.post("/authenticated", async (c) => {
   }
 });
 
-// 保持原有的 "/" 端点以兼容现有代码，使用认证中间件
+// 保持原有的 "/" 端点以兼容现有代码，使用CSRF保护
 chat.use("/*", async (c, next) => {
   // 跳过已经处理的路由
   if (c.req.path.includes("/guest") || c.req.path.includes("/authenticated")) {
@@ -115,16 +102,8 @@ chat.use("/*", async (c, next) => {
     return;
   }
 
-  try {
-    const authService = new AuthService(c.env.DB);
-    await authMiddleware(c.req.raw, authService);
-    await next();
-  } catch (error) {
-    if (error instanceof Response && error.status === 401) {
-      return error;
-    }
-    return c.json({ error: "Authentication failed" }, 401);
-  }
+  // 对根路径聊天应用 CSRF 保护
+  await csrfProtection(c, next);
 });
 
 chat.post("/", async (c) => {

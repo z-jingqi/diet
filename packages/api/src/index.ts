@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { compress } from "hono/compress";
+import { securityHeaders, rateLimit } from "./middleware/security";
+import { dataCleanup } from "./middleware/cleanup";
 import tags from "./routes/tags";
 import auth from "./routes/auth";
 import chat from "./routes/chat";
@@ -8,8 +11,29 @@ import { Bindings } from "./types/bindings";
 // 创建 Hono 应用
 const app = new Hono<{ Bindings: Bindings }>();
 
+// 数据清理（定期任务）
+app.use("*", dataCleanup);
+
+// 安全头（所有响应）
+app.use("*", securityHeaders);
+
 // 启用 CORS
 app.use("*", cors());
+
+// 基础速率限制
+app.use("*", rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  maxRequests: 100 // 每15分钟最多100个请求
+}));
+
+// 认证相关的严格速率限制
+app.use("/auth/*", rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  maxRequests: 5 // 防止暴力破解
+}));
+
+// 对标签 API 启用压缩（数据量较大）
+app.use("/tags/*", compress());
 
 // 挂载认证路由（不需要认证）
 app.route("/auth", auth);

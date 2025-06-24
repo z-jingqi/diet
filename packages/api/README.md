@@ -1,15 +1,15 @@
 # Diet API
 
-基于阿里云 Serverless 和多种 AI 模型的 API 服务。
+基于 Cloudflare Workers 和多种 AI 模型的 API 服务。
 
 ## 功能特性
 
-- 基于阿里云函数计算（FC）的 Serverless 架构
+- 基于 Cloudflare Workers 的 Serverless 架构
 - 支持多种 AI 提供商：
   - 阿里云千问（默认）
   - OpenAI（待实现）
   - Anthropic（待实现）
-- Express.js 后端服务
+- Hono 高性能 Web 框架
 - TypeScript 支持
 - 本地开发环境支持
 
@@ -17,7 +17,7 @@
 
 - Node.js 18+
 - pnpm
-- 阿里云账号
+- Cloudflare 账号
 - AI 服务 API Key（根据选择的提供商）
 
 ## 安装
@@ -43,19 +43,11 @@ pnpm dev
 
 ## 部署
 
-1. 安装阿里云函数计算命令行工具：
-```bash
-npm install @alicloud/fun -g
-```
+使用 Cloudflare Wrangler 部署：
 
-2. 配置阿里云账号信息：
 ```bash
-fun config
-```
-
-3. 部署到阿里云：
-```bash
-pnpm deploy
+# 部署到 Cloudflare Workers
+pnpm run deploy
 ```
 
 ## API 接口
@@ -65,7 +57,8 @@ pnpm deploy
 - 返回服务状态
 
 ### 聊天接口
-- POST /api/chat
+- POST /api/chat/guest - 游客聊天
+- POST /api/chat - 认证用户聊天
 - 请求体：
 ```json
 {
@@ -78,22 +71,40 @@ pnpm deploy
 }
 ```
 
+### 标签接口
+- GET /api/tags/all - 获取所有标签和分类
+- GET /api/tags - 获取标签列表（支持筛选）
+- GET /api/tags/categories - 获取标签分类
+
+### 认证接口
+- POST /api/auth/login - 用户登录
+- POST /api/auth/register - 用户注册
+- POST /api/auth/logout - 用户登出
+
+## 技术栈
+
+- **框架**: Hono - 高性能 Web 框架
+- **运行时**: Cloudflare Workers
+- **数据库**: Cloudflare D1 (SQLite)
+- **AI 服务**: 阿里云千问 / OpenAI
+- **语言**: TypeScript
+
 ## 注意事项
 
 - 确保在生产环境中正确设置环境变量
-- 建议使用阿里云密钥管理服务（KMS）来管理 API 密钥
+- 建议使用 Cloudflare 密钥管理来管理 API 密钥
 - 本地开发时注意不要将包含敏感信息的 .env 文件提交到版本控制系统
 - 切换 AI 提供商时，确保已配置对应的 API Key
 
 # Diet API Service
 
-This is the API service for the Diet application.
+This is the API service for the Diet application, built with Hono and deployed on Cloudflare Workers.
 
 ## Setup
 
 1. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 2. Create a `.env` file in the root directory with the following variables:
@@ -112,79 +123,20 @@ QWEN_API_KEY=your_qwen_api_key
 
 Run the development server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ## Building
 
 Build the project:
 ```bash
-npm run build
+pnpm run build
 ```
 
-## Running
+## Deployment
 
-Start the server:
+Deploy to Cloudflare Workers:
 ```bash
-npm start
-```
-
-## AI Services
-
-The API supports multiple AI services:
-
-1. OpenAI
-   - Uses GPT-3.5/4 models
-   - Requires OpenAI API key
-
-2. Anthropic
-   - Uses Claude models
-   - Requires Anthropic API key
-
-3. Qwen
-   - Uses Qwen models
-   - Requires Qwen API key
-
-4. Baidu AI
-   - Uses Baidu Wenxin models
-   - Requires Baidu API key and secret
-   - Supports both chat and embedding services
-   - Free tier includes:
-     - 1000万 tokens for new users
-     - Monthly free quota
-   - Features:
-     - Strong Chinese language understanding
-     - Multi-modal support
-     - Complete API ecosystem
-
-## API Endpoints
-
-### Chat
-
-```http
-POST /api/chat
-Content-Type: application/json
-
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Hello"
-    }
-  ],
-  "provider": "baidu" // or "openai", "anthropic", "qwen"
-}
-```
-
-### Embedding
-
-```http
-POST /api/embedding
-Content-Type: application/json
-
-{
-  "text": "Hello world",
-  "provider": "baidu" // or "openai", "anthropic", "qwen"
-}
+pnpm run deploy
 ```
  
