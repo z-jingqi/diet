@@ -5,10 +5,6 @@ import {
   register as apiRegister,
   logout as apiLogout,
   getCurrentUser,
-  isLoggedIn,
-  checkGuestMode,
-  enableGuestMode,
-  disableGuestMode,
 } from "@/lib/api/auth-api";
 
 interface AuthState {
@@ -50,8 +46,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
         isGuestMode: false,
         isLoading: false,
       });
-      // 登录成功后禁用游客模式
-      disableGuestMode();
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : '登录失败',
@@ -72,8 +66,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
           isGuestMode: false,
           isLoading: false,
         });
-        // 注册成功后禁用游客模式
-        disableGuestMode();
       } else {
         set({ isLoading: false });
       }
@@ -108,27 +100,16 @@ const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      // 检查是否已登录
-      const loggedIn = await isLoggedIn();
-      if (loggedIn) {
-        const user = await getCurrentUser();
-        set({
-          user,
-          isAuthenticated: true,
-          isGuestMode: false,
-          isLoading: false,
-        });
-      } else {
-        // 检查是否为游客模式
-        const isGuest = checkGuestMode();
-        set({
-          user: null,
-          isAuthenticated: false,
-          isGuestMode: isGuest,
-          isLoading: false,
-        });
-      }
+      // 直接尝试获取用户信息，如果成功说明已登录，如果失败说明未登录
+      const user = await getCurrentUser();
+      set({
+        user,
+        isAuthenticated: true,
+        isGuestMode: false,
+        isLoading: false,
+      });
     } catch {
+      // 获取用户信息失败，说明未登录
       set({
         user: null,
         isAuthenticated: false,
@@ -139,7 +120,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   enableGuest: () => {
-    enableGuestMode();
     set({
       user: null,
       isAuthenticated: false,

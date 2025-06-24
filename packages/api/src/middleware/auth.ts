@@ -5,6 +5,11 @@ export interface AuthenticatedRequest extends Request {
   auth?: AuthContext;
 }
 
+export interface GuestRequest extends Request {
+  auth?: AuthContext;
+  isGuest?: boolean;
+}
+
 export async function authMiddleware(
   request: Request,
   authService: AuthService
@@ -23,4 +28,4 @@ export async function authMiddleware(
   }
 
   return Object.assign(request, { auth: authContext });
-} 
+}

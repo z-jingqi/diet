@@ -5,9 +5,11 @@ import TypingPrompt from "@/components/chat/TypingPrompt";
 import ChatLayout from "@/components/chat/ChatLayout";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import useChatStore from "@/store/chat-store";
+import useAuthStore from "@/store/auth-store";
 
 const ChatPage = () => {
   const confirm = useConfirmDialog();
+  const { isAuthenticated, isGuestMode, enableGuest } = useAuthStore();
 
   const {
     getCurrentMessages,
@@ -26,10 +28,10 @@ const ChatPage = () => {
 
   // 进入页面时创建临时会话
   useEffect(() => {
-    if (!currentSessionId) {
+    if (!currentSessionId && (isAuthenticated || isGuestMode)) {
       createTemporarySession();
     }
-  }, [currentSessionId, createTemporarySession]);
+  }, [currentSessionId, createTemporarySession, isAuthenticated, isGuestMode]);
 
   // 离开页面时清理临时会话
   useEffect(() => {
@@ -41,6 +43,13 @@ const ChatPage = () => {
       }
     };
   }, []);
+
+  // 如果用户未认证且未启用游客模式，自动启用游客模式
+  useEffect(() => {
+    if (!isAuthenticated && !isGuestMode) {
+      enableGuest();
+    }
+  }, [isAuthenticated, isGuestMode, enableGuest]);
 
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);
@@ -103,7 +112,7 @@ const ChatPage = () => {
   return (
     <div className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout
-        title="新对话"
+        title={isGuestMode ? "游客体验" : "新对话"}
         onClearSession={handleClearSession}
         onDeleteSession={handleDeleteSession}
         onCreateNewSession={handleCreateNewSession}
@@ -123,7 +132,24 @@ const ChatPage = () => {
               disabled={!canSendMessage()}
               canAbort={canAbort}
               onAbort={abortCurrentMessage}
+              placeholder={isGuestMode ? "输入消息开始体验..." : "输入消息..."}
             />
+
+            {/* 游客模式底部提示 */}
+            {isGuestMode && (
+              <div className="mt-2 text-center">
+                <p className="text-xs text-gray-500">
+                  游客模式下无法保存对话历史，
+                  <button
+                    onClick={() => (window.location.href = "/login")}
+                    className="text-blue-600 hover:text-blue-700 underline"
+                  >
+                    登录
+                  </button>
+                  可保存和管理对话记录
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </ChatLayout>

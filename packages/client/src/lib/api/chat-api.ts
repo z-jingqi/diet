@@ -13,7 +13,8 @@ import { ChatCompletionMessageParam } from "openai/resources";
 // 获取意图 - 通过发送带有INTENT_PROMPT的消息
 export const getIntent = async (
   messages: ChatCompletionMessageParam[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  isGuestMode = false
 ): Promise<MessageType> => {
   try {
     const result = await sendMessage({
@@ -21,6 +22,7 @@ export const getIntent = async (
       systemPrompt: INTENT_PROMPT,
       format: "json",
       signal,
+      isGuestMode,
     });
     const intent = result.intent?.trim()?.toLowerCase();
 
@@ -39,7 +41,8 @@ export const sendChatMessage = async (
   messages: ChatCompletionMessageParam[],
   onMessage: (data: any) => void,
   onError: (error: Error) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  isGuestMode = false
 ): Promise<void> => {
   return sendMessage({
     messages,
@@ -48,6 +51,7 @@ export const sendChatMessage = async (
     signal,
     onStreamMessage: onMessage,
     onStreamError: onError,
+    isGuestMode,
   });
 };
 
@@ -56,7 +60,8 @@ export const sendRecipeChatMessage = async (
   messages: ChatCompletionMessageParam[],
   onMessage: (data: any) => void,
   onError: (error: Error) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  isGuestMode = false
 ): Promise<void> => {
   return sendMessage({
     messages,
@@ -65,6 +70,7 @@ export const sendRecipeChatMessage = async (
     signal,
     onStreamMessage: onMessage,
     onStreamError: onError,
+    isGuestMode,
   });
 };
 
@@ -73,7 +79,8 @@ export const sendHealthAdviceChatMessage = async (
   messages: ChatCompletionMessageParam[],
   onMessage: (data: any) => void,
   onError: (error: Error) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  isGuestMode = false
 ): Promise<void> => {
   return sendMessage({
     messages,
@@ -82,18 +89,21 @@ export const sendHealthAdviceChatMessage = async (
     signal,
     onStreamMessage: onMessage,
     onStreamError: onError,
+    isGuestMode,
   });
 };
 
 // 发送健康建议消息（JSON）- 使用HEALTH_ADVICE_PROMPT
 export const sendHealthAdviceMessage = async (
   messages: ChatCompletionMessageParam[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  isGuestMode = false
 ): Promise<HealthAdvice> => {
   return sendMessage({
     messages,
     systemPrompt: HEALTH_ADVICE_PROMPT,
     format: "json",
     signal,
+    isGuestMode,
   });
 };
