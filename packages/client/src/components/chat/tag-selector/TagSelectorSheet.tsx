@@ -28,6 +28,7 @@ interface TagSelectorSheetProps {
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  disabledTagIds?: string[];
 }
 
 const TagSelectorSheet = ({
@@ -41,6 +42,7 @@ const TagSelectorSheet = ({
   isLoading,
   error,
   onRetry,
+  disabledTagIds = [],
 }: TagSelectorSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -84,6 +86,7 @@ const TagSelectorSheet = ({
                 tagsData={tagsData}
                 selectedTags={selectedTags}
                 onTagToggle={onTagToggle}
+                disabledTagIds={disabledTagIds}
               />
             )}
           </div>

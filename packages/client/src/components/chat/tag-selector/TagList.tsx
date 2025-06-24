@@ -10,6 +10,7 @@ interface TagListProps {
   };
   selectedTags: Tag[];
   onTagToggle: (tag: Tag) => void;
+  disabledTagIds?: string[];
 }
 
 const TagList = ({
@@ -17,6 +18,7 @@ const TagList = ({
   tagsData,
   selectedTags,
   onTagToggle,
+  disabledTagIds = [],
 }: TagListProps) => {
   return (
     <>
@@ -28,6 +30,7 @@ const TagList = ({
               .filter((tag) => tag.categoryId === category.id)
               .map((tag) => {
                 const isSelected = selectedTags.some((t) => t.id === tag.id);
+                const isDisabled = disabledTagIds.includes(tag.id) && !isSelected;
                 return (
                   <Badge
                     key={tag.id}
@@ -35,9 +38,15 @@ const TagList = ({
                     className={`cursor-pointer transition-colors px-4 py-2 text-sm ${
                       isSelected
                         ? "bg-primary text-primary-foreground"
+                        : isDisabled
+                        ? "opacity-50 pointer-events-none bg-muted"
                         : "hover:bg-muted"
                     }`}
-                    onClick={() => onTagToggle(tag)}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        onTagToggle(tag);
+                      }
+                    }}
                   >
                     {tag.name}
                   </Badge>

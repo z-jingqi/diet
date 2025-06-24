@@ -51,4 +51,31 @@ export const fetchTagById = async (id: string): Promise<Tag> => {
   }
   const data = await response.json();
   return data.tag;
+};
+
+// 获取所有标签冲突关系
+export const fetchTagConflicts = async () => {
+  const response = await fetchWithRefresh(`${API_BASE}/tags/conflicts`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch tag conflicts");
+  }
+  const data = await response.json();
+  return data.conflicts;
+};
+
+// 检查标签组合的冲突
+export const checkTagConflicts = async (tagIds: string[]) => {
+  const response = await fetchWithRefresh(`${API_BASE}/tags/check-conflicts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tagIds }),
+  });
+  
+  if (!response.ok) {
+    throw new Error("Failed to check tag conflicts");
+  }
+  
+  return response.json();
 }; 

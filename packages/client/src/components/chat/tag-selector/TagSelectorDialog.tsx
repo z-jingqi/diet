@@ -27,6 +27,7 @@ interface TagSelectorDialogProps {
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  disabledTagIds?: string[];
 }
 
 const TagSelectorDialog = ({
@@ -40,6 +41,7 @@ const TagSelectorDialog = ({
   isLoading,
   error,
   onRetry,
+  disabledTagIds = [],
 }: TagSelectorDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -77,6 +79,7 @@ const TagSelectorDialog = ({
               categories={categories}
               selectedTags={selectedTags}
               onTagToggle={onTagToggle}
+              disabledTagIds={disabledTagIds}
             />
           )}
         </div>

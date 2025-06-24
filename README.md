@@ -73,7 +73,9 @@
 | 前端框架 | Vite + React | 轻量级前端框架，开发体验好 |
 | UI | shadcn/ui + Tailwind CSS | 高颜值组件库和样式系统 |
 | 状态管理 | Zustand | 管理用户选择、搜索历史等状态 |
-| 数据存储 | JSON 文件 | 静态数据存储，支持增量更新 |
+| 数据库 | Cloudflare D1 (SQLite) | Serverless SQLite 数据库 |
+| ORM | Drizzle ORM | 类型安全的数据库操作 |
+| 数据迁移 | Drizzle Kit | 数据库迁移和版本管理 |
 | 搜索 | Fuse.js | 支持模糊搜索菜名和食材 |
 | AI 接口 | OpenAI API | 菜谱生成和食材分析 |
 | 表单 | react-hook-form + zod | 表单验证和类型安全 |
@@ -101,12 +103,24 @@
 │   │   │   └── lib/     # 工具函数
 │   │   └── package.json # 前端依赖配置
 │   │
-│   └── api/             # 后端 API 服务
+│   ├── api/             # 后端 API 服务
+│   │   ├── src/
+│   │   │   ├── routes/  # API 路由
+│   │   │   ├── services/ # 业务逻辑
+│   │   │   ├── db/      # 数据库相关
+│   │   │   │   ├── schema.ts # 数据库表结构定义
+│   │   │   │   └── seed-data.sql # 种子数据
+│   │   │   ├── migrations/ # 数据库迁移文件
+│   │   │   └── utils/   # 工具函数
+│   │   ├── DATABASE_MANAGEMENT.md # 📖 [数据库管理指南](./packages/api/DATABASE_MANAGEMENT.md)
+│   │   └── package.json # API 依赖配置
+│   │
+│   └── shared/          # 共享类型和工具
 │       ├── src/
-│       │   ├── routes/  # API 路由
-│       │   ├── services/ # 业务逻辑
-│       │   └── utils/   # 工具函数
-│       └── package.json # API 依赖配置
+│       │   ├── types/   # 共享类型定义
+│       │   ├── schemas/ # 数据验证模式
+│       │   └── prompts/ # 共享提示词
+│       └── package.json # 共享依赖配置
 │
 ├── package.json         # 工作空间配置
 ├── turbo.json          # Turborepo 配置
@@ -115,12 +129,21 @@
 
 ## 🔄 当前进度
 
+### ✅ 已完成
+1. 项目基础架构搭建
+2. 用户认证系统
+3. 聊天对话功能
+4. 标签系统（饮食限制条件）
+5. 数据库设计和迁移
+6. AI 菜谱生成
+7. 健康建议功能
+
 ### 📝 待开发
-1. 饮食限制条件配置
-2. 用户历史记录
-3. 本地存储管理
-4. 搜索功能
-5. 数据验证系统
+1. 用户历史记录
+2. 本地存储管理
+3. 搜索功能
+4. 数据验证系统
+5. 收藏管理模块
 
 ## 🔮 未来计划
 
@@ -144,3 +167,11 @@
 - 遵循 monorepo 最佳实践，保持包之间的独立性
 - 使用 Cloudflare Workers 实现 Serverless 部署
 - 确保前后端 API 接口类型安全
+- 使用 Drizzle ORM 进行类型安全的数据库操作
+- 遵循数据库迁移最佳实践，确保数据一致性
+
+## 📖 相关文档
+
+- [📖 数据库管理指南](./packages/api/DATABASE_MANAGEMENT.md) - 详细的数据库操作指南
+- [🔐 认证系统文档](./packages/api/AUTH_README.md) - 用户认证和会话管理
+- [🔄 刷新令牌文档](./packages/api/REFRESH_TOKEN_README.md) - 令牌刷新机制

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchTagsData } from "@/lib/api/tags-api";
+import { fetchTagsData, checkTagConflicts } from "@/lib/api/tags-api";
 import type { Tag } from "@diet/shared";
 import SelectedTagsDisplay from "./SelectedTagsDisplay";
 import TagSelectorDialog from "./TagSelectorDialog";
@@ -19,6 +19,7 @@ const TagSelector = ({
 }: TagSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [conflictTagIds, setConflictTagIds] = useState<string[]>([]);
 
   // 检测设备类型
   useEffect(() => {
@@ -46,6 +47,31 @@ const TagSelector = ({
     enabled: isOpen, // 只在弹窗打开时查询
   });
 
+  // 冲突检测逻辑
+  useEffect(() => {
+    if (selectedTags.length < 2) {
+      setConflictTagIds([]);
+      return;
+    }
+    const check = async () => {
+      try {
+        const res = await checkTagConflicts(selectedTags.map(t => t.id));
+        // 收集所有有冲突的tagId
+        const ids = [
+          ...res.conflicts.mutual_exclusive.flatMap((c: any) => [c.tagId1, c.tagId2]),
+          ...res.conflicts.warning.flatMap((c: any) => [c.tagId1, c.tagId2]),
+        ];
+        // 只禁用未被选中的冲突tag
+        const selectedIds = selectedTags.map(t => t.id);
+        const disableIds = Array.from(new Set(ids)).filter(id => !selectedIds.includes(id));
+        setConflictTagIds(disableIds);
+      } catch {
+        setConflictTagIds([]);
+      }
+    };
+    check();
+  }, [selectedTags]);
+
   const handleTagToggle = (tag: Tag) => {
     const isSelected = selectedTags.some((t: Tag) => t.id === tag.id);
     if (isSelected) {
@@ -65,6 +91,7 @@ const TagSelector = ({
 
   const categories = tagsData?.categories || [];
 
+  // 传递禁用tagId给TagSelectorDialog/Sheet
   return (
     <div>
       {/* 已选标签显示 */}
@@ -87,6 +114,7 @@ const TagSelector = ({
           isLoading={isLoading}
           error={error}
           onRetry={handleRetry}
+          disabledTagIds={conflictTagIds}
         />
       ) : (
         <TagSelectorDialog
@@ -100,6 +128,7 @@ const TagSelector = ({
           isLoading={isLoading}
           error={error}
           onRetry={handleRetry}
+          disabledTagIds={conflictTagIds}
         />
       )}
     </div>
