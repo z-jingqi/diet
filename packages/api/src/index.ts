@@ -7,6 +7,9 @@ import tags from "./routes/tags";
 import auth from "./routes/auth";
 import chat from "./routes/chat";
 import { Bindings } from "./types/bindings";
+import { createYoga } from 'graphql-yoga';
+import { schema } from './graphql/schema';
+import { createDB } from './db';
 
 // 创建 Hono 应用
 const app = new Hono<{ Bindings: Bindings }>();
@@ -43,6 +46,22 @@ app.route("/chat", chat);
 
 // 挂载标签路由（需要认证）
 app.route("/tags", tags);
+
+// 挂载 GraphQL Yoga
+const yoga = createYoga({
+  schema,
+  graphiql: process.env.NODE_ENV !== 'production',
+});
+
+app.all('/graphql', async (c) => {
+  // 为每个请求创建独立的 DB 实例
+  const response = await yoga.fetch(c.req.raw, {
+    context: {
+      db: createDB(c.env.DB),
+    },
+  });
+  return response as unknown as Response;
+});
 
 // 全局错误处理
 app.onError((err, c) => {
