@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, User, Lock, UserPlus } from "lucide-react";
+import { Loader2, User, Lock, UserPlus, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useAuthStore from "@/store/auth-store";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { useUsernameValidation } from "@/hooks/useUsernameValidation";
 
 const LoginPage = () => {
   const authNavigate = useAuthNavigate();
@@ -19,6 +20,16 @@ const LoginPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { login, register, enableGuest, isLoading, clearError } = useAuthStore();
+  const { validateUsername, resetValidation, isValidating, isAvailable, error: validationError } = useUsernameValidation();
+
+  // 当用户名变化时进行异步校验
+  useEffect(() => {
+    if (!isLogin && formData.username.trim()) {
+      validateUsername(formData.username);
+    } else if (isLogin) {
+      resetValidation();
+    }
+  }, [formData.username, isLogin, validateUsername, resetValidation]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -29,6 +40,8 @@ const LoginPage = () => {
       newErrors.username = "用户名长度至少3个字符";
     } else if (formData.username.length > 20) {
       newErrors.username = "用户名长度不能超过20个字符";
+    } else if (!isLogin && isAvailable === false) {
+      newErrors.username = "用户名已被使用";
     }
 
     if (!formData.password.trim()) {
@@ -73,6 +86,59 @@ const LoginPage = () => {
     }
   };
 
+  const handleToggleMode = () => {
+    setIsLogin(!isLogin);
+    setFormData({
+      username: "",
+      password: "",
+    });
+    setErrors({});
+    clearError();
+    resetValidation();
+  };
+
+  // 渲染用户名输入框的右侧图标
+  const renderUsernameIcon = () => {
+    if (isLogin) {
+      return null;
+    }
+
+    if (isValidating) {
+      return <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-gray-400" />;
+    }
+
+    if (formData.username.length >= 3 && formData.username.length <= 20) {
+      if (isAvailable === true) {
+        return <CheckCircle className="absolute right-3 top-3 h-4 w-4 text-green-500" />;
+      } else if (isAvailable === false) {
+        return <XCircle className="absolute right-3 top-3 h-4 w-4 text-red-500" />;
+      }
+    }
+
+    return null;
+  };
+
+  // 渲染用户名验证状态文本
+  const renderUsernameStatus = () => {
+    if (isLogin) {
+      return null;
+    }
+
+    if (validationError) {
+      return <MutedText className="text-red-500 text-sm mt-1">{validationError}</MutedText>;
+    }
+
+    if (formData.username.length >= 3 && formData.username.length <= 20) {
+      if (isAvailable === true) {
+        return <MutedText className="text-green-600 text-sm mt-1">用户名可用</MutedText>;
+      } else if (isAvailable === false) {
+        return <MutedText className="text-red-500 text-sm mt-1">用户名已被使用</MutedText>;
+      }
+    }
+
+    return null;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -107,10 +173,12 @@ const LoginPage = () => {
                     className={cn("pl-10", errors.username && "border-red-500")}
                     disabled={isLoading}
                   />
+                  {renderUsernameIcon()}
                 </div>
                 {errors.username && (
                   <MutedText className="text-red-500 text-sm mt-1">{errors.username}</MutedText>
                 )}
+                {renderUsernameStatus()}
               </div>
 
               <div>
@@ -133,7 +201,7 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || (!isLogin && (isValidating || isAvailable === false))}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLogin ? "登录" : "注册"}
@@ -165,15 +233,7 @@ const LoginPage = () => {
                   <Button
                     variant="link"
                     className="text-sm"
-                    onClick={() => {
-                      setIsLogin(!isLogin);
-                      setFormData({
-                        username: "",
-                        password: "",
-                      });
-                      setErrors({});
-                      clearError();
-                    }}
+                    onClick={handleToggleMode}
                     disabled={isLoading}
                   >
                     {isLogin ? "没有账号？点击注册" : "已有账号？点击登录"}

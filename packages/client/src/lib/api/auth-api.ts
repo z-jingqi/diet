@@ -90,3 +90,19 @@ export const getCurrentUser = async (): Promise<User> => {
   const data = await response.json();
   return data.user;
 };
+
+// 检查用户名是否已存在
+export const checkUsername = async (username: string): Promise<{ exists: boolean; available: boolean }> => {
+  const response = await fetchWithRefresh(`${API_BASE}/auth/check-username?username=${encodeURIComponent(username)}`);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "检查用户名失败");
+  }
+  
+  const data = await response.json();
+  return {
+    exists: data.exists,
+    available: data.available
+  };
+};

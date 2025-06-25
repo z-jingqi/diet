@@ -410,4 +410,16 @@ export class AuthService {
     // 目前返回模拟数据
     throw new Error("微信登录功能暂未实现");
   }
+
+  // 检查用户名是否已存在
+  async checkUsernameExists(username: string): Promise<boolean> {
+    const existingUser = await this.getFirstRow(
+      this.db
+        .select()
+        .from(users)
+        .where(eq(users.username, username))
+    );
+    
+    return !!existingUser;
+  }
 }

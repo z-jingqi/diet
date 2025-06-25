@@ -30,6 +30,7 @@
     "hono": "4.7.11"
   },
   "devDependencies": {
+    "@libsql/client": "0.15.9",
     "@types/node": "^20.11.24",
     "drizzle-kit": "0.31.2",
     "drizzle-orm": "0.44.2",

@@ -180,4 +180,32 @@ auth.get("/me", async (c) => {
   return c.json({ user: authContext.user });
 });
 
+// 检查用户名是否已存在
+auth.get("/check-username", async (c) => {
+  const username = c.req.query('username');
+  
+  if (!username) {
+    return c.json({ success: false, message: '用户名参数不能为空' }, 400);
+  }
+
+  // 验证用户名长度
+  if (username.length < 3 || username.length > 20) {
+    return c.json({ success: false, message: '用户名长度必须在3-20个字符之间' }, 400);
+  }
+
+  const db = createDB(c.env.DB);
+  const authService = new AuthService(db);
+  
+  try {
+    const exists = await authService.checkUsernameExists(username);
+    return c.json({
+      success: true,
+      exists,
+      available: !exists
+    });
+  } catch (error) {
+    return c.json({ success: false, message: '检查用户名失败' }, 500);
+  }
+});
+
 export default auth; 
