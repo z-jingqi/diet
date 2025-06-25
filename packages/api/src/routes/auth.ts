@@ -3,6 +3,7 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { AuthService } from '../services/auth';
 import { LoginRequest, RegisterRequest, WechatLoginRequest } from '@diet/shared';
 import { Bindings } from '../types/bindings';
+import { createDB } from '../db';
 
 const auth = new Hono<{ Bindings: Bindings }>();
 
@@ -26,19 +27,20 @@ auth.post("/register", async (c) => {
       return c.json({ success: false, message: '密码长度不能少于6个字符' }, 400);
     }
 
-    const authService = new AuthService(c.env.DB);
+    const db = createDB(c.env.DB);
+    const authService = new AuthService(db);
     const user = await authService.register(body);
     
     // 注册成功后创建会话
     const session = await authService.createSession(user.id);
     
     // 设置 httpOnly cookie
-    setCookie(c, 'session_token', session.session_token, {
+    setCookie(c, 'session_token', session.sessionToken, {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',
       secure: true,
-      expires: new Date(session.session_expires_at)
+      expires: new Date(session.sessionExpiresAt)
     });
     
     return c.json({
@@ -62,23 +64,24 @@ auth.post("/login", async (c) => {
       return c.json({ success: false, message: '用户名和密码不能为空' }, 400);
     }
 
-    const authService = new AuthService(c.env.DB);
-    const { user, session_token, refresh_token, session_expires_at, refresh_expires_at } = await authService.login(body);
+    const db = createDB(c.env.DB);
+    const authService = new AuthService(db);
+    const { user, sessionToken, refreshToken, sessionExpiresAt, refreshExpiresAt } = await authService.login(body);
     
     // 设置 httpOnly cookie
-    setCookie(c, 'session_token', session_token, {
+    setCookie(c, 'session_token', sessionToken, {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',
       secure: true,
-      expires: new Date(session_expires_at)
+      expires: new Date(sessionExpiresAt)
     });
-    setCookie(c, 'refresh_token', refresh_token, {
+    setCookie(c, 'refresh_token', refreshToken, {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',
       secure: true,
-      expires: new Date(refresh_expires_at)
+      expires: new Date(refreshExpiresAt)
     });
     
     return c.json({
@@ -101,11 +104,12 @@ auth.post("/wechat-login", async (c) => {
       return c.json({ success: false, message: '微信授权码不能为空' }, 400);
     }
 
-    const authService = new AuthService(c.env.DB);
-    const { user, session_token } = await authService.wechatLogin(body.code);
+    const db = createDB(c.env.DB);
+    const authService = new AuthService(db);
+    const { user, sessionToken } = await authService.wechatLogin(body.code);
     
     // 设置 httpOnly cookie
-    c.header('Set-Cookie', `session_token=${session_token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+    c.header('Set-Cookie', `session_token=${sessionToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
     
     return c.json({
       success: true,
@@ -124,17 +128,18 @@ auth.post('/refresh', async (c) => {
   if (!refreshToken) {
     return c.json({ error: '未提供 refresh token' }, 401);
   }
-  const authService = new AuthService(c.env.DB);
+  const db = createDB(c.env.DB);
+  const authService = new AuthService(db);
   try {
-    const { session_token, session_expires_at } = await authService.refreshSession(refreshToken);
-    setCookie(c, 'session_token', session_token, {
+    const { sessionToken, sessionExpiresAt } = await authService.refreshSession(refreshToken);
+    setCookie(c, 'session_token', sessionToken, {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',
       secure: true,
-      expires: new Date(session_expires_at)
+      expires: new Date(sessionExpiresAt)
     });
-    return c.json({ session_token, session_expires_at });
+    return c.json({ sessionToken, sessionExpiresAt });
   } catch {
     // refresh token 失效，清除 cookie
     deleteCookie(c, 'session_token');
@@ -147,7 +152,8 @@ auth.post('/refresh', async (c) => {
 auth.post("/logout", async (c) => {
   const sessionToken = getCookie(c, 'session_token');
   const refreshToken = getCookie(c, 'refresh_token');
-  const authService = new AuthService(c.env.DB);
+  const db = createDB(c.env.DB);
+  const authService = new AuthService(db);
   if (sessionToken) {
     await authService.logout(sessionToken);
   }
@@ -165,7 +171,8 @@ auth.get("/me", async (c) => {
   if (!sessionToken) {
     return c.json({ error: '未登录' }, 401);
   }
-  const authService = new AuthService(c.env.DB);
+  const db = createDB(c.env.DB);
+  const authService = new AuthService(db);
   const authContext = await authService.validateSession(sessionToken);
   if (!authContext) {
     return c.json({ error: '登录已过期' }, 401);

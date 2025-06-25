@@ -17,14 +17,7 @@ tagsRouter.get("/categories", async (c) => {
     const db = createDB(c.env.DB);
     
     const categories = await db
-      .select({
-        id: tagCategories.id,
-        name: tagCategories.name,
-        description: tagCategories.description,
-        sortOrder: tagCategories.sortOrder,
-        isActive: tagCategories.isActive,
-        createdAt: tagCategories.createdAt,
-      })
+      .select()
       .from(tagCategories)
       .where(eq(tagCategories.isActive, true))
       .orderBy(asc(tagCategories.sortOrder));
@@ -59,28 +52,17 @@ tagsRouter.get("/", async (c) => {
     }
     
     const tagsList = await db
-      .select({
-        id: tags.id,
-        name: tags.name,
-        description: tags.description,
-        categoryId: tags.categoryId,
-        restrictions: tags.restrictions,
-        aiPrompt: tags.aiPrompt,
-        isActive: tags.isActive,
-        sortOrder: tags.sortOrder,
-        createdAt: tags.createdAt,
-        updatedAt: tags.updatedAt,
-        categoryName: tagCategories.name,
-      })
+      .select()
       .from(tags)
       .innerJoin(tagCategories, eq(tags.categoryId, tagCategories.id))
       .where(and(...whereConditions))
       .orderBy(asc(tags.sortOrder), asc(tags.name));
 
     // 处理 restrictions 字段，将 JSON 字符串转换为数组
-    const processedResults = tagsList.map((tag) => ({
-      ...tag,
-      restrictions: tag.restrictions ? JSON.parse(tag.restrictions) : [],
+    const processedResults = tagsList.map((row) => ({
+      ...row.tags,
+      categoryName: row.tag_categories.name,
+      restrictions: row.tags.restrictions ? JSON.parse(row.tags.restrictions) : [],
     }));
 
     return c.json({ tags: processedResults });
@@ -97,32 +79,14 @@ tagsRouter.get("/all", async (c) => {
     
     // 获取分类
     const categories = await db
-      .select({
-        id: tagCategories.id,
-        name: tagCategories.name,
-        description: tagCategories.description,
-        sortOrder: tagCategories.sortOrder,
-        isActive: tagCategories.isActive,
-        createdAt: tagCategories.createdAt,
-      })
+      .select()
       .from(tagCategories)
       .where(eq(tagCategories.isActive, true))
       .orderBy(asc(tagCategories.sortOrder));
 
     // 获取标签
     const tagsList = await db
-      .select({
-        id: tags.id,
-        name: tags.name,
-        description: tags.description,
-        categoryId: tags.categoryId,
-        restrictions: tags.restrictions,
-        aiPrompt: tags.aiPrompt,
-        isActive: tags.isActive,
-        sortOrder: tags.sortOrder,
-        createdAt: tags.createdAt,
-        updatedAt: tags.updatedAt,
-      })
+      .select()
       .from(tags)
       .where(eq(tags.isActive, true))
       .orderBy(asc(tags.sortOrder), asc(tags.name));
@@ -156,14 +120,7 @@ tagsRouter.get("/conflicts", async (c) => {
     const db = createDB(c.env.DB);
     
     const conflicts = await db
-      .select({
-        id: tagConflicts.id,
-        tagId1: tagConflicts.tagId1,
-        tagId2: tagConflicts.tagId2,
-        conflictType: tagConflicts.conflictType,
-        description: tagConflicts.description,
-        createdAt: tagConflicts.createdAt,
-      })
+      .select()
       .from(tagConflicts)
       .orderBy(asc(tagConflicts.conflictType), asc(tagConflicts.id));
 
@@ -188,13 +145,7 @@ tagsRouter.post("/check-conflicts", async (c) => {
     
     // 获取所有相关的冲突关系
     const conflicts = await db
-      .select({
-        id: tagConflicts.id,
-        tagId1: tagConflicts.tagId1,
-        tagId2: tagConflicts.tagId2,
-        conflictType: tagConflicts.conflictType,
-        description: tagConflicts.description,
-      })
+      .select()
       .from(tagConflicts)
       .where(
         and(
@@ -228,34 +179,20 @@ tagsRouter.get("/:id", async (c) => {
     const db = createDB(c.env.DB);
     
     const tag = await db
-      .select({
-        id: tags.id,
-        name: tags.name,
-        description: tags.description,
-        categoryId: tags.categoryId,
-        restrictions: tags.restrictions,
-        aiPrompt: tags.aiPrompt,
-        isActive: tags.isActive,
-        sortOrder: tags.sortOrder,
-        createdAt: tags.createdAt,
-        updatedAt: tags.updatedAt,
-        categoryName: tagCategories.name,
-      })
+      .select()
       .from(tags)
       .innerJoin(tagCategories, eq(tags.categoryId, tagCategories.id))
       .where(and(eq(tags.id, tagId), eq(tags.isActive, true)))
-      .limit(1);
+      .then(rows => rows[0]);
 
-    if (tag.length === 0) {
+    if (!tag) {
       return c.json({ error: "Tag not found" }, 404);
     }
 
     const processedTag = {
-      ...tag[0],
-      restrictions:
-        tag[0].restrictions && typeof tag[0].restrictions === "string"
-          ? JSON.parse(tag[0].restrictions)
-          : [],
+      ...tag.tags,
+      categoryName: tag.tag_categories.name,
+      restrictions: tag.tags.restrictions ? JSON.parse(tag.tags.restrictions) : [],
     };
 
     return c.json({ tag: processedTag });

@@ -1,8 +1,10 @@
-import { D1Database } from '@cloudflare/workers-types';
+import type { DB } from '../db';
+import { csrfTokens } from '../db/schema';
+import { eq, sql, and } from 'drizzle-orm';
 import { generateId } from '../utils/id';
 
 export class CsrfService {
-  constructor(private db: D1Database) {}
+  constructor(private db: DB) {}
 
   // 生成 CSRF token
   private generateCsrfToken(): string {
@@ -15,13 +17,12 @@ export class CsrfService {
     const token = this.generateCsrfToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小时过期
 
-    await this.db
-      .prepare(`
-        INSERT INTO csrf_tokens (id, user_id, token, expires_at)
-        VALUES (?, ?, ?, ?)
-      `)
-      .bind(tokenId, userId, token, expiresAt.toISOString())
-      .run();
+    await this.db.insert(csrfTokens).values({
+      id: tokenId,
+      userId,
+      token,
+      expiresAt: expiresAt.toISOString(),
+    });
 
     return token;
   }
@@ -29,43 +30,44 @@ export class CsrfService {
   // 验证 CSRF token
   async validateCsrfToken(userId: string, token: string): Promise<boolean> {
     const result = await this.db
-      .prepare(`
-        SELECT id FROM csrf_tokens 
-        WHERE user_id = ? AND token = ? AND expires_at > CURRENT_TIMESTAMP
-      `)
-      .bind(userId, token)
-      .first<{ id: string }>();
-
+      .select()
+      .from(csrfTokens)
+      .where(and(
+        eq(csrfTokens.userId, userId),
+        eq(csrfTokens.token, token),
+        sql`${csrfTokens.expiresAt} > CURRENT_TIMESTAMP`
+      ))
+      .then((rows) => rows[0]);
     return !!result;
   }
 
   // 删除 CSRF token
   async deleteCsrfToken(userId: string, token: string): Promise<void> {
-    await this.db
-      .prepare('DELETE FROM csrf_tokens WHERE user_id = ? AND token = ?')
-      .bind(userId, token)
-      .run();
+    await this.db.delete(csrfTokens)
+      .where(and(
+        eq(csrfTokens.userId, userId),
+        eq(csrfTokens.token, token)
+      ));
   }
 
   // 清理过期的 CSRF token
   async cleanupExpiredTokens(): Promise<void> {
-    await this.db
-      .prepare('DELETE FROM csrf_tokens WHERE expires_at <= CURRENT_TIMESTAMP')
-      .run();
+    await this.db.delete(csrfTokens)
+      .where(sql`${csrfTokens.expiresAt} <= CURRENT_TIMESTAMP`);
   }
 
   // 获取用户的 CSRF token
   async getCsrfToken(userId: string): Promise<string | null> {
     const result = await this.db
-      .prepare(`
-        SELECT token FROM csrf_tokens 
-        WHERE user_id = ? AND expires_at > CURRENT_TIMESTAMP
-        ORDER BY created_at DESC
-        LIMIT 1
-      `)
-      .bind(userId)
-      .first<{ token: string }>();
-
+      .select()
+      .from(csrfTokens)
+      .where(and(
+        eq(csrfTokens.userId, userId),
+        sql`${csrfTokens.expiresAt} > CURRENT_TIMESTAMP`
+      ))
+      .orderBy(sql`created_at DESC`)
+      .limit(1)
+      .then((rows) => rows[0]);
     return result?.token || null;
   }
 } 

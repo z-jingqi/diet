@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, User, Lock, Mail, UserPlus } from "lucide-react";
+import { Loader2, User, Lock, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useAuthStore from "@/store/auth-store";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
@@ -14,10 +14,7 @@ const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
     password: "",
-    confirmPassword: "",
-    nickname: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -28,22 +25,10 @@ const LoginPage = () => {
 
     if (!formData.username.trim()) {
       newErrors.username = "用户名不能为空";
-    }
-
-    if (!isLogin) {
-      if (!formData.email.trim()) {
-        newErrors.email = "邮箱不能为空";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = "邮箱格式不正确";
-      }
-
-      if (!formData.nickname.trim()) {
-        newErrors.nickname = "昵称不能为空";
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "两次输入的密码不一致";
-      }
+    } else if (formData.username.length < 3) {
+      newErrors.username = "用户名长度至少3个字符";
+    } else if (formData.username.length > 20) {
+      newErrors.username = "用户名长度不能超过20个字符";
     }
 
     if (!formData.password.trim()) {
@@ -68,7 +53,7 @@ const LoginPage = () => {
       if (isLogin) {
         await login(formData.username, formData.password);
       } else {
-        await register(formData.username, formData.email, formData.password, formData.nickname);
+        await register(formData.username, formData.password);
       }
       authNavigate({ to: "/" });
     } catch (error) {
@@ -106,7 +91,7 @@ const LoginPage = () => {
               {isLogin ? "登录账号" : "创建账号"}
             </CardTitle>
             <CardDescription className="text-center">
-              {isLogin ? "请输入您的用户名和密码" : "请填写以下信息创建账号"}
+              {isLogin ? "请输入您的用户名和密码" : "请填写用户名和密码创建账号"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -128,41 +113,6 @@ const LoginPage = () => {
                 )}
               </div>
 
-              {!isLogin && (
-                <>
-                  <div>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        type="email"
-                        placeholder="邮箱"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        className={cn("pl-10", errors.email && "border-red-500")}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    {errors.email && (
-                      <MutedText className="text-red-500 text-sm mt-1">{errors.email}</MutedText>
-                    )}
-                  </div>
-
-                  <div>
-                    <Input
-                      type="text"
-                      placeholder="昵称"
-                      value={formData.nickname}
-                      onChange={(e) => handleInputChange("nickname", e.target.value)}
-                      className={cn(errors.nickname && "border-red-500")}
-                      disabled={isLoading}
-                    />
-                    {errors.nickname && (
-                      <MutedText className="text-red-500 text-sm mt-1">{errors.nickname}</MutedText>
-                    )}
-                  </div>
-                </>
-              )}
-
               <div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -179,22 +129,6 @@ const LoginPage = () => {
                   <MutedText className="text-red-500 text-sm mt-1">{errors.password}</MutedText>
                 )}
               </div>
-
-              {!isLogin && (
-                <div>
-                  <Input
-                    type="password"
-                    placeholder="确认密码"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    className={cn(errors.confirmPassword && "border-red-500")}
-                    disabled={isLoading}
-                  />
-                  {errors.confirmPassword && (
-                    <MutedText className="text-red-500 text-sm mt-1">{errors.confirmPassword}</MutedText>
-                  )}
-                </div>
-              )}
 
               <Button
                 type="submit"
@@ -235,10 +169,7 @@ const LoginPage = () => {
                       setIsLogin(!isLogin);
                       setFormData({
                         username: "",
-                        email: "",
                         password: "",
-                        confirmPassword: "",
-                        nickname: "",
                       });
                       setErrors({});
                       clearError();

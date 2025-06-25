@@ -16,7 +16,7 @@ interface AuthState {
   
   // 认证方法
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, nickname?: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   enableGuest: () => void;
@@ -55,10 +55,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (username: string, email: string, password: string, nickname?: string) => {
+  register: async (username: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiRegister({ username, email, password, nickname });
+      const response = await apiRegister({ username, password });
       if (response.user) {
         set({
           user: response.user,
