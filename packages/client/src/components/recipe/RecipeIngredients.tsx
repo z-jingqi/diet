@@ -48,31 +48,33 @@ const RecipeIngredients = ({ ingredients }: RecipeIngredientsProps) => {
             </div>
             
             {/* 营养成分信息 */}
-            <div className="bg-muted/50 p-3 rounded-md">
-              <Typography variant="span" className="font-medium mb-2 block">营养成分：</Typography>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Flame className="h-3 w-3 text-orange-500" />
-                  <MutedText>{ingredient.nutrition.calories} kcal</MutedText>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Scale className="h-3 w-3 text-blue-500" />
-                  <MutedText>{ingredient.nutrition.protein}g 蛋白质</MutedText>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Droplet className="h-3 w-3 text-green-500" />
-                  <MutedText>{ingredient.nutrition.potassium}mg 钾</MutedText>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Droplet className="h-3 w-3 text-purple-500" />
-                  <MutedText>{ingredient.nutrition.phosphorus}mg 磷</MutedText>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Droplet className="h-3 w-3 text-red-500" />
-                  <MutedText>{ingredient.nutrition.sodium}mg 钠</MutedText>
+            {ingredient.nutrition && (
+              <div className="bg-muted/50 p-3 rounded-md">
+                <Typography variant="span" className="font-medium mb-2 block">营养成分：</Typography>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-3 w-3 text-orange-500" />
+                    <MutedText>{ingredient.nutrition.calories} kcal</MutedText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-3 w-3 text-blue-500" />
+                    <MutedText>{ingredient.nutrition.protein}g 蛋白质</MutedText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Droplet className="h-3 w-3 text-green-500" />
+                    <MutedText>{ingredient.nutrition.potassium}mg 钾</MutedText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Droplet className="h-3 w-3 text-purple-500" />
+                    <MutedText>{ingredient.nutrition.phosphorus}mg 磷</MutedText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Droplet className="h-3 w-3 text-red-500" />
+                    <MutedText>{ingredient.nutrition.sodium}mg 钠</MutedText>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>

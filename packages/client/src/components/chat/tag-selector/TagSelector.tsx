@@ -55,14 +55,15 @@ const TagSelector = ({
     }
     const check = async () => {
       try {
-        const res = await checkTagConflicts(selectedTags.map(t => t.id));
+        const tagIds = selectedTags.map(t => t.id).filter((id): id is string => id !== undefined);
+        const res = await checkTagConflicts(tagIds);
         // 收集所有有冲突的tagId
         const ids = [
           ...res.conflicts.mutual_exclusive.flatMap((c: any) => [c.tagId1, c.tagId2]),
           ...res.conflicts.warning.flatMap((c: any) => [c.tagId1, c.tagId2]),
         ];
         // 只禁用未被选中的冲突tag
-        const selectedIds = selectedTags.map(t => t.id);
+        const selectedIds = selectedTags.map(t => t.id).filter((id): id is string => id !== undefined);
         const disableIds = Array.from(new Set(ids)).filter(id => !selectedIds.includes(id));
         setConflictTagIds(disableIds);
       } catch {

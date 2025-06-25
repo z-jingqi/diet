@@ -119,17 +119,19 @@ const RecipePage = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* 食材清单 */}
               <div className="xl:col-span-1">
-                <RecipeIngredients ingredients={currentRecipe.ingredients} />
+                <RecipeIngredients ingredients={currentRecipe.ingredients || []} />
               </div>
               
               {/* 烹饪步骤 */}
               <div className="xl:col-span-1">
-                <RecipeSteps steps={currentRecipe.steps} />
+                <RecipeSteps steps={currentRecipe.steps || []} />
               </div>
               
               {/* 营养信息 */}
               <div className="xl:col-span-1">
-                <RecipeNutrition nutrition={currentRecipe.nutrition} />
+                {currentRecipe.nutrition && (
+                  <RecipeNutrition nutrition={currentRecipe.nutrition} />
+                )}
               </div>
             </div>
 

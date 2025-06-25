@@ -43,7 +43,7 @@ export const useTagConflicts = () => {
     }
 
     try {
-      const tagIds = tags.map(tag => tag.id);
+      const tagIds = tags.map(tag => tag.id).filter((id): id is string => id !== undefined);
       const result = await checkTagConflicts(tagIds);
       setConflictResult(result);
     } catch (error) {

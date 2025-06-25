@@ -29,7 +29,7 @@ const SelectedTagsDisplay = ({
           {tag.name}
           <button
             disabled={disabled}
-            onClick={() => onRemoveTag(tag.id)}
+            onClick={() => tag.id && onRemoveTag(tag.id)}
             className={`ml-1 transition-colors ${disabled ? '' : 'hover:text-red-500'}`}
           >
             <X className="w-3 h-3" />

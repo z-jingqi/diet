@@ -5,8 +5,8 @@ import type { Tag, TagCategory } from "@diet/shared";
 interface TagListProps {
   categories: TagCategory[];
   tagsData?: {
-    tags: Tag[];
-    categories: TagCategory[];
+    tags?: Tag[];
+    categories?: TagCategory[];
   };
   selectedTags: Tag[];
   onTagToggle: (tag: Tag) => void;
@@ -27,10 +27,10 @@ const TagList = ({
           <Typography variant="span" className="mb-2 text-sm">{category.name}</Typography>
           <div className="flex flex-wrap gap-2">
             {tagsData?.tags
-              .filter((tag) => tag.categoryId === category.id)
+              ?.filter((tag) => tag.categoryId === category.id)
               .map((tag) => {
                 const isSelected = selectedTags.some((t) => t.id === tag.id);
-                const isDisabled = disabledTagIds.includes(tag.id) && !isSelected;
+                const isDisabled = tag.id && disabledTagIds.includes(tag.id) && !isSelected;
                 return (
                   <Badge
                     key={tag.id}

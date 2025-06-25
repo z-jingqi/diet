@@ -19,8 +19,8 @@ interface TagSelectorSheetProps {
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   tagsData?: {
-    tags: Tag[];
-    categories: TagCategory[];
+    tags?: Tag[];
+    categories?: TagCategory[];
   };
   categories: TagCategory[];
   selectedTags: Tag[];
