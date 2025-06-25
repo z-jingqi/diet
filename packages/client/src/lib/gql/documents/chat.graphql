@@ -1,0 +1,52 @@
+query GetMyChatSessions {
+  myChatSessions {
+    id
+    title
+    messages {
+      role
+      content
+      timestamp
+    }
+    currentTags
+    createdAt
+    updatedAt
+    user {
+      id
+      username
+    }
+  }
+}
+
+mutation CreateChatSession($userId: String!, $title: String!, $messages: String!, $currentTags: String) {
+  createChatSession(userId: $userId, title: $title, messages: $messages, currentTags: $currentTags) {
+    id
+    title
+    messages {
+      role
+      content
+      timestamp
+    }
+    currentTags
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $currentTags: String) {
+  updateChatSession(id: $id, title: $title, messages: $messages, currentTags: $currentTags) {
+    id
+    title
+    messages {
+      role
+      content
+      timestamp
+    }
+    currentTags
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteChatSession($id: ID!) {
+  deleteChatSession(id: $id)
+} 

@@ -10,9 +10,9 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { MutedText } from "@/components/ui/typography";
-import type { Tag, TagCategory } from "@diet/shared";
 import TagSkeleton from "./TagSkeleton";
 import TagList from "./TagList";
+import { Tag, TagCategory } from "@/lib/gql/graphql";
 
 interface TagSelectorSheetProps {
   isOpen: boolean;
@@ -58,7 +58,10 @@ const TagSelectorSheet = ({
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0">
+      <SheetContent
+        side="bottom"
+        className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0"
+      >
         <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between">
           <SheetTitle>选择标签</SheetTitle>
           <SheetClose asChild>
@@ -103,4 +106,4 @@ const TagSelectorSheet = ({
   );
 };
 
-export default TagSelectorSheet; 
+export default TagSelectorSheet;

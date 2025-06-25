@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Typography } from "@/components/ui/typography";
-import type { Tag, TagCategory } from "@diet/shared";
+import { Tag, TagCategory } from "@/lib/gql/graphql";
 
 interface TagListProps {
   categories: TagCategory[];
@@ -24,13 +24,16 @@ const TagList = ({
     <>
       {categories.map((category) => (
         <div key={category.id} className="mb-6 flex flex-col gap-1">
-          <Typography variant="span" className="mb-2 text-sm">{category.name}</Typography>
+          <Typography variant="span" className="mb-2 text-sm">
+            {category.name}
+          </Typography>
           <div className="flex flex-wrap gap-2">
             {tagsData?.tags
               ?.filter((tag) => tag.categoryId === category.id)
               .map((tag) => {
                 const isSelected = selectedTags.some((t) => t.id === tag.id);
-                const isDisabled = tag.id && disabledTagIds.includes(tag.id) && !isSelected;
+                const isDisabled =
+                  tag.id && disabledTagIds.includes(tag.id) && !isSelected;
                 return (
                   <Badge
                     key={tag.id}
@@ -39,8 +42,8 @@ const TagList = ({
                       isSelected
                         ? "bg-primary text-primary-foreground"
                         : isDisabled
-                        ? "opacity-50 pointer-events-none bg-muted"
-                        : "hover:bg-muted"
+                          ? "opacity-50 pointer-events-none bg-muted"
+                          : "hover:bg-muted"
                     }`}
                     onClick={() => {
                       if (!isDisabled) {
@@ -59,4 +62,4 @@ const TagList = ({
   );
 };
 
-export default TagList; 
+export default TagList;

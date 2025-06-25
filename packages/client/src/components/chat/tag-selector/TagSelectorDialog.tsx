@@ -9,9 +9,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { MutedText } from "@/components/ui/typography";
-import type { Tag, TagCategory } from "@diet/shared";
 import TagSkeleton from "./TagSkeleton";
 import TagList from "./TagList";
+import { Tag, TagCategory } from "@/lib/gql/graphql";
 
 interface TagSelectorDialogProps {
   isOpen: boolean;
@@ -95,4 +95,4 @@ const TagSelectorDialog = ({
   );
 };
 
-export default TagSelectorDialog; 
+export default TagSelectorDialog;

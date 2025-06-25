@@ -26,11 +26,13 @@
   },
   "dependencies": {
     "@diet/shared": "workspace:*",
+    "@graphql-yoga/plugin-csrf-prevention": "3.13.5",
     "@hono/node-server": "1.14.4",
     "@pothos/core": "4.7.0",
     "@pothos/plugin-drizzle": "0.10.6",
     "drizzle-zod": "0.8.2",
     "graphql": "16.11.0",
+    "graphql-sse": "2.5.4",
     "graphql-yoga": "5.13.5",
     "hono": "4.7.11"
   },

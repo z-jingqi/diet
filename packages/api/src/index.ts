@@ -8,8 +8,10 @@ import auth from "./routes/auth";
 import chat from "./routes/chat";
 import { Bindings } from "./types/bindings";
 import { createYoga } from 'graphql-yoga';
+import { useCSRFPrevention } from '@graphql-yoga/plugin-csrf-prevention';
 import { schema } from './graphql/schema';
 import { createDB } from './db';
+import { createGraphQLContext } from './graphql/middleware/auth';
 
 // 创建 Hono 应用
 const app = new Hono<{ Bindings: Bindings }>();
@@ -51,14 +53,23 @@ app.route("/tags", tags);
 const yoga = createYoga({
   schema,
   graphiql: process.env.NODE_ENV !== 'production',
+  plugins: [
+    useCSRFPrevention({
+      requestHeaders: ['X-CSRF-Token'] // 使用现有的 CSRF 头部
+    })
+  ]
 });
 
 app.all('/graphql', async (c) => {
+  // GraphQL 端点使用 Yoga 的 CSRF 保护，跳过 REST CSRF 中间件
   // 为每个请求创建独立的 DB 实例
+  const db = createDB(c.env.DB);
+  
+  // 创建 GraphQL 上下文（包含认证信息）
+  const context = await createGraphQLContext(db, c.req.raw.headers);
+  
   const response = await yoga.fetch(c.req.raw, {
-    context: {
-      db: createDB(c.env.DB),
-    },
+    context,
   });
   return response as unknown as Response;
 });

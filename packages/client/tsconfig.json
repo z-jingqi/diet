@@ -28,5 +28,10 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "src/lib/gql/graphql.ts",
+    "src/lib/gql/gql.ts",
+    "src/lib/gql/fragment-masking.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

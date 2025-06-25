@@ -1,0 +1,104 @@
+query GetTags($categoryId: String, $search: String) {
+  tags(categoryId: $categoryId, search: $search) {
+    id
+    name
+    description
+    categoryId
+    aiPrompt
+    sortOrder
+    isActive
+    createdAt
+    updatedAt
+    restrictions
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+query GetTagCategories {
+  tagCategories {
+    id
+    name
+    description
+    sortOrder
+    isActive
+    createdAt
+  }
+}
+
+query GetTag($id: ID!) {
+  tag(id: $id) {
+    id
+    name
+    description
+    categoryId
+    aiPrompt
+    sortOrder
+    isActive
+    createdAt
+    updatedAt
+    restrictions
+    category {
+      id
+      name
+      description
+    }
+  }
+}
+
+query GetTagConflicts {
+  tagConflicts {
+    id
+    conflictType
+    description
+    createdAt
+    tagId1
+    tagId2
+    tag1 {
+      id
+      name
+      description
+    }
+    tag2 {
+      id
+      name
+      description
+    }
+  }
+}
+
+query CheckTagConflicts($tagIds: [String!]!) {
+  checkTagConflicts(tagIds: $tagIds)
+}
+
+mutation CreateTag(
+  $name: String!
+  $description: String!
+  $categoryId: String!
+  $aiPrompt: String!
+  $restrictions: [String!]
+  $sortOrder: Int
+) {
+  createTag(
+    name: $name
+    description: $description
+    categoryId: $categoryId
+    aiPrompt: $aiPrompt
+    restrictions: $restrictions
+    sortOrder: $sortOrder
+  ) {
+    id
+    name
+    description
+    categoryId
+    aiPrompt
+    sortOrder
+    isActive
+    createdAt
+    updatedAt
+    restrictions
+  }
+} 

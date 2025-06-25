@@ -1,6 +1,6 @@
 import { X, Tag as TagIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { Tag } from "@diet/shared";
+import { Tag } from "@/lib/gql/graphql";
 
 interface SelectedTagsDisplayProps {
   selectedTags: Tag[];
