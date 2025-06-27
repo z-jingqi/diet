@@ -53,7 +53,7 @@ export const TagRef = builder.objectRef<TagModel>('Tag').implement({
     category: t.field({
       type: TagCategoryRef,
       resolve: async (parent, _args, ctx) => {
-        const [category] = await ctx.context.db
+        const [category] = await ctx.db
           .select()
           .from(tagCategories)
           .where(eq(tagCategories.id, parent.categoryId))
@@ -80,7 +80,7 @@ export const TagConflictRef = builder.objectRef<TagConflictModel>('TagConflict')
     tag1: t.field({
       type: TagRef,
       resolve: async (parent, _args, ctx) => {
-        const [tag] = await ctx.context.db
+        const [tag] = await ctx.db
           .select()
           .from(tags)
           .where(eq(tags.id, parent.tagId1))
@@ -92,7 +92,7 @@ export const TagConflictRef = builder.objectRef<TagConflictModel>('TagConflict')
     tag2: t.field({
       type: TagRef,
       resolve: async (parent, _args, ctx) => {
-        const [tag] = await ctx.context.db
+        const [tag] = await ctx.db
           .select()
           .from(tags)
           .where(eq(tags.id, parent.tagId2))
@@ -111,7 +111,7 @@ builder.queryFields((t) => ({
   tagCategories: t.field({
     type: [TagCategoryRef],
     resolve: async (_root, _args, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(tagCategories)
         .where(eq(tagCategories.isActive, true))
@@ -126,7 +126,7 @@ builder.queryFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [category] = await ctx.context.db
+      const [category] = await ctx.db
         .select()
         .from(tagCategories)
         .where(eq(tagCategories.id, id as string))
@@ -155,7 +155,7 @@ builder.queryFields((t) => ({
         whereConditions.push(like(tags.name, `%${search}%`));
       }
       
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(tags)
         .where(and(...whereConditions))
@@ -170,7 +170,7 @@ builder.queryFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [tag] = await ctx.context.db
+      const [tag] = await ctx.db
         .select()
         .from(tags)
         .where(eq(tags.id, id as string))
@@ -186,7 +186,7 @@ builder.queryFields((t) => ({
       categoryId: t.arg.string({ required: true }),
     },
     resolve: async (_root, { categoryId }, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(tags)
         .where(eq(tags.categoryId, categoryId));
@@ -197,7 +197,7 @@ builder.queryFields((t) => ({
   tagConflicts: t.field({
     type: [TagConflictRef],
     resolve: async (_root, _args, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(tagConflicts)
         .orderBy(asc(tagConflicts.conflictType), asc(tagConflicts.id));
@@ -212,7 +212,7 @@ builder.queryFields((t) => ({
     },
     resolve: async (_root, { tagIds }, ctx) => {
       // 获取所有相关的冲突关系
-      const conflicts = await ctx.context.db
+      const conflicts = await ctx.db
         .select()
         .from(tagConflicts)
         .where(
@@ -253,7 +253,7 @@ builder.mutationFields((t) => ({
       sortOrder: t.arg.int({ required: false }),
     },
     resolve: async (_root, { name, description, sortOrder }, ctx) => {
-      const [category] = await ctx.context.db
+      const [category] = await ctx.db
         .insert(tagCategories)
         .values({
           id: crypto.randomUUID(),
@@ -282,7 +282,7 @@ builder.mutationFields((t) => ({
       if (description !== undefined) updateData.description = description;
       if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
 
-      const [category] = await ctx.context.db
+      const [category] = await ctx.db
         .update(tagCategories)
         .set(updateData)
         .where(eq(tagCategories.id, id as string))
@@ -299,7 +299,7 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [category] = await ctx.context.db
+      const [category] = await ctx.db
         .delete(tagCategories)
         .where(eq(tagCategories.id, id as string))
         .returning();
@@ -320,7 +320,7 @@ builder.mutationFields((t) => ({
       sortOrder: t.arg.int({ required: false }),
     },
     resolve: async (_root, { name, description, categoryId, restrictions, aiPrompt, sortOrder }, ctx) => {
-      const [tag] = await ctx.context.db
+      const [tag] = await ctx.db
         .insert(tags)
         .values({
           id: crypto.randomUUID(),
@@ -357,7 +357,7 @@ builder.mutationFields((t) => ({
       if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
       updateData.updatedAt = new Date().toISOString();
 
-      const [tag] = await ctx.context.db
+      const [tag] = await ctx.db
         .update(tags)
         .set(updateData)
         .where(eq(tags.id, id as string))
@@ -374,7 +374,7 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [tag] = await ctx.context.db
+      const [tag] = await ctx.db
         .delete(tags)
         .where(eq(tags.id, id as string))
         .returning();
@@ -393,7 +393,7 @@ builder.mutationFields((t) => ({
       description: t.arg.string({ required: false }),
     },
     resolve: async (_root, { tagId1, tagId2, conflictType, description }, ctx) => {
-      const [conflict] = await ctx.context.db
+      const [conflict] = await ctx.db
         .insert(tagConflicts)
         .values({
           id: crypto.randomUUID(),
@@ -415,7 +415,7 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [conflict] = await ctx.context.db
+      const [conflict] = await ctx.db
         .delete(tagConflicts)
         .where(eq(tagConflicts.id, id as string))
         .returning();

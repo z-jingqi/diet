@@ -90,6 +90,7 @@ const TagSelector = ({
 
   const isLoading = tagsLoading || categoriesLoading;
   const error = tagsError || categoriesError;
+  console.log(error);
 
   // 传递禁用tagId给TagSelectorDialog/Sheet
   return (

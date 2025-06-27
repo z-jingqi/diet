@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { GraphQLClient } from 'graphql-request';
 import type { RequestInit } from 'graphql-request/dist/types.dom';
 import { useQuery, useMutation, type UseQueryOptions, type UseMutationOptions } from '@tanstack/react-query';

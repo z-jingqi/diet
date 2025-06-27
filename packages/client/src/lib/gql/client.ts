@@ -1,10 +1,15 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Query, Mutation } from './graphql';
 
-// 创建 GraphQL 客户端
-export const graphqlClient = new GraphQLClient('/api/graphql', {
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://127.0.0.1:8787' : '');
+
+const ENDPOINT = `${API_BASE}/api/graphql`;
+
+export const graphqlClient = new GraphQLClient(ENDPOINT, {
   headers: {
-    'X-CSRF-Token': 'true', // 使用与后端一致的 CSRF 头部
+    'X-CSRF-Token': 'true',
   },
 });
 

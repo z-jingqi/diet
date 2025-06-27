@@ -7,15 +7,14 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
-    "deploy": "wrangler deploy",
-    "local": "wrangler dev",
+    "dev:local": "wrangler dev",
+    "dev:dev": "wrangler dev --env dev-remote --remote",
+    "deploy:prod": "wrangler deploy",
     "put-model": "wrangler secret put CLOUDFLARE_MODEL",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "type-check": "turbo run type-check",
-    "prepare": "husky install",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "2.0.1",
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20250613.0",
     "@eslint/js": "^9.25.0",
+    "@graphql-codegen/add": "5.0.3",
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",

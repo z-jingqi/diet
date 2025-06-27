@@ -80,7 +80,7 @@ export const UserRef = builder.objectRef<GraphQLUser>('User').implement({
     oauthAccounts: t.field({
       type: [OAuthAccountRef],
       resolve: async (parent, _args, ctx) => {
-        return await ctx.context.db
+        return await ctx.db
           .select()
           .from(oauthAccounts)
           .where(eq(oauthAccounts.userId, parent.id));
@@ -90,7 +90,7 @@ export const UserRef = builder.objectRef<GraphQLUser>('User').implement({
     sessions: t.field({
       type: [UserSessionRef],
       resolve: async (parent, _args, ctx) => {
-        return await ctx.context.db
+        return await ctx.db
           .select()
           .from(userSessions)
           .where(eq(userSessions.userId, parent.id));
@@ -110,7 +110,7 @@ builder.objectField(OAuthAccountRef, 'user', (t) =>
   t.field({
     type: UserRef,
     resolve: async (parent, _args, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.id, parent.userId))
@@ -124,7 +124,7 @@ builder.objectField(UserSessionRef, 'user', (t) =>
   t.field({
     type: UserRef,
     resolve: async (parent, _args, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.id, parent.userId))
@@ -138,7 +138,7 @@ builder.objectField(CSRFTokenRef, 'user', (t) =>
   t.field({
     type: UserRef,
     resolve: async (parent, _args, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.id, parent.userId))
@@ -160,7 +160,7 @@ builder.queryFields((t) => ({
       const auth = requireAuth(ctx);
       
       // 从数据库重新获取用户信息，确保返回完整的数据库模型
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.id, auth.user.id))
@@ -177,7 +177,7 @@ builder.queryFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.id, id as string))
@@ -193,7 +193,7 @@ builder.queryFields((t) => ({
       username: t.arg.string({ required: true }),
     },
     resolve: async (_root, { username }, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.username, username))
@@ -209,7 +209,7 @@ builder.queryFields((t) => ({
       userId: t.arg.string({ required: true }),
     },
     resolve: async (_root, { userId }, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(oauthAccounts)
         .where(eq(oauthAccounts.userId, userId));
@@ -223,7 +223,7 @@ builder.queryFields((t) => ({
       userId: t.arg.string({ required: true }),
     },
     resolve: async (_root, { userId }, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(userSessions)
         .where(eq(userSessions.userId, userId));
@@ -247,7 +247,7 @@ builder.mutationFields((t) => ({
       phone: t.arg.string({ required: false }),
     },
     resolve: async (_root, { username, email, passwordHash, nickname, avatarUrl, phone }, ctx) => {
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .insert(users)
         .values({
           id: crypto.randomUUID(),
@@ -284,7 +284,7 @@ builder.mutationFields((t) => ({
       if (phone !== undefined) updateData.phone = phone;
       updateData.updatedAt = new Date().toISOString();
 
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .update(users)
         .set(updateData)
         .where(eq(users.id, id as string))
@@ -307,7 +307,7 @@ builder.mutationFields((t) => ({
       expiresAt: t.arg.string({ required: false }),
     },
     resolve: async (_root, { userId, provider, providerUserId, providerUserData, accessToken, refreshToken, expiresAt }, ctx) => {
-      const [account] = await ctx.context.db
+      const [account] = await ctx.db
         .insert(oauthAccounts)
         .values({
           id: crypto.randomUUID(),
@@ -338,7 +338,7 @@ builder.mutationFields((t) => ({
       userAgent: t.arg.string({ required: false }),
     },
     resolve: async (_root, { userId, sessionToken, refreshToken, sessionExpiresAt, refreshExpiresAt, ipAddress, userAgent }, ctx) => {
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .insert(userSessions)
         .values({
           id: crypto.randomUUID(),
@@ -363,7 +363,7 @@ builder.mutationFields((t) => ({
       sessionToken: t.arg.string({ required: true }),
     },
     resolve: async (_root, { sessionToken }, ctx) => {
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .delete(userSessions)
         .where(eq(userSessions.sessionToken, sessionToken))
         .returning();
@@ -381,7 +381,7 @@ builder.mutationFields((t) => ({
       expiresAt: t.arg.string({ required: true }),
     },
     resolve: async (_root, { userId, token, expiresAt }, ctx) => {
-      const [csrfToken] = await ctx.context.db
+      const [csrfToken] = await ctx.db
         .insert(csrfTokens)
         .values({
           id: crypto.randomUUID(),
@@ -402,7 +402,7 @@ builder.mutationFields((t) => ({
       token: t.arg.string({ required: true }),
     },
     resolve: async (_root, { token }, ctx) => {
-      const [csrfToken] = await ctx.context.db
+      const [csrfToken] = await ctx.db
         .delete(csrfTokens)
         .where(eq(csrfTokens.token, token))
         .returning();
@@ -430,7 +430,7 @@ builder.mutationFields((t) => ({
       }
 
       // 检查用户名是否已存在
-      const existingUser = await ctx.context.db
+      const existingUser = await ctx.db
         .select()
         .from(users)
         .where(eq(users.username, username))
@@ -441,7 +441,7 @@ builder.mutationFields((t) => ({
       }
 
       // 创建用户（这里简化处理，实际应该使用 AuthService）
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .insert(users)
         .values({
           id: crypto.randomUUID(),
@@ -473,7 +473,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, { username, password }, ctx) => {
       // 查找用户
-      const [user] = await ctx.context.db
+      const [user] = await ctx.db
         .select()
         .from(users)
         .where(eq(users.username, username))
@@ -495,7 +495,7 @@ builder.mutationFields((t) => ({
       const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7天
 
       // 创建用户会话
-      await ctx.context.db
+      await ctx.db
         .insert(userSessions)
         .values({
           id: crypto.randomUUID(),
@@ -510,7 +510,7 @@ builder.mutationFields((t) => ({
 
       // 生成 CSRF token
       const csrfToken = crypto.randomUUID();
-      await ctx.context.db
+      await ctx.db
         .insert(csrfTokens)
         .values({
           id: crypto.randomUUID(),
@@ -520,7 +520,7 @@ builder.mutationFields((t) => ({
         });
 
       // 更新最后登录时间
-      await ctx.context.db
+      await ctx.db
         .update(users)
         .set({ lastLoginAt: new Date().toISOString() })
         .where(eq(users.id, user.id));
@@ -541,12 +541,12 @@ builder.mutationFields((t) => ({
       const auth = requireAuth(ctx);
       
       // 删除当前会话
-      await ctx.context.db
+      await ctx.db
         .delete(userSessions)
         .where(eq(userSessions.sessionToken, auth.session.sessionToken));
 
       // 删除相关的 CSRF tokens
-      await ctx.context.db
+      await ctx.db
         .delete(csrfTokens)
         .where(eq(csrfTokens.userId, auth.user.id));
 
@@ -589,7 +589,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, { refreshToken }, ctx) => {
       // 查找有效的 refresh token
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .select()
         .from(userSessions)
         .where(
@@ -615,7 +615,7 @@ builder.mutationFields((t) => ({
       const newSessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24小时
 
       // 更新会话
-      await ctx.context.db
+      await ctx.db
         .update(userSessions)
         .set({
           sessionToken: newSessionToken,
@@ -643,7 +643,7 @@ builder.mutationFields((t) => ({
         throw new Error('用户名长度必须在3-20个字符之间');
       }
 
-      const existingUser = await ctx.context.db
+      const existingUser = await ctx.db
         .select()
         .from(users)
         .where(eq(users.username, username))

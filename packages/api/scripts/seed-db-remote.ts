@@ -10,7 +10,11 @@ const seedDataPath = path.join(__dirname, '../src/db/seed-data.sql');
 
 async function seedRemoteDatabase() {
   try {
-    console.log('🚀 开始更新远程数据库...');
+    // 根据环境变量确定目标数据库
+    const targetEnv = process.env.TARGET_ENV || 'dev'; // 默认 dev
+    const envFlag = targetEnv === 'prod' ? '' : `--env ${targetEnv}-remote`;
+    
+    console.log(`🚀 开始更新${targetEnv === 'prod' ? '生产' : '开发'}数据库...`);
     
     // 第一步：清理现有数据（按外键依赖顺序）
     console.log('🧹 清理现有数据...');
@@ -22,7 +26,7 @@ async function seedRemoteDatabase() {
     
     for (const clearCommand of clearCommands) {
       try {
-        const clearSql = `npx wrangler d1 execute DB --remote --command="${clearCommand}"`;
+        const clearSql = `npx wrangler d1 execute DB ${envFlag} --remote --command="${clearCommand}"`;
         console.log(`执行清理命令: ${clearCommand}`);
         execSync(clearSql, { 
           cwd: path.join(__dirname, '../..'),
@@ -39,7 +43,7 @@ async function seedRemoteDatabase() {
     
     // 第二步：插入新的种子数据
     console.log('🌱 插入新的种子数据...');
-    const command = `npx wrangler d1 execute DB --remote --file=${seedDataPath}`;
+    const command = `npx wrangler d1 execute DB ${envFlag} --remote --file=${seedDataPath}`;
     
     console.log(`执行插入命令: ${command}`);
     const result = execSync(command, { 

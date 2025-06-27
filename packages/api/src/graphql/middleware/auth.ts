@@ -5,10 +5,8 @@ import type { AuthContext } from '@diet/shared';
 
 // 扩展 GraphQL 上下文类型
 export interface GraphQLContext {
-  context: {
-    db: DB;
-    user?: AuthContext | null;
-  };
+  db: DB;
+  user?: AuthContext | null;
 }
 
 // 从请求头中提取 session token
@@ -87,27 +85,27 @@ export async function createGraphQLContext(
   const sessionToken = extractSessionToken(headers);
   
   if (!sessionToken) {
-    return { context: { db, user: null } };
+    return { db, user: null };
   }
 
   const user = await validateSessionToken(db, sessionToken);
   
-  return { context: { db, user } };
+  return { db, user };
 }
 
 // 认证装饰器 - 用于需要认证的字段
-export function requireAuth<T extends { context: { user?: AuthContext | null } }>(
+export function requireAuth<T extends { user?: AuthContext | null }>(
   context: T
 ): AuthContext {
-  if (!context.context.user) {
+  if (!context.user) {
     throw new Error('Authentication required');
   }
-  return context.context.user;
+  return context.user;
 }
 
 // 可选认证装饰器 - 用于可选的认证字段
-export function optionalAuth<T extends { context: { user?: AuthContext | null } }>(
+export function optionalAuth<T extends { user?: AuthContext | null }>(
   context: T
 ): AuthContext | null {
-  return context.context.user || null;
+  return context.user || null;
 } 

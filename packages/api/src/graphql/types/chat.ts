@@ -83,7 +83,7 @@ export const ChatSessionRef = builder.objectRef<ChatSessionModel>('ChatSession')
     user: t.field({
       type: UserRef,
       resolve: async (parent, _args, ctx) => {
-        const [user] = await ctx.context.db
+        const [user] = await ctx.db
           .select()
           .from(users)
           .where(eq(users.id, parent.userId))
@@ -111,7 +111,7 @@ builder.queryFields((t) => ({
       userId: t.arg.string({ required: true }),
     },
     resolve: async (_root, { userId }, ctx) => {
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(chatSessions)
         .where(and(eq(chatSessions.userId, userId), isNull(chatSessions.deletedAt)));
@@ -125,7 +125,7 @@ builder.queryFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .select()
         .from(chatSessions)
         .where(and(eq(chatSessions.id, id as string), isNull(chatSessions.deletedAt)))
@@ -139,7 +139,7 @@ builder.queryFields((t) => ({
     type: [ChatSessionRef],
     resolve: async (_root, _args, ctx) => {
       const auth = requireAuth(ctx);
-      return await ctx.context.db
+      return await ctx.db
         .select()
         .from(chatSessions)
         .where(and(eq(chatSessions.userId, auth.user.id), isNull(chatSessions.deletedAt)));
@@ -161,7 +161,7 @@ builder.mutationFields((t) => ({
       currentTags: t.arg.string({ required: false }),
     },
     resolve: async (_root, { userId, title, messages, currentTags }, ctx) => {
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .insert(chatSessions)
         .values({
           id: crypto.randomUUID(),
@@ -192,7 +192,7 @@ builder.mutationFields((t) => ({
       if (currentTags !== undefined) updateData.currentTags = currentTags;
       updateData.updatedAt = new Date().toISOString();
 
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .update(chatSessions)
         .set(updateData)
         .where(eq(chatSessions.id, id as string))
@@ -209,7 +209,7 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [session] = await ctx.context.db
+      const [session] = await ctx.db
         .update(chatSessions)
         .set({ deletedAt: new Date().toISOString() })
         .where(eq(chatSessions.id, id as string))

@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
     "start": "node dist/index.js",
-    "dev": "wrangler dev",
+    "dev": "npm run dev:local",
+    "dev:local": "wrangler dev",
+    "dev:dev": "wrangler dev --env dev-remote --remote",
     "watch": "tsup src/index.ts --format esm --dts --watch",
     "lint": "eslint src --ext ts,tsx",
     "type-check": "tsc --noEmit",
@@ -18,11 +20,17 @@
     "db:studio": "drizzle-kit studio",
     "db:check-migrations": "tsx scripts/check-migrations.ts",
     "db:migrate:local": "drizzle-kit migrate",
-    "db:migrate:remote": "drizzle-kit migrate --remote",
     "db:seed:local": "tsx scripts/seed-db.ts",
     "db:reset:local": "npm run db:migrate:local && npm run db:seed:local",
     "db:status:local": "wrangler d1 execute DB --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
-    "db:status:remote": "wrangler d1 execute DB --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\""
+    "db:migrate:dev": "drizzle-kit migrate --remote",
+    "db:seed:dev": "TARGET_ENV=dev tsx scripts/seed-db-remote.ts",
+    "db:reset:dev": "npm run db:migrate:dev && npm run db:seed:dev",
+    "db:status:dev": "wrangler d1 execute DB --env dev-remote --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
+    "db:migrate:prod": "drizzle-kit migrate --remote",
+    "db:seed:prod": "TARGET_ENV=prod tsx scripts/seed-db-remote.ts",
+    "db:reset:prod": "npm run db:migrate:prod && npm run db:seed:prod",
+    "db:status:prod": "wrangler d1 execute DB --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\""
   },
   "dependencies": {
     "@diet/shared": "workspace:*",
