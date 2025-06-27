@@ -3,7 +3,6 @@ import { cors } from "hono/cors";
 import { compress } from "hono/compress";
 import { securityHeaders, rateLimit } from "./middleware/security";
 import { dataCleanup } from "./middleware/cleanup";
-import tags from "./routes/tags";
 import auth from "./routes/auth";
 import chat from "./routes/chat";
 import { Bindings } from "./types/bindings";
@@ -37,17 +36,14 @@ app.use("/auth/*", rateLimit({
   maxRequests: 5 // 防止暴力破解
 }));
 
-// 对标签 API 启用压缩（数据量较大）
-app.use("/tags/*", compress());
+// 启用压缩（对所有响应进行压缩，减小带宽占用）
+app.use("*", compress());
 
 // 挂载认证路由（不需要认证）
 app.route("/auth", auth);
 
 // 挂载聊天路由（需要认证）
 app.route("/chat", chat);
-
-// 挂载标签路由（需要认证）
-app.route("/tags", tags);
 
 // 挂载 GraphQL Yoga
 const yoga = createYoga({
