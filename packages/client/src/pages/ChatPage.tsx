@@ -6,6 +6,7 @@ import ChatLayout from "@/components/chat/ChatLayout";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import useChatStore from "@/store/chat-store";
 import useAuthStore from "@/store/auth-store";
+import { useMyChatSessions } from "@/lib/gql/hooks/chat";
 
 const ChatPage = () => {
   const confirm = useConfirmDialog();
@@ -22,9 +23,32 @@ const ChatPage = () => {
     deleteSession,
     renameSession,
     clearSession,
+    loadSessionsFromGraphQL,
   } = useChatStore();
 
+  // GraphQL 查询用户聊天会话
+  const { data: graphqlSessions, isLoading: isLoadingSessions } = useMyChatSessions();
+
   const messages = getCurrentMessages();
+
+  // 当 GraphQL 数据加载完成且用户已认证时，加载会话到 store
+  useEffect(() => {
+    if (isAuthenticated && !isGuestMode && graphqlSessions?.myChatSessions) {
+      // 过滤掉 null 值并转换数据格式
+      const validSessions = graphqlSessions.myChatSessions
+        .filter((session): session is NonNullable<typeof session> => session !== null)
+        .map((session) => ({
+          id: session.id || '',
+          title: session.title || "新对话",
+          messages: session.messages?.filter((msg): msg is NonNullable<typeof msg> => msg !== null) || [],
+          currentTags: session.currentTags?.filter((tag): tag is string => tag !== null) || [],
+          createdAt: session.createdAt,
+          updatedAt: session.updatedAt,
+        }));
+      
+      loadSessionsFromGraphQL(validSessions);
+    }
+  }, [isAuthenticated, isGuestMode, graphqlSessions, loadSessionsFromGraphQL]);
 
   // 进入页面时创建临时会话
   useEffect(() => {

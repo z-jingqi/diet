@@ -36,8 +36,16 @@ app.use("/auth/*", rateLimit({
   maxRequests: 5 // 防止暴力破解
 }));
 
-// 启用压缩（对所有响应进行压缩，减小带宽占用）
-app.use("*", compress());
+// 启用压缩，但跳过 GraphQL 端点（防止 introspection 无法被工具解析）
+app.use("*", async (c, next) => {
+  if (c.req.path.startsWith("/graphql")) {
+    await next();
+    return;
+  }
+  const compressionMiddleware = compress();
+  // @ts-ignore - call compression middleware directly
+  return compressionMiddleware(c, next);
+});
 
 // 挂载认证路由（不需要认证）
 app.route("/auth", auth);

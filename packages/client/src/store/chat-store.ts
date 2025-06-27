@@ -33,6 +33,8 @@ interface ChatState {
   getCurrentSession: () => ChatSession | null;
   getCurrentMessages: () => Message[];
   getSessions: () => ChatSession[];
+  // 新增：从 GraphQL 加载会话
+  loadSessionsFromGraphQL: (graphqlSessions: any[]) => void;
   // 消息更新方法
   updateMessageRecipeDetails: (messageId: string, recipeDetails: RecipeDetail[]) => void;
   // 工具方法
@@ -717,6 +719,25 @@ const useChatStore = create<
       } else {
         return content.substring(0, maxLength) + "...";
       }
+    },
+
+    // 新增：从 GraphQL 加载会话
+    loadSessionsFromGraphQL: (graphqlSessions: any[]) => {
+      const convertedSessions: ChatSession[] = graphqlSessions.map((session) => ({
+        id: session.id,
+        title: session.title || "新对话",
+        messages: session.messages || [],
+        currentTags: session.currentTags || [],
+        createdAt: new Date(session.createdAt),
+        updatedAt: new Date(session.updatedAt),
+      }));
+
+      set((state) => ({
+        sessions: convertedSessions,
+        // 如果没有当前会话且加载的会话不为空，选择第一个会话
+        currentSessionId: state.currentSessionId || (convertedSessions.length > 0 ? convertedSessions[0].id : null),
+        isTemporarySession: false,
+      }));
     },
   };
 });
