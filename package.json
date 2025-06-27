@@ -10,6 +10,7 @@
     "dev:local": "wrangler dev",
     "dev:dev": "wrangler dev --env dev-remote --remote",
     "deploy:prod": "wrangler deploy",
+    "build": "turbo run build",
     "put-model": "wrangler secret put CLOUDFLARE_MODEL",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
