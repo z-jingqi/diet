@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,9 +30,11 @@ interface TagSelectorSheetProps {
   error: Error | null;
   onRetry: () => void;
   disabledTagIds?: string[];
+  warningTagIds?: string[];
+  conflictDescriptions?: Record<string, string>;
 }
 
-const TagSelectorSheet = ({
+const TagSelectorSheet = memo(({
   isOpen,
   onOpenChange,
   disabled,
@@ -43,6 +46,8 @@ const TagSelectorSheet = ({
   error,
   onRetry,
   disabledTagIds = [],
+  warningTagIds = [],
+  conflictDescriptions = {},
 }: TagSelectorSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -90,6 +95,8 @@ const TagSelectorSheet = ({
                 selectedTags={selectedTags}
                 onTagToggle={onTagToggle}
                 disabledTagIds={disabledTagIds}
+                warningTagIds={warningTagIds}
+                conflictDescriptions={conflictDescriptions}
               />
             )}
           </div>
@@ -104,6 +111,8 @@ const TagSelectorSheet = ({
       </SheetContent>
     </Sheet>
   );
-};
+});
+
+TagSelectorSheet.displayName = "TagSelectorSheet";
 
 export default TagSelectorSheet;

@@ -12,6 +12,34 @@ import {
   type CheckTagConflictsQueryVariables
 } from '../graphql';
 
+// 冲突类型定义
+export interface TagConflictInfo {
+  mutual_exclusive: Array<{
+    id: string;
+    tagId1: string;
+    tagId2: string;
+    description: string;
+  }>;
+  warning: Array<{
+    id: string;
+    tagId1: string;
+    tagId2: string;
+    description: string;
+  }>;
+  info: Array<{
+    id: string;
+    tagId1: string;
+    tagId2: string;
+    description: string;
+  }>;
+}
+
+export interface ConflictResult {
+  conflicts: TagConflictInfo;
+  hasConflicts: boolean;
+  totalConflicts: number;
+}
+
 // 获取标签列表
 export function useTags(categoryId?: string, search?: string) {
   const variables: GetTagsQueryVariables = {};
@@ -40,9 +68,19 @@ export function useTagConflicts() {
 // 检查标签组合的冲突
 export function useCheckTagConflicts(tagIds: string[]) {
   const variables: CheckTagConflictsQueryVariables = { tagIds };
-  return useCheckTagConflictsQuery(graphqlClient, variables, {
+  const query = useCheckTagConflictsQuery(graphqlClient, variables, {
     enabled: tagIds.length > 0
   });
+
+  // 解析返回的 JSON 字符串
+  const parsedData = query.data?.checkTagConflicts 
+    ? (JSON.parse(query.data.checkTagConflicts) as ConflictResult)
+    : null;
+
+  return {
+    ...query,
+    data: parsedData,
+  };
 }
 
 // 创建标签

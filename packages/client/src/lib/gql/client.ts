@@ -1,11 +1,9 @@
 import { GraphQLClient } from 'graphql-request';
 import type { Query, Mutation } from './graphql';
+import { API_BASE } from '@/lib/constants';
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? 'http://127.0.0.1:8787' : '');
-
-const ENDPOINT = `${API_BASE}/api/graphql`;
+// 使用统一的 API_BASE，确保 ENDPOINT 始终是有效的 URL
+const ENDPOINT = `${API_BASE}/graphql`;
 
 export const graphqlClient = new GraphQLClient(ENDPOINT, {
   headers: {
@@ -31,7 +29,7 @@ export async function mutate<T extends keyof Mutation>(
 
 // 认证相关的客户端（包含 session token）
 export function createAuthenticatedClient(sessionToken: string) {
-  return new GraphQLClient('/api/graphql', {
+  return new GraphQLClient(`${API_BASE}/graphql`, {
     headers: {
       'X-CSRF-Token': 'true', // 使用与后端一致的 CSRF 头部
       'Cookie': `session_token=${sessionToken}`,

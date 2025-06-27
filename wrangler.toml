@@ -28,3 +28,6 @@ enabled = true
 binding = "DB"
 database_name = "diet-dev"
 database_id = "612ab730-2083-468c-8a06-ba9c7a3001e9"
+
+[env.dev-remote.ai]
+binding = "AI"
