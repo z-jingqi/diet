@@ -34,8 +34,8 @@ export interface UserSession {
   refreshExpiresAt: string;
   ipAddress?: string | null;
   userAgent?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | null;
+  updatedAt?: string | null;
 }
 
 export interface CsrfToken {
