@@ -7,6 +7,8 @@ import type { AuthContext } from "@diet/shared";
 export interface GraphQLContext {
   db: DB;
   user?: AuthContext | null;
+  responseCookies: string[];
+  headers: Headers;
   services: {
     auth: import("../services/auth-service").AuthService;
     chat: import("../services/chat-service").ChatService;
@@ -103,9 +105,9 @@ export async function createGraphQLContext(
   } as const;
 
   if (!sessionToken) {
-    return { db, user: null, services };
+    return { db, user: null, responseCookies: [], headers, services };
   }
 
   const user = await validateSessionToken(db, sessionToken);
-  return { db, user, services };
+  return { db, user, responseCookies: [], headers, services };
 }

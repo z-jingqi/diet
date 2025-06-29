@@ -3,7 +3,6 @@ import { cors } from "hono/cors";
 import { compress } from "hono/compress";
 import { securityHeaders, rateLimit } from "./middleware/security";
 import { dataCleanup } from "./middleware/cleanup";
-import auth from "./routes/auth";
 import chat from "./routes/chat";
 import { Bindings } from "./types/bindings";
 import { createYoga } from "graphql-yoga";
@@ -21,8 +20,20 @@ app.use("*", dataCleanup);
 // 安全头（所有响应）
 app.use("*", securityHeaders);
 
-// 启用 CORS
-app.use("*", cors());
+// 启用 CORS，支持携带凭证（cookies）
+app.use(
+  "*",
+  cors({
+    // 运行在本地开发模式时允许所有源，
+    // 生产环境建议通过环境变量显式配置允许的前端地址
+    origin: (origin) => origin ?? "*",
+    allowHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    exposeHeaders: ["Set-Cookie"],
+    credentials: true,
+    maxAge: 86400, // 24h
+  })
+);
 
 // 基础速率限制
 app.use(
@@ -30,15 +41,6 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15分钟
     maxRequests: 100, // 每15分钟最多100个请求
-  })
-);
-
-// 认证相关的严格速率限制
-app.use(
-  "/auth/*",
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15分钟
-    maxRequests: 5, // 防止暴力破解
   })
 );
 
@@ -66,9 +68,6 @@ app.use("*", async (c, next) => {
   await next();
 });
 
-// 挂载认证路由（不需要认证）
-app.route("/auth", auth);
-
 // 挂载聊天路由（需要认证）
 app.route("/chat", chat);
 
@@ -83,6 +82,7 @@ const yoga = createYoga({
   ],
 });
 
+// GraphQL 端点
 app.all("/graphql", async (c) => {
   // GraphQL 端点使用 Yoga 的 CSRF 保护，跳过 REST CSRF 中间件
   // 为每个请求创建独立的 DB 实例
@@ -92,8 +92,20 @@ app.all("/graphql", async (c) => {
   const context = await createGraphQLContext(db, c.req.raw.headers);
 
   // Pass the GraphQLContext as the **third** parameter so Yoga uses it directly
-  const response = await yoga.fetch(c.req.raw, {}, context);
-  return response as unknown as Response;
+  const response = (await yoga.fetch(
+    c.req.raw,
+    {},
+    context
+  )) as unknown as Response;
+
+  // Append cookies set during resolvers
+  if (context.responseCookies.length) {
+    context.responseCookies.forEach((cookie) => {
+      response.headers.append("Set-Cookie", cookie);
+    });
+  }
+
+  return response;
 });
 
 // 全局错误处理

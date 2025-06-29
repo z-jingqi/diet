@@ -1,49 +1,21 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createAuthenticatedClient, graphqlClient } from "../client";
+import { QUERY_KEYS } from "./common";
 import {
   useGetMeQuery,
   useRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
 } from "../graphql";
-import { useMutation } from "@tanstack/react-query";
-
-// GraphQL 查询文档（等 codegen 更新后可由自动生成的常量替换）
-const UserByUsernameDocument = /* GraphQL */ `
-  query UserByUsername($username: String!) {
-    userByUsername(username: $username) {
-      id
-    }
-  }
-`;
-
-// 获取用户认证状态
-function useAuth() {
-  const sessionToken = localStorage.getItem("session_token");
-  return { sessionToken, isAuthenticated: !!sessionToken };
-}
 
 // 获取当前用户信息
 export function useMe() {
-  const { sessionToken } = useAuth();
-
-  const client = sessionToken
-    ? createAuthenticatedClient(sessionToken)
-    : graphqlClient;
+  const client = createAuthenticatedClient();
   const result = useGetMeQuery(client);
-
-  if (!sessionToken) {
-    return {
-      ...result,
-      data: null,
-      error: new Error("Not authenticated"),
-      isAuthenticated: false,
-    };
-  }
 
   return {
     ...result,
-    isAuthenticated: true,
+    isAuthenticated: !!result.data?.me,
   };
 }
 
@@ -53,16 +25,8 @@ export function useLogin() {
 
   return useLoginMutation(graphqlClient, {
     onSuccess: (data) => {
-      // 保存 session token 和 csrf token
-      if (data.login?.sessionToken) {
-        localStorage.setItem("session_token", data.login.sessionToken);
-      }
-      if (data.login?.csrfToken) {
-        localStorage.setItem("csrf_token", data.login.csrfToken);
-      }
-
       // 刷新用户信息
-      queryClient.invalidateQueries({ queryKey: ["GetMe"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_ME });
     },
   });
 }
@@ -70,18 +34,11 @@ export function useLogin() {
 // 用户登出
 export function useLogout() {
   const queryClient = useQueryClient();
-  const { sessionToken } = useAuth();
 
-  const client = sessionToken
-    ? createAuthenticatedClient(sessionToken)
-    : graphqlClient;
+  const client = createAuthenticatedClient();
 
   return useLogoutMutation(client, {
     onSuccess: () => {
-      // 清除本地存储
-      localStorage.removeItem("session_token");
-      localStorage.removeItem("csrf_token");
-
       // 清除查询缓存
       queryClient.clear();
     },
@@ -95,14 +52,14 @@ export function useRegister() {
   return useRegisterMutation(graphqlClient, {
     onSuccess: () => {
       // 注册成功后可能需要刷新相关查询
-      queryClient.invalidateQueries({ queryKey: ["GetMe"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_ME });
     },
   });
 }
 
 // 综合认证 hook - 替代 auth store
 export function useAuthState() {
-  const { sessionToken } = useAuth();
+  const client = createAuthenticatedClient();
   const {
     data: meData,
     isLoading: meLoading,
@@ -114,7 +71,7 @@ export function useAuthState() {
   const registerMutation = useRegister();
   const queryClient = useQueryClient();
 
-  const isAuthenticated = !!sessionToken && !!meData?.me;
+  const isAuthenticated = !!meData?.me;
   const user = meData?.me || null;
 
   // 登录函数 - 使用 GraphQL
@@ -128,26 +85,16 @@ export function useAuthState() {
       await logoutMutation.mutateAsync({});
     } catch (error) {
       console.error("Logout error:", error);
-      // 即使 GraphQL 调用失败，也要清除本地存储
-      localStorage.removeItem("session_token");
-      localStorage.removeItem("csrf_token");
       queryClient.clear();
     }
   };
 
   // 检查认证状态
   const checkAuth = async () => {
-    if (!sessionToken) {
-      return false;
-    }
-
     try {
       await refetchMe();
       return true;
     } catch {
-      // 清除无效的 token
-      localStorage.removeItem("session_token");
-      localStorage.removeItem("csrf_token");
       return false;
     }
   };

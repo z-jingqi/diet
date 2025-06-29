@@ -8,7 +8,7 @@ import {
   useRegisterMutation,
   type LoginMutationVariables,
   type LogoutMutationVariables,
-  type RegisterMutationVariables
+  type RegisterMutationVariables,
 } from "@/lib/gql/graphql";
 
 interface AuthState {
@@ -17,26 +17,28 @@ interface AuthState {
   isGuestMode: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // 认证方法
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   enableGuest: () => void;
-  
+
   // 状态检查
   canUseFeatures: () => boolean;
   requireAuth: () => boolean;
-  
+
   // 清除错误
   clearError: () => void;
+
+  // 清除 session
+  clearSession: () => void;
 }
 
 // 获取认证客户端
 function getAuthClient() {
-  const sessionToken = localStorage.getItem('session_token');
-  return sessionToken ? createAuthenticatedClient(sessionToken) : graphqlClient;
+  return createAuthenticatedClient();
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
@@ -51,24 +53,16 @@ const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const client = getAuthClient();
       const variables: LoginMutationVariables = { username, password };
-      
+
       // 使用生成的 mutation fetcher
       const result = await useLoginMutation.fetcher(client, variables)();
-      
+
       if (!result.login) {
-        throw new Error('登录失败');
+        throw new Error("登录失败");
       }
-      
-      const { user, sessionToken, csrfToken } = result.login;
-      
-      // 保存 tokens
-      if (sessionToken) {
-        localStorage.setItem('session_token', sessionToken);
-      }
-      if (csrfToken) {
-        localStorage.setItem('csrf_token', csrfToken);
-      }
-      
+
+      const { user } = result.login;
+
       set({
         user: user as User,
         isAuthenticated: true,
@@ -77,7 +71,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : '登录失败',
+        error: error instanceof Error ? error.message : "登录失败",
         isLoading: false,
       });
       throw error;
@@ -89,14 +83,14 @@ const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const client = getAuthClient();
       const variables: RegisterMutationVariables = { username, password };
-      
+
       // 使用生成的 mutation fetcher
       await useRegisterMutation.fetcher(client, variables)();
-      
+
       set({ isLoading: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : '注册失败',
+        error: error instanceof Error ? error.message : "注册失败",
         isLoading: false,
       });
       throw error;
@@ -108,16 +102,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const client = getAuthClient();
       const variables: LogoutMutationVariables = {};
-      
+
       // 使用生成的 mutation fetcher
       await useLogoutMutation.fetcher(client, variables)();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      // 清除本地存储
-      localStorage.removeItem('session_token');
-      localStorage.removeItem('csrf_token');
-      
       set({
         user: null,
         isAuthenticated: false,
@@ -130,26 +120,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      const sessionToken = localStorage.getItem('session_token');
-      if (!sessionToken) {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isGuestMode: false,
-          isLoading: false,
-        });
-        return;
-      }
-
       const client = getAuthClient();
-      
+
       // 使用生成的 query fetcher
       const result = await useGetMeQuery.fetcher(client)();
-      
+
       if (!result.me) {
-        throw new Error('获取用户信息失败');
+        throw new Error("获取用户信息失败");
       }
-      
+
       set({
         user: result.me as User,
         isAuthenticated: true,
@@ -158,9 +137,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch {
       // 获取用户信息失败，说明未登录
-      localStorage.removeItem('session_token');
-      localStorage.removeItem('csrf_token');
-      
       set({
         user: null,
         isAuthenticated: false,
@@ -192,6 +168,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
   clearError: () => {
     set({ error: null });
   },
+
+  clearSession: () => {
+    // 清除 session token
+  },
 }));
 
-export default useAuthStore; 
+export default useAuthStore;

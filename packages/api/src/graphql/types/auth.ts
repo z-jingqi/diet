@@ -493,8 +493,47 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, { username, password }, ctx) => {
       const result = await ctx.services.auth.login({ username, password });
+
+      // Set cookies ------------------------------------------
+      const secure = process.env.NODE_ENV === "production" ? "Secure" : "";
+
+      if (result.sessionToken) {
+        ctx.responseCookies.push(
+          [
+            `session_token=${result.sessionToken}`,
+            "Path=/",
+            "HttpOnly",
+            secure,
+            "SameSite=Lax",
+          ]
+            .filter(Boolean)
+            .join("; ")
+        );
+      }
+
+      if (result.refreshToken) {
+        ctx.responseCookies.push(
+          [
+            `refresh_token=${result.refreshToken}`,
+            "Path=/",
+            "HttpOnly",
+            secure,
+            "SameSite=Lax",
+          ]
+            .filter(Boolean)
+            .join("; ")
+        );
+      }
+
+      if (result.csrfToken) {
+        ctx.responseCookies.push(
+          [`csrf-token=${result.csrfToken}`, "Path=/", secure, "SameSite=Lax"]
+            .filter(Boolean)
+            .join("; ")
+        );
+      }
+
       return {
-        ...result,
         user: result.user
           ? (toGraphQLUser(result.user as any) as GraphQLUser)
           : null,
@@ -507,6 +546,19 @@ builder.mutationFields((t) => ({
     resolve: async (_root, _args, ctx) => {
       const auth = requireAuth(ctx);
       await ctx.services.auth.logout(auth.session.sessionToken);
+
+      // Clear cookie
+      ctx.responseCookies.push(
+        [
+          "session_token=",
+          "Path=/",
+          "HttpOnly",
+          "Secure",
+          "SameSite=Lax",
+          "Max-Age=0",
+        ].join("; ")
+      );
+
       return true;
     },
   }),
@@ -514,10 +566,53 @@ builder.mutationFields((t) => ({
   refreshSession: t.field({
     type: RefreshResponseRef,
     args: {
-      refreshToken: t.arg.string({ required: true }),
+      refreshToken: t.arg.string(), // optional, fallback to cookie
     },
     resolve: async (_root, { refreshToken }, ctx) => {
-      const result = await ctx.services.auth.refreshSession(refreshToken);
+      let token = refreshToken;
+      if (!token) {
+        // try from cookie
+        const cookieHeader = ctx.headers.get("cookie") || "";
+        const cookieMap = Object.fromEntries(
+          cookieHeader.split(";").map((c) => {
+            const [k, v] = c.trim().split("=");
+            return [k, v];
+          })
+        );
+        token = cookieMap["refresh_token"];
+      }
+
+      if (!token) {
+        throw new Error("Refresh token not provided");
+      }
+
+      const result = await ctx.services.auth.refreshSession(token);
+
+      // Set new cookies
+      const secure2 = process.env.NODE_ENV === "production" ? "Secure" : "";
+
+      if (result.sessionToken) {
+        ctx.responseCookies.push(
+          [
+            `session_token=${result.sessionToken}`,
+            "Path=/",
+            "HttpOnly",
+            secure2,
+            "SameSite=Lax",
+          ]
+            .filter(Boolean)
+            .join("; ")
+        );
+      }
+
+      if (result.csrfToken) {
+        ctx.responseCookies.push(
+          [`csrf-token=${result.csrfToken}`, "Path=/", secure2, "SameSite=Lax"]
+            .filter(Boolean)
+            .join("; ")
+        );
+      }
+
       return result;
     },
   }),

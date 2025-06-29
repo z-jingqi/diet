@@ -1,5 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { graphqlClient } from '../client';
+import { useQueryClient } from "@tanstack/react-query";
+import { graphqlClient } from "../client";
+import { QUERY_KEYS } from "./common";
 import {
   useGetTagsQuery,
   useGetTagCategoriesQuery,
@@ -9,8 +10,8 @@ import {
   useCheckTagConflictsQuery,
   type GetTagsQueryVariables,
   type GetTagQueryVariables,
-  type CheckTagConflictsQueryVariables
-} from '../graphql';
+  type CheckTagConflictsQueryVariables,
+} from "../graphql";
 
 // 冲突类型定义
 export interface TagConflictInfo {
@@ -45,7 +46,7 @@ export function useTags(categoryId?: string, search?: string) {
   const variables: GetTagsQueryVariables = {};
   if (categoryId) variables.categoryId = categoryId;
   if (search) variables.search = search;
-  
+
   return useGetTagsQuery(graphqlClient, variables);
 }
 
@@ -69,11 +70,11 @@ export function useTagConflicts() {
 export function useCheckTagConflicts(tagIds: string[]) {
   const variables: CheckTagConflictsQueryVariables = { tagIds };
   const query = useCheckTagConflictsQuery(graphqlClient, variables, {
-    enabled: tagIds.length > 0
+    enabled: tagIds.length > 0,
   });
 
   // 解析返回的 JSON 字符串
-  const parsedData = query.data?.checkTagConflicts 
+  const parsedData = query.data?.checkTagConflicts
     ? (JSON.parse(query.data.checkTagConflicts) as ConflictResult)
     : null;
 
@@ -86,13 +87,15 @@ export function useCheckTagConflicts(tagIds: string[]) {
 // 创建标签
 export function useCreateTag() {
   const queryClient = useQueryClient();
-  
+
   return useCreateTagMutation(graphqlClient, {
     onSuccess: () => {
       // 刷新相关查询
-      queryClient.invalidateQueries({ queryKey: ['GetTags'] });
-      queryClient.invalidateQueries({ queryKey: ['GetTagCategories'] });
-      queryClient.invalidateQueries({ queryKey: ['GetTagConflicts'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_TAGS });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GET_TAG_CATEGORIES,
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_TAG_CONFLICTS });
     },
   });
-} 
+}

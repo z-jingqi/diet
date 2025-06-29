@@ -5,9 +5,24 @@ import { API_BASE } from "@/lib/constants";
 // 使用统一的 API_BASE，确保 ENDPOINT 始终是有效的 URL
 export const GRAPHQL_ENDPOINT = `${API_BASE}/graphql`;
 
+// Helper to read cookie value by name
+const getCookie = (name: string): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+};
+
 export const graphqlClient = new GraphQLClient(GRAPHQL_ENDPOINT, {
-  headers: {
-    "X-CSRF-Token": "true",
+  credentials: "include",
+  // 每次请求前动态注入 CSRF 头
+  fetch: async (input, init) => {
+    const csrfToken = getCookie("csrf-token");
+    // 保留 graphql-request 设定的所有原始头（尤其是 Content-Type: application/json）
+    const headers = new Headers(init?.headers);
+    if (csrfToken) {
+      headers.set("X-CSRF-Token", csrfToken);
+    }
+    return fetch(input, { ...init, headers });
   },
 });
 
@@ -28,11 +43,6 @@ export async function mutate<T extends keyof Mutation>(
 }
 
 // 认证相关的客户端（包含 session token）
-export function createAuthenticatedClient(sessionToken: string) {
-  return new GraphQLClient(GRAPHQL_ENDPOINT, {
-    headers: {
-      "X-CSRF-Token": "true", // 使用与后端一致的 CSRF 头部
-      Cookie: `session_token=${sessionToken}`,
-    },
-  });
+export function createAuthenticatedClient() {
+  return graphqlClient; // cookie already included
 }

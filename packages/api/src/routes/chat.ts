@@ -96,14 +96,13 @@ chat.post("/authenticated", async (c) => {
 
 // 保持原有的 "/" 端点以兼容现有代码，使用CSRF保护
 chat.use("/*", async (c, next) => {
-  // 跳过已经处理的路由
+  // 对除 /guest 和 /authenticated 外的请求执行 CSRF 保护
   if (c.req.path.includes("/guest") || c.req.path.includes("/authenticated")) {
-    await next();
-    return;
+    return await next();
   }
 
-  // 对根路径聊天应用 CSRF 保护
-  await csrfProtection(c, next);
+  // 直接调用 CSRF 中间件（其内部会在通过校验后调用 next）
+  return csrfProtection(c, next);
 });
 
 chat.post("/", async (c) => {

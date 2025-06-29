@@ -11,24 +11,14 @@ import {
   RefreshTokenResponse,
 } from "@diet/shared";
 import { generateId } from "../utils/id";
-import { CsrfService } from "./csrf";
 
 type SessionWithUser = {
   users: typeof users.$inferSelect;
   user_sessions: typeof user_sessions.$inferSelect;
 };
 
-// 扩展User类型以包含password_hash字段（仅在内部使用）
-interface UserWithPassword extends User {
-  password_hash: string;
-}
-
 export class AuthService {
-  private csrfService: CsrfService;
-
-  constructor(private db: DB) {
-    this.csrfService = new CsrfService(db as any);
-  }
+  constructor(private db: DB) {}
 
   // 密码加密（使用PBKDF2和随机盐值）
   private async hashPassword(password: string): Promise<string> {
@@ -203,8 +193,8 @@ export class AuthService {
     // 创建会话
     const session = await this.createSession(user.id);
 
-    // 生成CSRF token
-    const csrfToken = await this.csrfService.createToken(user.id);
+    // 生成 CSRF token（无状态）
+    const csrfToken = this.generateCsrfToken();
 
     // 更新最后登录时间
     await this.db
@@ -278,7 +268,7 @@ export class AuthService {
         .where(
           and(
             eq(user_sessions.session_token, sessionToken),
-            eq(user_sessions.session_expires_at, new Date().toISOString())
+            sql`${user_sessions.session_expires_at} > CURRENT_TIMESTAMP`
           )
         )
     );
@@ -305,7 +295,7 @@ export class AuthService {
         .where(
           and(
             eq(user_sessions.refresh_token, refreshToken),
-            eq(user_sessions.refresh_expires_at, new Date().toISOString())
+            sql`${user_sessions.refresh_expires_at} > CURRENT_TIMESTAMP`
           )
         )
     );
@@ -371,8 +361,8 @@ export class AuthService {
       })
       .where(eq(user_sessions.id, session.id));
 
-    // 生成新的CSRF token
-    const csrfToken = await this.csrfService.createToken(session.user_id);
+    // 生成新的 CSRF token
+    const csrfToken = this.generateCsrfToken();
 
     return {
       sessionToken: newSessionToken,
@@ -381,14 +371,9 @@ export class AuthService {
     };
   }
 
-  // 验证CSRF token
-  async validateCsrfToken(userId: string, csrfToken: string): Promise<boolean> {
-    return this.csrfService.validateToken(userId, csrfToken);
-  }
-
-  // 获取CSRF token
-  async getCsrfToken(userId: string): Promise<string | null> {
-    return this.csrfService.getToken(userId);
+  // 生成 CSRF token（无需持久化）
+  private generateCsrfToken(): string {
+    return crypto.randomUUID();
   }
 
   // 登出（删除会话）
@@ -447,5 +432,18 @@ export class AuthService {
       createdAt: user.created_at || undefined,
       updatedAt: user.updated_at || undefined,
     };
+  }
+
+  // 以下方法在无状态 CSRF 策略下不再需要，但保留空实现以兼容旧调用
+  async validateCsrfToken(
+    _userId: string,
+    _csrfToken: string
+  ): Promise<boolean> {
+    // 始终返回 true，因为验证交由中间件等值比较
+    return true;
+  }
+
+  async getCsrfToken(_userId: string): Promise<string | null> {
+    return null;
   }
 }

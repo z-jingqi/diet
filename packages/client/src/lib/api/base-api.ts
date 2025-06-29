@@ -6,19 +6,16 @@ import {
 
 type RequestInit = globalThis.RequestInit;
 
-// 获取 CSRF token
+// Helper: 读取 cookie
+const readCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+// 获取 CSRF token（从 cookie）
 const getCsrfToken = (): string | null => {
-  return localStorage.getItem("csrf_token");
-};
-
-// 设置 CSRF token
-const setCsrfToken = (token: string): void => {
-  localStorage.setItem("csrf_token", token);
-};
-
-// 清除 CSRF token
-const clearCsrfToken = (): void => {
-  localStorage.removeItem("csrf_token");
+  return readCookie("csrf-token");
 };
 
 // 检查是否已登录
@@ -67,26 +64,17 @@ export const fetchWithRefresh = async (
 
     if (refreshRes.ok) {
       const refreshData = await refreshRes.json();
-      // 更新 CSRF token
-      if (refreshData.csrf_token) {
-        setCsrfToken(refreshData.csrf_token);
-      }
-
       // 刷新成功，重试原请求
       response = await fetch(input, {
         ...init,
         credentials: "include",
         headers: {
           ...headers,
-          ...(refreshData.csrf_token && {
-            "X-CSRF-Token": refreshData.csrf_token,
-          }),
+          ...(refreshData.csrf_token
+            ? { "X-CSRF-Token": refreshData.csrf_token }
+            : {}),
         },
       });
-    } else {
-      // 刷新失败，清除 CSRF token
-      clearCsrfToken();
-      return response;
     }
   }
 
@@ -131,7 +119,7 @@ export const sendMessage = async ({
   if (format === "stream") {
     // 检查是否是游客请求（通过URL判断）
     const isGuestRequest = endpoint.includes("/chat/guest");
-    
+
     // 准备请求头
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -194,4 +182,4 @@ export const sendMessage = async ({
 };
 
 // 导出相关函数
-export { getCsrfToken, setCsrfToken, clearCsrfToken, isLoggedIn };
+export { getCsrfToken, isLoggedIn };
