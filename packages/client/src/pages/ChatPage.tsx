@@ -18,7 +18,6 @@ const ChatPage = () => {
     canSendMessage,
     abortCurrentMessage,
     currentSessionId,
-    createSession,
     createTemporarySession,
     switchSession,
     deleteSession,
