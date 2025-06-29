@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { buildMessage, buildUserMessage } from "@/utils/message-builder";
 import { toAIMessages } from "@/utils/chat-utils";
-import type { Message, ChatSession, Tag, MessageStatus, RecipeDetail } from "@diet/shared";
+import type {
+  Message,
+  ChatSession,
+  Tag,
+  MessageStatus,
+  RecipeDetail,
+} from "@diet/shared";
 import {
   getIntent,
   sendChatMessage,
@@ -36,7 +42,10 @@ interface ChatState {
   // 新增：从 GraphQL 加载会话
   loadSessionsFromGraphQL: (graphqlSessions: any[]) => void;
   // 消息更新方法
-  updateMessageRecipeDetails: (messageId: string, recipeDetails: RecipeDetail[]) => void;
+  updateMessageRecipeDetails: (
+    messageId: string,
+    recipeDetails: RecipeDetail[]
+  ) => void;
   // 工具方法
   generateSessionTitle: (messages: Message[]) => string;
   // 私有方法（重构后的内部方法）
@@ -180,7 +189,8 @@ const useChatStore = create<
     abortController: undefined,
 
     addMessage: (message) => {
-      const { currentSessionId, isTemporarySession, generateSessionTitle } = get();
+      const { currentSessionId, isTemporarySession, generateSessionTitle } =
+        get();
       if (!currentSessionId) {
         // 如果没有当前会话，创建一个新会话
         const newSessionId = get().createSession();
@@ -190,13 +200,13 @@ const useChatStore = create<
       // 使用公共方法更新当前会话，添加消息
       sessionUtils.updateCurrentSession((session) => {
         let newTitle = session.title;
-        
+
         // 如果session使用的是默认标题，从消息数组生成新标题
         if (session.title === "新对话") {
           const allMessages = [...session.messages, message];
           newTitle = generateSessionTitle(allMessages);
         }
-        
+
         return {
           ...session,
           messages: [...session.messages, message],
@@ -205,8 +215,8 @@ const useChatStore = create<
         };
       });
 
-      // 如果是临时会话且这是第一条AI消息，标记为非临时会话
-      if (isTemporarySession && !message.isUser) {
+      // 如果当前是临时会话，发送任意消息后将其转为正式会话
+      if (isTemporarySession) {
         set({ isTemporarySession: false });
       }
     },
@@ -491,12 +501,16 @@ const useChatStore = create<
 
       // 防重复调用保护
       if (!canSendMessage()) {
-        console.warn('Message sending is currently disabled or already in progress');
+        console.warn(
+          "Message sending is currently disabled or already in progress"
+        );
         return;
       }
 
       // 获取游客模式状态
-      const { isGuestMode } = await import("@/store/auth-store").then(m => m.default.getState());
+      const { isGuestMode } = await import("@/store/auth-store").then((m) =>
+        m.default.getState()
+      );
 
       // 1. 处理用户消息和标签更新
       handleUserMessage(content);
@@ -513,7 +527,11 @@ const useChatStore = create<
       try {
         // 4. 获取意图
         set({ gettingIntent: true });
-        const intent = await getIntent(AIMessages, controller.signal, isGuestMode);
+        const intent = await getIntent(
+          AIMessages,
+          controller.signal,
+          isGuestMode
+        );
         set({ gettingIntent: false, abortController: undefined });
 
         // 5. 根据意图处理消息
@@ -668,7 +686,7 @@ const useChatStore = create<
     getSessions: () => {
       const { sessions, currentSessionId, isTemporarySession } = get();
       // 过滤掉临时会话：如果当前会话是临时会话，则不包含在返回的列表中
-      return sessions.filter(session => {
+      return sessions.filter((session) => {
         if (isTemporarySession && session.id === currentSessionId) {
           return false;
         }
@@ -685,7 +703,10 @@ const useChatStore = create<
       }));
     },
 
-    updateMessageRecipeDetails: (messageId: string, recipeDetails: RecipeDetail[]) => {
+    updateMessageRecipeDetails: (
+      messageId: string,
+      recipeDetails: RecipeDetail[]
+    ) => {
       set((state) => {
         const currentMessages = get().getCurrentMessages();
         const updatedMessages = currentMessages.map((msg) =>
@@ -704,16 +725,16 @@ const useChatStore = create<
 
     generateSessionTitle: (messages: Message[]) => {
       // 找到第一个用户消息
-      const firstUserMessage = messages.find(msg => msg.isUser);
-      
+      const firstUserMessage = messages.find((msg) => msg.isUser);
+
       if (!firstUserMessage || !firstUserMessage.content) {
         return "新对话";
       }
-      
-      // 取前15个字符作为标题，如果超过15个字符则加上省略号
-      const maxLength = 15;
+
+      // 取前20个字符作为标题，如果超过20个字符则加上省略号
+      const maxLength = 20;
       const content = firstUserMessage.content.trim();
-      
+
       if (content.length <= maxLength) {
         return content;
       } else {
@@ -723,21 +744,26 @@ const useChatStore = create<
 
     // 新增：从 GraphQL 加载会话
     loadSessionsFromGraphQL: (graphqlSessions: any[]) => {
-      const convertedSessions: ChatSession[] = graphqlSessions.map((session) => ({
-        id: session.id,
-        title: session.title || "新对话",
-        messages: session.messages || [],
-        currentTags: session.currentTags || [],
-        createdAt: new Date(session.createdAt),
-        updatedAt: new Date(session.updatedAt),
-      }));
+      const convertedSessions: ChatSession[] = graphqlSessions.map(
+        (session) => ({
+          id: session.id,
+          title: session.title || "新对话",
+          messages: session.messages || [],
+          currentTags: session.currentTags || [],
+          createdAt: new Date(session.createdAt),
+          updatedAt: new Date(session.updatedAt),
+        })
+      );
 
-      set((state) => ({
-        sessions: convertedSessions,
-        // 如果没有当前会话且加载的会话不为空，选择第一个会话
-        currentSessionId: state.currentSessionId || (convertedSessions.length > 0 ? convertedSessions[0].id : null),
-        isTemporarySession: false,
-      }));
+      if (convertedSessions.length > 0) {
+        // 仅当后端返回了会话列表时才覆盖本地会话
+        set((state) => ({
+          sessions: convertedSessions,
+          // 如果没有当前会话且加载的会话不为空，选择第一个会话
+          currentSessionId: state.currentSessionId || convertedSessions[0].id,
+          isTemporarySession: false,
+        }));
+      }
     },
   };
 });

@@ -14,28 +14,28 @@ const KitchenToolsPage = () => {
 
   const handleToolToggle = (toolId: string, checked: boolean) => {
     if (checked) {
-      setSelectedTools(prev => [...prev, toolId]);
+      setSelectedTools((prev) => [...prev, toolId]);
     } else {
-      setSelectedTools(prev => prev.filter(id => id !== toolId));
+      setSelectedTools((prev) => prev.filter((id) => id !== toolId));
     }
   };
 
   const handleAddCustomTool = (tool: string) => {
-    setCustomTools(prev => [...prev, tool]);
+    setCustomTools((prev) => [...prev, tool]);
   };
 
   const handleRemoveCustomTool = (tool: string) => {
-    setCustomTools(prev => prev.filter(t => t !== tool));
+    setCustomTools((prev) => prev.filter((t) => t !== tool));
   };
 
   const handleSave = () => {
     // TODO: 保存厨具设置到本地存储或后端
     const allTools = [...selectedTools, ...customTools];
     console.log("保存厨具设置:", allTools);
-    
+
     // 保存到 localStorage
     localStorage.setItem("kitchenTools", JSON.stringify(allTools));
-    
+
     // 返回上一页
     authNavigate({ to: "/" });
   };
@@ -110,7 +110,8 @@ const KitchenToolsPage = () => {
                 已选择 {selectedTools.length + customTools.length} 件厨具
               </Typography>
               <MutedText className="text-sm">
-                常用厨具: {selectedTools.length} 件 | 自定义厨具: {customTools.length} 件
+                常用厨具: {selectedTools.length} 件 | 自定义厨具:{" "}
+                {customTools.length} 件
               </MutedText>
             </div>
           </CardContent>
@@ -120,4 +121,4 @@ const KitchenToolsPage = () => {
   );
 };
 
-export default KitchenToolsPage; 
+export default KitchenToolsPage;

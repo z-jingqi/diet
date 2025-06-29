@@ -18,6 +18,7 @@ const ChatPage = () => {
     canSendMessage,
     abortCurrentMessage,
     currentSessionId,
+    createSession,
     createTemporarySession,
     switchSession,
     deleteSession,
@@ -27,7 +28,8 @@ const ChatPage = () => {
   } = useChatStore();
 
   // GraphQL 查询用户聊天会话
-  const { data: graphqlSessions, isLoading: isLoadingSessions } = useMyChatSessions();
+  const { data: graphqlSessions, isLoading: isLoadingSessions } =
+    useMyChatSessions();
 
   const messages = getCurrentMessages();
 
@@ -36,26 +38,33 @@ const ChatPage = () => {
     if (isAuthenticated && !isGuestMode && graphqlSessions?.myChatSessions) {
       // 过滤掉 null 值并转换数据格式
       const validSessions = graphqlSessions.myChatSessions
-        .filter((session): session is NonNullable<typeof session> => session !== null)
+        .filter(
+          (session): session is NonNullable<typeof session> => session !== null
+        )
         .map((session) => ({
-          id: session.id || '',
+          id: session.id || "",
           title: session.title || "新对话",
-          messages: session.messages?.filter((msg): msg is NonNullable<typeof msg> => msg !== null) || [],
-          currentTags: session.currentTags?.filter((tag): tag is string => tag !== null) || [],
+          messages:
+            session.messages?.filter(
+              (msg): msg is NonNullable<typeof msg> => msg !== null
+            ) || [],
+          currentTags:
+            session.currentTags?.filter((tag): tag is string => tag !== null) ||
+            [],
           createdAt: session.createdAt,
           updatedAt: session.updatedAt,
         }));
-      
+
       loadSessionsFromGraphQL(validSessions);
     }
   }, [isAuthenticated, isGuestMode, graphqlSessions, loadSessionsFromGraphQL]);
 
   // 进入页面时创建临时会话
   useEffect(() => {
-    if (!currentSessionId && (isAuthenticated || isGuestMode)) {
+    if (!currentSessionId) {
       createTemporarySession();
     }
-  }, [currentSessionId, createTemporarySession, isAuthenticated, isGuestMode]);
+  }, [currentSessionId, createTemporarySession]);
 
   // 离开页面时清理临时会话
   useEffect(() => {
