@@ -1,62 +1,64 @@
-import { builder } from '../builder';
-import { tagCategories, tags, tagConflicts } from '../../db/schema/tags';
-import { eq, and, like, asc, inArray } from 'drizzle-orm';
-import type { InferSelectModel } from 'drizzle-orm';
+import { builder } from "../builder";
+import { tag_categories, tags, tag_conflicts } from "../../db/schema/tags";
+import { eq, and, like, asc, inArray } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 
 // Drizzle model types
-type TagCategoryModel = InferSelectModel<typeof tagCategories>;
+type TagCategoryModel = InferSelectModel<typeof tag_categories>;
 type TagModel = InferSelectModel<typeof tags>;
-type TagConflictModel = InferSelectModel<typeof tagConflicts>;
+type TagConflictModel = InferSelectModel<typeof tag_conflicts>;
 
 // ----------------------
 // TagCategory type
 // ----------------------
-export const TagCategoryRef = builder.objectRef<TagCategoryModel>('TagCategory').implement({
-  fields: (t) => ({
-    id: t.exposeID('id'),
-    name: t.exposeString('name'),
-    description: t.exposeString('description', { nullable: true }),
-    sortOrder: t.exposeInt('sortOrder', { nullable: true }),
-    isActive: t.exposeBoolean('isActive', { nullable: true }),
-    createdAt: t.exposeString('createdAt', { nullable: true }),
-  }),
-});
+export const TagCategoryRef = builder
+  .objectRef<TagCategoryModel>("TagCategory")
+  .implement({
+    fields: (t) => ({
+      id: t.exposeID("id"),
+      name: t.exposeString("name"),
+      description: t.exposeString("description", { nullable: true }),
+      sortOrder: t.exposeInt("sort_order", { nullable: true }),
+      isActive: t.exposeBoolean("is_active", { nullable: true }),
+      createdAt: t.exposeString("created_at", { nullable: true }),
+    }),
+  });
 
 // ----------------------
 // Tag type
 // ----------------------
-export const TagRef = builder.objectRef<TagModel>('Tag').implement({
+export const TagRef = builder.objectRef<TagModel>("Tag").implement({
   fields: (t) => ({
-    id: t.exposeID('id'),
-    name: t.exposeString('name'),
-    description: t.exposeString('description'),
-    categoryId: t.exposeString('categoryId'),
-    aiPrompt: t.exposeString('aiPrompt'),
-    sortOrder: t.exposeInt('sortOrder', { nullable: true }),
-    isActive: t.exposeBoolean('isActive', { nullable: true }),
-    createdAt: t.exposeString('createdAt', { nullable: true }),
-    updatedAt: t.exposeString('updatedAt', { nullable: true }),
-    
-    // Parse restrictions from JSON string
+    id: t.exposeID("id"),
+    name: t.exposeString("name"),
+    description: t.exposeString("description", { nullable: true }),
+    categoryId: t.exposeString("category_id"),
+    aiPrompt: t.exposeString("ai_prompt", { nullable: true }),
+    sortOrder: t.exposeInt("sort_order", { nullable: true }),
+    isActive: t.exposeBoolean("is_active", { nullable: true }),
+    createdAt: t.exposeString("created_at", { nullable: true }),
+    updatedAt: t.exposeString("updated_at", { nullable: true }),
     restrictions: t.field({
-      type: ['String'],
+      type: ["String"],
+      nullable: true,
       resolve: (parent) => {
-        if (!parent.restrictions) return [];
+        if (!parent.restrictions) return null;
         try {
-          return JSON.parse(parent.restrictions) as string[];
+          return JSON.parse(parent.restrictions);
         } catch {
-          return [];
+          return null;
         }
       },
     }),
-    
+
+    // Relations
     category: t.field({
       type: TagCategoryRef,
       resolve: async (parent, _args, ctx) => {
         const [category] = await ctx.db
           .select()
-          .from(tagCategories)
-          .where(eq(tagCategories.id, parent.categoryId))
+          .from(tag_categories)
+          .where(eq(tag_categories.id, parent.category_id))
           .limit(1);
         return category ?? null;
       },
@@ -64,178 +66,132 @@ export const TagRef = builder.objectRef<TagModel>('Tag').implement({
   }),
 });
 
+// Add tags relation to TagCategory after TagRef is defined
+builder.objectField(TagCategoryRef, "tags", (t) =>
+  t.field({
+    type: [TagRef],
+    resolve: async (parent, _args, ctx) => {
+      return await ctx.db
+        .select()
+        .from(tags)
+        .where(eq(tags.category_id, parent.id))
+        .orderBy(asc(tags.sort_order), asc(tags.name));
+    },
+  })
+);
+
 // ----------------------
 // TagConflict type
 // ----------------------
-export const TagConflictRef = builder.objectRef<TagConflictModel>('TagConflict').implement({
-  fields: (t) => ({
-    id: t.exposeID('id'),
-    tagId1: t.exposeString('tagId1'),
-    tagId2: t.exposeString('tagId2'),
-    conflictType: t.exposeString('conflictType'),
-    description: t.exposeString('description', { nullable: true }),
-    createdAt: t.exposeString('createdAt', { nullable: true }),
-    
-    // Relations
-    tag1: t.field({
-      type: TagRef,
-      resolve: async (parent, _args, ctx) => {
-        const [tag] = await ctx.db
-          .select()
-          .from(tags)
-          .where(eq(tags.id, parent.tagId1))
-          .limit(1);
-        return tag ?? null;
-      },
+export const TagConflictRef = builder
+  .objectRef<TagConflictModel>("TagConflict")
+  .implement({
+    fields: (t) => ({
+      id: t.exposeID("id"),
+      tagId1: t.exposeString("tag_id_1"),
+      tagId2: t.exposeString("tag_id_2"),
+      conflictType: t.exposeString("conflict_type"),
+      description: t.exposeString("description", { nullable: true }),
+      createdAt: t.exposeString("created_at", { nullable: true }),
     }),
-    
-    tag2: t.field({
-      type: TagRef,
-      resolve: async (parent, _args, ctx) => {
-        const [tag] = await ctx.db
-          .select()
-          .from(tags)
-          .where(eq(tags.id, parent.tagId2))
-          .limit(1);
-        return tag ?? null;
-      },
-    }),
-  }),
-});
+  });
+
+// Add tag relations to TagConflict after TagRef is defined
+builder.objectField(TagConflictRef, "tag1", (t) =>
+  t.field({
+    type: TagRef,
+    resolve: async (parent, _args, ctx) => {
+      const [tag] = await ctx.db
+        .select()
+        .from(tags)
+        .where(eq(tags.id, parent.tag_id_1))
+        .limit(1);
+      return tag ?? null;
+    },
+  })
+);
+
+builder.objectField(TagConflictRef, "tag2", (t) =>
+  t.field({
+    type: TagRef,
+    resolve: async (parent, _args, ctx) => {
+      const [tag] = await ctx.db
+        .select()
+        .from(tags)
+        .where(eq(tags.id, parent.tag_id_2))
+        .limit(1);
+      return tag ?? null;
+    },
+  })
+);
 
 // ----------------------
 // Queries
 // ----------------------
 builder.queryFields((t) => ({
-  // Fetch all active tag categories
+  // Fetch all tag categories
   tagCategories: t.field({
     type: [TagCategoryRef],
-    resolve: async (_root, _args, ctx) => {
-      return await ctx.db
-        .select()
-        .from(tagCategories)
-        .where(eq(tagCategories.isActive, true))
-        .orderBy(asc(tagCategories.sortOrder));
-    },
+    resolve: (_r, _a, ctx) => ctx.services.tag.listCategories(),
   }),
 
-  // Fetch single tag category by ID
+  // Fetch a specific tag category
   tagCategory: t.field({
     type: TagCategoryRef,
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { id }, ctx) => {
-      const [category] = await ctx.db
-        .select()
-        .from(tagCategories)
-        .where(eq(tagCategories.id, id as string))
-        .limit(1);
-      return category ?? null;
-    },
+    resolve: (_r, { id }, ctx) => ctx.services.tag.getCategory(id),
   }),
 
-  // Fetch all active tags
+  // Fetch all tags
   tags: t.field({
     type: [TagRef],
     args: {
-      categoryId: t.arg.string({ required: false }),
-      search: t.arg.string({ required: false }),
+      categoryId: t.arg.id(),
+      search: t.arg.string(),
     },
-    resolve: async (_root, { categoryId, search }, ctx) => {
-      let whereConditions = [eq(tags.isActive, true)];
-      
-      // 添加分类过滤
-      if (categoryId) {
-        whereConditions.push(eq(tags.categoryId, categoryId));
-      }
-      
-      // 添加搜索过滤
-      if (search) {
-        whereConditions.push(like(tags.name, `%${search}%`));
-      }
-      
-      return await ctx.db
-        .select()
-        .from(tags)
-        .where(and(...whereConditions))
-        .orderBy(asc(tags.sortOrder), asc(tags.name));
-    },
+    resolve: (_r, args, ctx) =>
+      ctx.services.tag.listTags({
+        categoryId: args.categoryId ?? undefined,
+        search: args.search ?? undefined,
+      }),
   }),
 
-  // Fetch single tag by ID
+  // Fetch a specific tag
   tag: t.field({
     type: TagRef,
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { id }, ctx) => {
-      const [tag] = await ctx.db
-        .select()
-        .from(tags)
-        .where(eq(tags.id, id as string))
-        .limit(1);
-      return tag ?? null;
-    },
+    resolve: (_r, { id }, ctx) => ctx.services.tag.getTag(id),
   }),
 
   // Fetch tags by category
   tagsByCategory: t.field({
     type: [TagRef],
     args: {
-      categoryId: t.arg.string({ required: true }),
+      categoryId: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { categoryId }, ctx) => {
-      return await ctx.db
-        .select()
-        .from(tags)
-        .where(eq(tags.categoryId, categoryId));
-    },
+    resolve: (_r, { categoryId }, ctx) =>
+      ctx.services.tag.getTagsByCategory(categoryId),
   }),
 
   // Fetch all tag conflicts
   tagConflicts: t.field({
     type: [TagConflictRef],
-    resolve: async (_root, _args, ctx) => {
-      return await ctx.db
-        .select()
-        .from(tagConflicts)
-        .orderBy(asc(tagConflicts.conflictType), asc(tagConflicts.id));
-    },
+    resolve: (_r, _a, ctx) => ctx.services.tag.listConflicts(),
   }),
 
   // Check tag conflicts for a set of tag IDs
   checkTagConflicts: t.field({
-    type: 'String', // 返回 JSON 字符串格式的冲突信息
+    type: "String", // 返回 JSON 字符串格式的冲突信息
     args: {
-      tagIds: t.arg.stringList({ required: true }),
+      tagIds: t.arg.idList({ required: true }),
     },
     resolve: async (_root, { tagIds }, ctx) => {
-      // 获取所有相关的冲突关系
-      const conflicts = await ctx.db
-        .select()
-        .from(tagConflicts)
-        .where(
-          and(
-            inArray(tagConflicts.tagId1, tagIds),
-            inArray(tagConflicts.tagId2, tagIds)
-          )
-        );
-
-      // 按冲突类型分组
-      const conflictsByType = {
-        mutual_exclusive: conflicts.filter(c => c.conflictType === 'mutual_exclusive'),
-        warning: conflicts.filter(c => c.conflictType === 'warning'),
-        info: conflicts.filter(c => c.conflictType === 'info'),
-      };
-
-      const result = {
-        conflicts: conflictsByType,
-        hasConflicts: conflicts.length > 0,
-        totalConflicts: conflicts.length,
-      };
-
-      return JSON.stringify(result);
+      const res = await ctx.services.tag.checkConflicts(tagIds);
+      return JSON.stringify(res);
     },
   }),
 }));
@@ -244,27 +200,20 @@ builder.queryFields((t) => ({
 // Mutations
 // ----------------------
 builder.mutationFields((t) => ({
-  // Create new tag category
+  // Create tag category
   createTagCategory: t.field({
     type: TagCategoryRef,
     args: {
       name: t.arg.string({ required: true }),
-      description: t.arg.string({ required: false }),
-      sortOrder: t.arg.int({ required: false }),
+      description: t.arg.string(),
+      sortOrder: t.arg.int(),
     },
-    resolve: async (_root, { name, description, sortOrder }, ctx) => {
-      const [category] = await ctx.db
-        .insert(tagCategories)
-        .values({
-          id: crypto.randomUUID(),
-          name,
-          description: description ?? null,
-          sortOrder: sortOrder ?? 0,
-        })
-        .returning();
-      
-      return category;
-    },
+    resolve: (_r, args, ctx) =>
+      ctx.services.tag.createCategory({
+        name: args.name,
+        description: args.description ?? null,
+        sortOrder: args.sortOrder ?? undefined,
+      }),
   }),
 
   // Update tag category
@@ -272,69 +221,47 @@ builder.mutationFields((t) => ({
     type: TagCategoryRef,
     args: {
       id: t.arg.id({ required: true }),
-      name: t.arg.string({ required: false }),
-      description: t.arg.string({ required: false }),
-      sortOrder: t.arg.int({ required: false }),
+      name: t.arg.string(),
+      description: t.arg.string(),
+      sortOrder: t.arg.int(),
     },
-    resolve: async (_root, { id, name, description, sortOrder }, ctx) => {
-      const updateData: any = {};
-      if (name !== undefined) updateData.name = name;
-      if (description !== undefined) updateData.description = description;
-      if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
-
-      const [category] = await ctx.db
-        .update(tagCategories)
-        .set(updateData)
-        .where(eq(tagCategories.id, id as string))
-        .returning();
-      
-      return category ?? null;
-    },
+    resolve: (_r, args, ctx) =>
+      ctx.services.tag.updateCategory(args.id, {
+        name: args.name ?? undefined,
+        description: args.description ?? undefined,
+        sortOrder: args.sortOrder ?? undefined,
+      }),
   }),
 
   // Delete tag category
   deleteTagCategory: t.field({
-    type: 'Boolean',
+    type: "Boolean",
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { id }, ctx) => {
-      const [category] = await ctx.db
-        .delete(tagCategories)
-        .where(eq(tagCategories.id, id as string))
-        .returning();
-      
-      return !!category;
-    },
+    resolve: (_r, { id }, ctx) => ctx.services.tag.deleteCategory(id),
   }),
 
-  // Create new tag
+  // Create tag
   createTag: t.field({
     type: TagRef,
     args: {
       name: t.arg.string({ required: true }),
-      description: t.arg.string({ required: true }),
-      categoryId: t.arg.string({ required: true }),
-      restrictions: t.arg.stringList({ required: false }),
-      aiPrompt: t.arg.string({ required: true }),
-      sortOrder: t.arg.int({ required: false }),
+      description: t.arg.string(),
+      categoryId: t.arg.id({ required: true }),
+      aiPrompt: t.arg.string(),
+      restrictions: t.arg.stringList(),
+      sortOrder: t.arg.int(),
     },
-    resolve: async (_root, { name, description, categoryId, restrictions, aiPrompt, sortOrder }, ctx) => {
-      const [tag] = await ctx.db
-        .insert(tags)
-        .values({
-          id: crypto.randomUUID(),
-          name,
-          description,
-          categoryId,
-          restrictions: restrictions ? JSON.stringify(restrictions) : null,
-          aiPrompt,
-          sortOrder: sortOrder ?? 0,
-        })
-        .returning();
-      
-      return tag;
-    },
+    resolve: (_r, args, ctx) =>
+      ctx.services.tag.createTag({
+        name: args.name,
+        description: args.description ?? null,
+        categoryId: args.categoryId,
+        aiPrompt: args.aiPrompt ?? null,
+        restrictions: args.restrictions ?? null,
+        sortOrder: args.sortOrder ?? null,
+      }),
   }),
 
   // Update tag
@@ -342,85 +269,57 @@ builder.mutationFields((t) => ({
     type: TagRef,
     args: {
       id: t.arg.id({ required: true }),
-      name: t.arg.string({ required: false }),
-      description: t.arg.string({ required: false }),
-      restrictions: t.arg.stringList({ required: false }),
-      aiPrompt: t.arg.string({ required: false }),
-      sortOrder: t.arg.int({ required: false }),
+      name: t.arg.string(),
+      description: t.arg.string(),
+      aiPrompt: t.arg.string(),
+      restrictions: t.arg.stringList(),
+      sortOrder: t.arg.int(),
     },
-    resolve: async (_root, { id, name, description, restrictions, aiPrompt, sortOrder }, ctx) => {
-      const updateData: any = {};
-      if (name !== undefined) updateData.name = name;
-      if (description !== undefined) updateData.description = description;
-      if (restrictions !== undefined) updateData.restrictions = JSON.stringify(restrictions);
-      if (aiPrompt !== undefined) updateData.aiPrompt = aiPrompt;
-      if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
-      updateData.updatedAt = new Date().toISOString();
-
-      const [tag] = await ctx.db
-        .update(tags)
-        .set(updateData)
-        .where(eq(tags.id, id as string))
-        .returning();
-      
-      return tag ?? null;
+    resolve: (_r, args, ctx) => {
+      const data: any = {};
+      if (args.name !== undefined) data.name = args.name;
+      if (args.description !== undefined) data.description = args.description;
+      if (args.aiPrompt !== undefined) data.aiPrompt = args.aiPrompt;
+      if (args.restrictions !== undefined)
+        data.restrictions = args.restrictions;
+      if (args.sortOrder !== undefined) data.sortOrder = args.sortOrder;
+      return ctx.services.tag.updateTag(args.id, data);
     },
   }),
 
   // Delete tag
   deleteTag: t.field({
-    type: 'Boolean',
+    type: "Boolean",
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { id }, ctx) => {
-      const [tag] = await ctx.db
-        .delete(tags)
-        .where(eq(tags.id, id as string))
-        .returning();
-      
-      return !!tag;
-    },
+    resolve: (_r, { id }, ctx) => ctx.services.tag.deleteTag(id),
   }),
 
   // Create tag conflict
   createTagConflict: t.field({
     type: TagConflictRef,
     args: {
-      tagId1: t.arg.string({ required: true }),
-      tagId2: t.arg.string({ required: true }),
+      tagId1: t.arg.id({ required: true }),
+      tagId2: t.arg.id({ required: true }),
       conflictType: t.arg.string({ required: true }),
-      description: t.arg.string({ required: false }),
+      description: t.arg.string(),
     },
-    resolve: async (_root, { tagId1, tagId2, conflictType, description }, ctx) => {
-      const [conflict] = await ctx.db
-        .insert(tagConflicts)
-        .values({
-          id: crypto.randomUUID(),
-          tagId1,
-          tagId2,
-          conflictType,
-          description: description ?? null,
-        })
-        .returning();
-      
-      return conflict;
-    },
+    resolve: (_r, args, ctx) =>
+      ctx.services.tag.createTagConflict({
+        tagId1: args.tagId1,
+        tagId2: args.tagId2,
+        conflictType: args.conflictType,
+        description: args.description,
+      }),
   }),
 
   // Delete tag conflict
   deleteTagConflict: t.field({
-    type: 'Boolean',
+    type: "Boolean",
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: async (_root, { id }, ctx) => {
-      const [conflict] = await ctx.db
-        .delete(tagConflicts)
-        .where(eq(tagConflicts.id, id as string))
-        .returning();
-      
-      return !!conflict;
-    },
+    resolve: (_r, { id }, ctx) => ctx.services.tag.deleteTagConflict(id),
   }),
-})); 
+}));

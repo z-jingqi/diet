@@ -20,14 +20,14 @@
     "db:studio": "drizzle-kit studio",
     "db:check-migrations": "tsx scripts/check-migrations.ts",
     "db:migrate:local": "drizzle-kit migrate",
-    "db:seed:local": "tsx scripts/seed-db.ts",
+    "db:seed:local": "tsx scripts/seed-db-local.ts",
     "db:reset:local": "npm run db:migrate:local && npm run db:seed:local",
-    "db:status:local": "wrangler d1 execute DB --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
-    "db:migrate:dev": "drizzle-kit migrate --remote",
+    "db:status:local": "wrangler d1 execute DB --local --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
+    "db:migrate:dev": "dotenv -e .env.dev -- drizzle-kit migrate",
     "db:seed:dev": "TARGET_ENV=dev tsx scripts/seed-db-remote.ts",
     "db:reset:dev": "npm run db:migrate:dev && npm run db:seed:dev",
     "db:status:dev": "wrangler d1 execute DB --env dev-remote --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\"",
-    "db:migrate:prod": "drizzle-kit migrate --remote",
+    "db:migrate:prod": "dotenv -e .env.prod -- drizzle-kit migrate",
     "db:seed:prod": "TARGET_ENV=prod tsx scripts/seed-db-remote.ts",
     "db:reset:prod": "npm run db:migrate:prod && npm run db:seed:prod",
     "db:status:prod": "wrangler d1 execute DB --remote --command=\"SELECT name FROM sqlite_master WHERE type='table'\""
@@ -50,6 +50,7 @@
     "drizzle-kit": "0.31.2",
     "drizzle-orm": "0.44.2",
     "tsx": "^4.7.1",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "dotenv-cli": "^7.3.0"
   }
 }

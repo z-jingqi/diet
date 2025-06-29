@@ -17,8 +17,18 @@ query GetMyChatSessions {
   }
 }
 
-mutation CreateChatSession($userId: String!, $title: String!, $messages: String!, $currentTags: String) {
-  createChatSession(userId: $userId, title: $title, messages: $messages, currentTags: $currentTags) {
+mutation CreateChatSession(
+  $userId: ID!
+  $title: String!
+  $messages: String!
+  $currentTags: String
+) {
+  createChatSession(
+    userId: $userId
+    title: $title
+    messages: $messages
+    currentTags: $currentTags
+  ) {
     id
     title
     messages {
@@ -32,8 +42,18 @@ mutation CreateChatSession($userId: String!, $title: String!, $messages: String!
   }
 }
 
-mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $currentTags: String) {
-  updateChatSession(id: $id, title: $title, messages: $messages, currentTags: $currentTags) {
+mutation UpdateChatSession(
+  $id: ID!
+  $title: String
+  $messages: String
+  $currentTags: String
+) {
+  updateChatSession(
+    id: $id
+    title: $title
+    messages: $messages
+    currentTags: $currentTags
+  ) {
     id
     title
     messages {
@@ -49,4 +69,4 @@ mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $current
 
 mutation DeleteChatSession($id: ID!) {
   deleteChatSession(id: $id)
-} 
+}

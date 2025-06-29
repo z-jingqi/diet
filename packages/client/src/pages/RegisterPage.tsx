@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,14 +10,22 @@ import {
 } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, User, Lock, UserPlus } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Lock,
+  UserPlus,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import useAuthStore from "@/store/auth-store";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { useUsernameValidation } from "@/hooks/useUsernameValidation";
 import { Link } from "@tanstack/react-router";
-import { validateFormData } from "@/utils/validation";
+import { validateFormData, USERNAME_RULES } from "@/utils/validation";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const authNavigate = useAuthNavigate();
   const [formData, setFormData] = useState({
     username: "",
@@ -25,10 +33,29 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { login, enableGuest, isLoading, clearError } = useAuthStore();
+  const { register, enableGuest, isLoading, clearError } = useAuthStore();
+  const {
+    validateUsername: validateUsernameAsync,
+    resetValidation,
+    isValidating,
+    isAvailable,
+    error: validationError,
+  } = useUsernameValidation();
+
+  // 当用户名变化时进行异步校验
+  useEffect(() => {
+    if (formData.username.trim()) {
+      validateUsernameAsync(formData.username);
+    } else {
+      resetValidation();
+    }
+  }, [formData.username, validateUsernameAsync, resetValidation]);
 
   const validateForm = () => {
-    const { errors: newErrors, isValid } = validateFormData(formData);
+    const { errors: newErrors, isValid } = validateFormData(
+      formData,
+      isAvailable
+    );
     setErrors(newErrors);
     return isValid;
   };
@@ -42,10 +69,10 @@ const LoginPage = () => {
     }
 
     try {
-      await login(formData.username, formData.password);
+      await register(formData.username, formData.password);
       authNavigate({ to: "/" });
     } catch (error) {
-      console.error("登录失败，请重试", error);
+      console.error("注册失败，请重试", error);
     }
   };
 
@@ -61,14 +88,72 @@ const LoginPage = () => {
     }
   };
 
+  // 渲染用户名输入框的右侧图标
+  const renderUsernameIcon = () => {
+    if (isValidating) {
+      return (
+        <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-gray-400" />
+      );
+    }
+
+    if (
+      formData.username.length >= USERNAME_RULES.minLength &&
+      formData.username.length <= USERNAME_RULES.maxLength
+    ) {
+      if (isAvailable === true) {
+        return (
+          <CheckCircle className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+        );
+      } else if (isAvailable === false) {
+        return (
+          <XCircle className="absolute right-3 top-3 h-4 w-4 text-red-500" />
+        );
+      }
+    }
+
+    return null;
+  };
+
+  // 渲染用户名验证状态文本
+  const renderUsernameStatus = () => {
+    if (validationError) {
+      return (
+        <MutedText className="text-red-500 text-sm mt-1">
+          {validationError}
+        </MutedText>
+      );
+    }
+
+    if (
+      formData.username.length >= USERNAME_RULES.minLength &&
+      formData.username.length <= USERNAME_RULES.maxLength
+    ) {
+      if (isAvailable === true) {
+        return (
+          <MutedText className="text-green-600 text-sm mt-1">
+            用户名可用
+          </MutedText>
+        );
+      } else if (isAvailable === false) {
+        return (
+          <MutedText className="text-red-500 text-sm mt-1">
+            用户名已被使用
+          </MutedText>
+        );
+      }
+    }
+
+    return null;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center">登录账号</CardTitle>
+            <CardTitle className="text-center">创建账号</CardTitle>
             <CardDescription className="text-center">
-              请输入您的用户名和密码
+              请填写用户名和密码创建账号
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -86,12 +171,14 @@ const LoginPage = () => {
                     className={cn("pl-10", errors.username && "border-red-500")}
                     disabled={isLoading}
                   />
+                  {renderUsernameIcon()}
                 </div>
                 {errors.username && (
                   <MutedText className="text-red-500 text-sm mt-1">
                     {errors.username}
                   </MutedText>
                 )}
+                {renderUsernameStatus()}
               </div>
 
               <div>
@@ -115,9 +202,13 @@ const LoginPage = () => {
                 )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || isValidating || isAvailable === false}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                登录
+                注册
               </Button>
             </form>
 
@@ -151,7 +242,7 @@ const LoginPage = () => {
                     asChild
                     disabled={isLoading}
                   >
-                    <Link to="/register">没有账号？点击注册</Link>
+                    <Link to="/login">已有账号？点击登录</Link>
                   </Button>
                 </div>
               </div>
@@ -163,4 +254,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

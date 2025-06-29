@@ -25,9 +25,23 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 export const rateLimit = (options: RateLimitOptions) => {
   return async (c: Context, next: Next) => {
-    const clientIP = c.req.header('CF-Connecting-IP') || 
-                     c.req.header('X-Forwarded-For') || 
-                     'unknown';
+    // 检测是否为本地开发环境
+    const isLocalDev = process.env.NODE_ENV === 'development' || 
+                      c.req.header('host')?.includes('localhost') ||
+                      c.req.header('host')?.includes('127.0.0.1') ||
+                      c.req.header('host')?.includes(':8787'); // wrangler dev 默认端口
+    
+    // 本地开发环境跳过速率限制
+    if (isLocalDev) {
+      await next();
+      return;
+    }
+    
+    // 获取客户端IP，支持多种环境
+    let clientIP = c.req.header('CF-Connecting-IP') || 
+                   c.req.header('X-Forwarded-For') || 
+                   c.req.header('X-Real-IP') ||
+                   'unknown';
     
     const now = Date.now();
     const key = `${clientIP}`;

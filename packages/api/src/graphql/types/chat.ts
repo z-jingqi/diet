@@ -1,21 +1,21 @@
-import { builder } from '../builder';
-import { chatSessions } from '../../db/schema/chat';
-import { users } from '../../db/schema/auth';
-import { eq, isNull, and } from 'drizzle-orm';
-import type { InferSelectModel } from 'drizzle-orm';
-import { requireAuth } from '../middleware/auth';
-import { UserRef } from './auth'; // Import UserRef from auth.ts
+import { builder } from "../builder";
+import { chat_sessions } from "../../db/schema/chat";
+import { users } from "../../db/schema/auth";
+import { eq } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
+import { requireAuth } from "../middleware/auth";
+import { UserRef } from "./auth"; // Import UserRef from auth.ts
 
 // Drizzle model types
-type ChatSessionModel = InferSelectModel<typeof chatSessions>;
+type ChatSessionModel = InferSelectModel<typeof chat_sessions>;
 type UserModel = InferSelectModel<typeof users>;
 
-// Message type for parsed messages
-interface ChatMessage {
-  role: 'user' | 'assistant';
+// Chat message type for GraphQL
+type ChatMessage = {
+  role: string;
   content: string;
-  timestamp?: string;
-}
+  timestamp: string;
+};
 
 // Chat response type
 interface ChatResponse {
@@ -26,77 +26,83 @@ interface ChatResponse {
 // ----------------------
 // ChatMessage type
 // ----------------------
-export const ChatMessageRef = builder.objectRef<ChatMessage>('ChatMessage').implement({
-  fields: (t) => ({
-    role: t.exposeString('role'),
-    content: t.exposeString('content'),
-    timestamp: t.exposeString('timestamp', { nullable: true }),
-  }),
-});
+export const ChatMessageRef = builder
+  .objectRef<ChatMessage>("ChatMessage")
+  .implement({
+    fields: (t) => ({
+      role: t.exposeString("role"),
+      content: t.exposeString("content"),
+      timestamp: t.exposeString("timestamp"),
+    }),
+  });
 
 // ----------------------
 // ChatResponse type
 // ----------------------
-export const ChatResponseRef = builder.objectRef<ChatResponse>('ChatResponse').implement({
-  fields: (t) => ({
-    response: t.exposeString('response'),
-    sessionId: t.exposeString('sessionId', { nullable: true }),
-  }),
-});
+export const ChatResponseRef = builder
+  .objectRef<ChatResponse>("ChatResponse")
+  .implement({
+    fields: (t) => ({
+      response: t.exposeString("response"),
+      sessionId: t.exposeString("sessionId", { nullable: true }),
+    }),
+  });
 
 // ----------------------
 // ChatSession type
 // ----------------------
-export const ChatSessionRef = builder.objectRef<ChatSessionModel>('ChatSession').implement({
-  fields: (t) => ({
-    id: t.exposeID('id'),
-    title: t.exposeString('title'),
-    createdAt: t.exposeString('createdAt', { nullable: true }),
-    updatedAt: t.exposeString('updatedAt', { nullable: true }),
-    
-    // Parse messages from JSON string
-    messages: t.field({
-      type: [ChatMessageRef],
-      resolve: (parent) => {
-        try {
-          return JSON.parse(parent.messages) as ChatMessage[];
-        } catch {
-          return [];
-        }
-      },
-    }),
-    
-    // Parse current tags from JSON string
-    currentTags: t.field({
-      type: ['String'],
-      resolve: (parent) => {
-        if (!parent.currentTags) return [];
-        try {
-          return JSON.parse(parent.currentTags) as string[];
-        } catch {
-          return [];
-        }
-      },
-    }),
-    
-    // User relation
-    user: t.field({
-      type: UserRef,
-      resolve: async (parent, _args, ctx) => {
-        const [user] = await ctx.db
-          .select()
-          .from(users)
-          .where(eq(users.id, parent.userId))
-          .limit(1);
-        return user ? toGraphQLUser(user) : null;
-      },
-    }),
-  }),
-});
+export const ChatSessionRef = builder
+  .objectRef<ChatSessionModel>("ChatSession")
+  .implement({
+    fields: (t) => ({
+      id: t.exposeID("id"),
+      title: t.exposeString("title"),
+      currentTags: t.field({
+        type: ["String"],
+        nullable: true,
+        resolve: (parent) => {
+          if (!parent.current_tags) return null;
+          try {
+            return JSON.parse(parent.current_tags);
+          } catch {
+            return null;
+          }
+        },
+      }),
+      messages: t.field({
+        type: [ChatMessageRef],
+        nullable: true,
+        resolve: (parent) => {
+          if (!parent.messages) return null;
+          try {
+            return JSON.parse(parent.messages);
+          } catch {
+            return null;
+          }
+        },
+      }),
+      createdAt: t.exposeString("created_at", { nullable: true }),
+      updatedAt: t.exposeString("updated_at", { nullable: true }),
+      deletedAt: t.exposeString("deleted_at", { nullable: true }),
 
-// Helper function to convert database user to GraphQL user (import from auth.ts)
-function toGraphQLUser(user: UserModel): any {
-  const { passwordHash, ...graphQLUser } = user;
+      // Relations
+      user: t.field({
+        type: UserRef,
+        resolve: async (parent, _args, ctx) => {
+          const [user] = await ctx.db
+            .select()
+            .from(users)
+            .where(eq(users.id, parent.user_id))
+            .limit(1);
+          return user ? toGraphQLUser(user) : null;
+        },
+      }),
+    }),
+  });
+
+// Helper function to convert database user to GraphQL user
+function toGraphQLUser(user: UserModel) {
+  const { password_hash, ...graphQLUser } = user;
   return graphQLUser;
 }
 
@@ -104,75 +110,53 @@ function toGraphQLUser(user: UserModel): any {
 // Queries
 // ----------------------
 builder.queryFields((t) => ({
-  // Fetch chat sessions for a user
-  chatSessions: t.field({
+  // Get current user's chat sessions
+  myChatSessions: t.field({
     type: [ChatSessionRef],
-    args: {
-      userId: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, { userId }, ctx) => {
-      return await ctx.db
-        .select()
-        .from(chatSessions)
-        .where(and(eq(chatSessions.userId, userId), isNull(chatSessions.deletedAt)));
+    resolve: async (_root, _args, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.chat.getMyChatSessions(auth.user.id);
     },
   }),
 
-  // Fetch single chat session by ID
+  // Get chat session by ID
   chatSession: t.field({
     type: ChatSessionRef,
     args: {
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [session] = await ctx.db
-        .select()
-        .from(chatSessions)
-        .where(and(eq(chatSessions.id, id as string), isNull(chatSessions.deletedAt)))
-        .limit(1);
-      return session ?? null;
+      return ctx.services.chat.getChatSession(id);
     },
   }),
 
-  // Get current user's chat sessions
-  myChatSessions: t.field({
+  // Get chat sessions for a specific user
+  chatSessions: t.field({
     type: [ChatSessionRef],
-    resolve: async (_root, _args, ctx) => {
-      const auth = requireAuth(ctx);
-      return await ctx.db
-        .select()
-        .from(chatSessions)
-        .where(and(eq(chatSessions.userId, auth.user.id), isNull(chatSessions.deletedAt)));
+    args: {
+      userId: t.arg.id({ required: true }),
+    },
+    resolve: async (_root, { userId }, ctx) => {
+      return ctx.services.chat.getChatSessionsByUser(userId);
     },
   }),
 }));
 
 // ----------------------
-// Mutations (Only Chat Session Management)
+// Mutations
 // ----------------------
 builder.mutationFields((t) => ({
-  // Create new chat session
+  // Create chat session
   createChatSession: t.field({
     type: ChatSessionRef,
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.id({ required: true }),
       title: t.arg.string({ required: true }),
-      messages: t.arg.string({ required: true }),
-      currentTags: t.arg.string({ required: false }),
+      messages: t.arg.string({ required: true }), // JSON string
+      currentTags: t.arg.string(), // JSON string
     },
-    resolve: async (_root, { userId, title, messages, currentTags }, ctx) => {
-      const [session] = await ctx.db
-        .insert(chatSessions)
-        .values({
-          id: crypto.randomUUID(),
-          userId,
-          title,
-          messages,
-          currentTags: currentTags ?? null,
-        })
-        .returning();
-      
-      return session;
+    resolve: async (_root, args, ctx) => {
+      return ctx.services.chat.createChatSession(args);
     },
   }),
 
@@ -181,41 +165,27 @@ builder.mutationFields((t) => ({
     type: ChatSessionRef,
     args: {
       id: t.arg.id({ required: true }),
-      title: t.arg.string({ required: false }),
-      messages: t.arg.string({ required: false }),
-      currentTags: t.arg.string({ required: false }),
+      title: t.arg.string(),
+      messages: t.arg.string(), // JSON string
+      currentTags: t.arg.string(), // JSON string
     },
-    resolve: async (_root, { id, title, messages, currentTags }, ctx) => {
-      const updateData: any = {};
-      if (title !== undefined) updateData.title = title;
-      if (messages !== undefined) updateData.messages = messages;
-      if (currentTags !== undefined) updateData.currentTags = currentTags;
-      updateData.updatedAt = new Date().toISOString();
-
-      const [session] = await ctx.db
-        .update(chatSessions)
-        .set(updateData)
-        .where(eq(chatSessions.id, id as string))
-        .returning();
-      
-      return session ?? null;
+    resolve: async (_root, args, ctx) => {
+      return ctx.services.chat.updateChatSession(args.id, {
+        title: args.title ?? undefined,
+        messages: args.messages ?? undefined,
+        currentTags: args.currentTags ?? undefined,
+      });
     },
   }),
 
-  // Soft delete chat session
+  // Delete chat session (soft delete)
   deleteChatSession: t.field({
-    type: 'Boolean',
+    type: "Boolean",
     args: {
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      const [session] = await ctx.db
-        .update(chatSessions)
-        .set({ deletedAt: new Date().toISOString() })
-        .where(eq(chatSessions.id, id as string))
-        .returning();
-      
-      return !!session;
+      return ctx.services.chat.deleteChatSession(id);
     },
   }),
-})); 
+}));

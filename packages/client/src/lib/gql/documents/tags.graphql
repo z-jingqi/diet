@@ -1,4 +1,4 @@
-query GetTags($categoryId: String, $search: String) {
+query GetTags($categoryId: ID, $search: String) {
   tags(categoryId: $categoryId, search: $search) {
     id
     name
@@ -70,14 +70,14 @@ query GetTagConflicts {
   }
 }
 
-query CheckTagConflicts($tagIds: [String!]!) {
+query CheckTagConflicts($tagIds: [ID!]!) {
   checkTagConflicts(tagIds: $tagIds)
 }
 
 mutation CreateTag(
   $name: String!
   $description: String!
-  $categoryId: String!
+  $categoryId: ID!
   $aiPrompt: String!
   $restrictions: [String!]
   $sortOrder: Int
@@ -101,4 +101,4 @@ mutation CreateTag(
     updatedAt
     restrictions
   }
-} 
+}

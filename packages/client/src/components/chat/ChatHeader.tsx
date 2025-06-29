@@ -55,7 +55,7 @@ const ChatHeader = ({
               variant="ghost"
               className="h-auto p-1 hover:bg-accent flex items-center"
             >
-              <Typography variant="span" className="text-base font-normal mr-1">
+              <Typography variant="span" className="text-base font-normal">
                 {title}
               </Typography>
               <ChevronRight className="h-4 w-4" />
@@ -83,28 +83,6 @@ const ChatHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* 右侧占位符，保持布局平衡 */}
-      <div className="w-6" />
-
-      {/* 用户状态指示器 - 只在游客模式时显示 */}
-      {isGuestMode && (
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="flex items-center space-x-1">
-            <UserIcon className="w-3 h-3" />
-            <span>游客模式</span>
-          </Badge>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleLoginClick}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          >
-            <LogInIcon className="w-4 h-4 mr-1" />
-            登录
-          </Button>
-        </div>
-      )}
     </header>
   );
 };

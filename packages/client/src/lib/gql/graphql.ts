@@ -52,6 +52,7 @@ export type ChatSession = {
   __typename?: 'ChatSession';
   createdAt?: Maybe<Scalars['String']['output']>;
   currentTags?: Maybe<Array<Scalars['String']['output']>>;
+  deletedAt?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   messages?: Maybe<Array<ChatMessage>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -68,7 +69,6 @@ export type LoginResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  checkUsername?: Maybe<Scalars['Boolean']['output']>;
   createCSRFToken?: Maybe<CsrfToken>;
   createChatSession?: Maybe<ChatSession>;
   createOAuthAccount?: Maybe<OAuthAccount>;
@@ -91,12 +91,7 @@ export type Mutation = {
   updateTag?: Maybe<Tag>;
   updateTagCategory?: Maybe<TagCategory>;
   updateUser?: Maybe<User>;
-  wechatLogin?: Maybe<WechatLoginResponse>;
-};
-
-
-export type MutationCheckUsernameArgs = {
-  username: Scalars['String']['input'];
+  wechatLogin?: Maybe<LoginResponse>;
 };
 
 
@@ -111,7 +106,7 @@ export type MutationCreateChatSessionArgs = {
   currentTags?: InputMaybe<Scalars['String']['input']>;
   messages: Scalars['String']['input'];
   title: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -127,9 +122,9 @@ export type MutationCreateOAuthAccountArgs = {
 
 
 export type MutationCreateTagArgs = {
-  aiPrompt: Scalars['String']['input'];
-  categoryId: Scalars['String']['input'];
-  description: Scalars['String']['input'];
+  aiPrompt?: InputMaybe<Scalars['String']['input']>;
+  categoryId: Scalars['ID']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   restrictions?: InputMaybe<Array<Scalars['String']['input']>>;
   sortOrder?: InputMaybe<Scalars['Int']['input']>;
@@ -146,8 +141,8 @@ export type MutationCreateTagCategoryArgs = {
 export type MutationCreateTagConflictArgs = {
   conflictType: Scalars['String']['input'];
   description?: InputMaybe<Scalars['String']['input']>;
-  tagId1: Scalars['String']['input'];
-  tagId2: Scalars['String']['input'];
+  tagId1: Scalars['ID']['input'];
+  tagId2: Scalars['ID']['input'];
 };
 
 
@@ -300,12 +295,12 @@ export type QueryChatSessionArgs = {
 
 
 export type QueryChatSessionsArgs = {
-  userId: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 
 export type QueryCheckTagConflictsArgs = {
-  tagIds: Array<Scalars['String']['input']>;
+  tagIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -325,13 +320,13 @@ export type QueryTagCategoryArgs = {
 
 
 export type QueryTagsArgs = {
-  categoryId?: InputMaybe<Scalars['String']['input']>;
+  categoryId?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryTagsByCategoryArgs = {
-  categoryId: Scalars['String']['input'];
+  categoryId: Scalars['ID']['input'];
 };
 
 
@@ -378,6 +373,7 @@ export type TagCategory = {
   isActive?: Maybe<Scalars['Boolean']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   sortOrder?: Maybe<Scalars['Int']['output']>;
+  tags?: Maybe<Array<Tag>>;
 };
 
 export type TagConflict = {
@@ -423,13 +419,6 @@ export type UserSession = {
   userAgent?: Maybe<Scalars['String']['output']>;
 };
 
-export type WechatLoginResponse = {
-  __typename?: 'WechatLoginResponse';
-  csrfToken?: Maybe<Scalars['String']['output']>;
-  sessionToken?: Maybe<Scalars['String']['output']>;
-  user?: Maybe<User>;
-};
-
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -443,12 +432,12 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register?: string | null };
 
-export type CheckUsernameMutationVariables = Exact<{
+export type UserByUsernameQueryVariables = Exact<{
   username: Scalars['String']['input'];
 }>;
 
 
-export type CheckUsernameMutation = { __typename?: 'Mutation', checkUsername?: boolean | null };
+export type UserByUsernameQuery = { __typename?: 'Query', userByUsername?: { __typename?: 'User', id?: string | null } | null };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -468,7 +457,7 @@ export type WechatLoginMutationVariables = Exact<{
 }>;
 
 
-export type WechatLoginMutation = { __typename?: 'Mutation', wechatLogin?: { __typename?: 'WechatLoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: string | null, createdAt?: string | null, updatedAt?: string | null } | null } | null };
+export type WechatLoginMutation = { __typename?: 'Mutation', wechatLogin?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: string | null, createdAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type RefreshSessionMutationVariables = Exact<{
   refreshToken: Scalars['String']['input'];
@@ -483,7 +472,7 @@ export type GetMyChatSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, currentTags?: Array<string> | null, createdAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'ChatMessage', role?: string | null, content?: string | null, timestamp?: string | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
 
 export type CreateChatSessionMutationVariables = Exact<{
-  userId: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
   title: Scalars['String']['input'];
   messages: Scalars['String']['input'];
   currentTags?: InputMaybe<Scalars['String']['input']>;
@@ -510,7 +499,7 @@ export type DeleteChatSessionMutationVariables = Exact<{
 export type DeleteChatSessionMutation = { __typename?: 'Mutation', deleteChatSession?: boolean | null };
 
 export type GetTagsQueryVariables = Exact<{
-  categoryId?: InputMaybe<Scalars['String']['input']>;
+  categoryId?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
 }>;
 
@@ -535,7 +524,7 @@ export type GetTagConflictsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetTagConflictsQuery = { __typename?: 'Query', tagConflicts?: Array<{ __typename?: 'TagConflict', id?: string | null, conflictType?: string | null, description?: string | null, createdAt?: string | null, tagId1?: string | null, tagId2?: string | null, tag1?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null, tag2?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null }> | null };
 
 export type CheckTagConflictsQueryVariables = Exact<{
-  tagIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  tagIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
 
@@ -544,7 +533,7 @@ export type CheckTagConflictsQuery = { __typename?: 'Query', checkTagConflicts?:
 export type CreateTagMutationVariables = Exact<{
   name: Scalars['String']['input'];
   description: Scalars['String']['input'];
-  categoryId: Scalars['String']['input'];
+  categoryId: Scalars['ID']['input'];
   aiPrompt: Scalars['String']['input'];
   restrictions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   sortOrder?: InputMaybe<Scalars['Int']['input']>;
@@ -621,31 +610,36 @@ export const useRegisterMutation = <
 
 useRegisterMutation.fetcher = (client: GraphQLClient, variables: RegisterMutationVariables, headers?: RequestInit['headers']) => fetcher<RegisterMutation, RegisterMutationVariables>(client, RegisterDocument, variables, headers);
 
-export const CheckUsernameDocument = `
-    mutation CheckUsername($username: String!) {
-  checkUsername(username: $username)
+export const UserByUsernameDocument = `
+    query UserByUsername($username: String!) {
+  userByUsername(username: $username) {
+    id
+  }
 }
     `;
 
-export const useCheckUsernameMutation = <
-      TError = unknown,
-      TContext = unknown
+export const useUserByUsernameQuery = <
+      TData = UserByUsernameQuery,
+      TError = unknown
     >(
       client: GraphQLClient,
-      options?: UseMutationOptions<CheckUsernameMutation, TError, CheckUsernameMutationVariables, TContext>,
+      variables: UserByUsernameQueryVariables,
+      options?: Omit<UseQueryOptions<UserByUsernameQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<UserByUsernameQuery, TError, TData>['queryKey'] },
       headers?: RequestInit['headers']
     ) => {
     
-    return useMutation<CheckUsernameMutation, TError, CheckUsernameMutationVariables, TContext>(
+    return useQuery<UserByUsernameQuery, TError, TData>(
       {
-    mutationKey: ['CheckUsername'],
-    mutationFn: (variables?: CheckUsernameMutationVariables) => fetcher<CheckUsernameMutation, CheckUsernameMutationVariables>(client, CheckUsernameDocument, variables, headers)(),
+    queryKey: ['UserByUsername', variables],
+    queryFn: fetcher<UserByUsernameQuery, UserByUsernameQueryVariables>(client, UserByUsernameDocument, variables, headers),
     ...options
   }
     )};
 
+useUserByUsernameQuery.getKey = (variables: UserByUsernameQueryVariables) => ['UserByUsername', variables];
 
-useCheckUsernameMutation.fetcher = (client: GraphQLClient, variables: CheckUsernameMutationVariables, headers?: RequestInit['headers']) => fetcher<CheckUsernameMutation, CheckUsernameMutationVariables>(client, CheckUsernameDocument, variables, headers);
+
+useUserByUsernameQuery.fetcher = (client: GraphQLClient, variables: UserByUsernameQueryVariables, headers?: RequestInit['headers']) => fetcher<UserByUsernameQuery, UserByUsernameQueryVariables>(client, UserByUsernameDocument, variables, headers);
 
 export const LoginDocument = `
     mutation Login($username: String!, $password: String!) {
@@ -829,7 +823,7 @@ useGetMyChatSessionsQuery.getKey = (variables?: GetMyChatSessionsQueryVariables)
 useGetMyChatSessionsQuery.fetcher = (client: GraphQLClient, variables?: GetMyChatSessionsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyChatSessionsQuery, GetMyChatSessionsQueryVariables>(client, GetMyChatSessionsDocument, variables, headers);
 
 export const CreateChatSessionDocument = `
-    mutation CreateChatSession($userId: String!, $title: String!, $messages: String!, $currentTags: String) {
+    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $currentTags: String) {
   createChatSession(
     userId: $userId
     title: $title
@@ -939,7 +933,7 @@ export const useDeleteChatSessionMutation = <
 useDeleteChatSessionMutation.fetcher = (client: GraphQLClient, variables: DeleteChatSessionMutationVariables, headers?: RequestInit['headers']) => fetcher<DeleteChatSessionMutation, DeleteChatSessionMutationVariables>(client, DeleteChatSessionDocument, variables, headers);
 
 export const GetTagsDocument = `
-    query GetTags($categoryId: String, $search: String) {
+    query GetTags($categoryId: ID, $search: String) {
   tags(categoryId: $categoryId, search: $search) {
     id
     name
@@ -1111,7 +1105,7 @@ useGetTagConflictsQuery.getKey = (variables?: GetTagConflictsQueryVariables) => 
 useGetTagConflictsQuery.fetcher = (client: GraphQLClient, variables?: GetTagConflictsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetTagConflictsQuery, GetTagConflictsQueryVariables>(client, GetTagConflictsDocument, variables, headers);
 
 export const CheckTagConflictsDocument = `
-    query CheckTagConflicts($tagIds: [String!]!) {
+    query CheckTagConflicts($tagIds: [ID!]!) {
   checkTagConflicts(tagIds: $tagIds)
 }
     `;
@@ -1140,7 +1134,7 @@ useCheckTagConflictsQuery.getKey = (variables: CheckTagConflictsQueryVariables) 
 useCheckTagConflictsQuery.fetcher = (client: GraphQLClient, variables: CheckTagConflictsQueryVariables, headers?: RequestInit['headers']) => fetcher<CheckTagConflictsQuery, CheckTagConflictsQueryVariables>(client, CheckTagConflictsDocument, variables, headers);
 
 export const CreateTagDocument = `
-    mutation CreateTag($name: String!, $description: String!, $categoryId: String!, $aiPrompt: String!, $restrictions: [String!], $sortOrder: Int) {
+    mutation CreateTag($name: String!, $description: String!, $categoryId: ID!, $aiPrompt: String!, $restrictions: [String!], $sortOrder: Int) {
   createTag(
     name: $name
     description: $description

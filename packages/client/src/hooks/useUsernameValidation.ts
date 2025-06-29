@@ -1,95 +1,90 @@
-import { useState, useCallback, useRef } from 'react';
-import { checkUsername } from '@/lib/api/auth-api';
-
-interface UsernameValidationState {
-  isValidating: boolean;
-  isAvailable: boolean | null;
-  error: string | null;
-}
+import { useState, useCallback, useRef, useEffect } from "react";
+import { UserByUsernameDocument } from "@/lib/gql/graphql";
+import useDebouncedCallback from "./useDebouncedCallback";
+import { GRAPHQL_ENDPOINT } from "@/lib/gql/client";
 
 export const useUsernameValidation = () => {
-  const [state, setState] = useState<UsernameValidationState>({
-    isValidating: false,
-    isAvailable: null,
-    error: null,
-  });
+  const [username, setUsername] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const timeoutRef = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const validateUsername = useCallback(async (username: string) => {
-    // 清除之前的定时器
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  // debounced setter for username
+  const debouncedSetUsername = useDebouncedCallback((val: string) => {
+    setUsername(val);
+  }, 500);
 
-    // 基本验证
-    if (!username.trim()) {
-      setState({
-        isValidating: false,
-        isAvailable: null,
-        error: null,
-      });
+  // whenever username changes, fire validation
+  const runValidation = useCallback(async (value: string) => {
+    // cancel previous request if still in-flight
+    abortRef.current?.abort();
+
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      setIsAvailable(null);
       return;
     }
 
-    if (username.length < 3) {
-      setState({
-        isValidating: false,
-        isAvailable: null,
-        error: null,
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setIsValidating(true);
+    setError(null);
+
+    try {
+      const res = await fetch(GRAPHQL_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: UserByUsernameDocument,
+          variables: { username: trimmed },
+        }),
+        signal: controller.signal,
       });
-      return;
-    }
 
-    if (username.length > 20) {
-      setState({
-        isValidating: false,
-        isAvailable: null,
-        error: null,
-      });
-      return;
-    }
-
-    // 设置验证中状态
-    setState(prev => ({
-      ...prev,
-      isValidating: true,
-      error: null,
-    }));
-
-    // 延迟500ms执行，避免频繁请求
-    timeoutRef.current = window.setTimeout(async () => {
-      try {
-        const result = await checkUsername(username);
-        setState({
-          isValidating: false,
-          isAvailable: result.available,
-          error: null,
-        });
-      } catch (error) {
-        setState({
-          isValidating: false,
-          isAvailable: null,
-          error: error instanceof Error ? error.message : '检查用户名失败',
-        });
+      const json = await res.json();
+      const user = json?.data?.userByUsername as
+        | { id: string }
+        | null
+        | undefined;
+      setIsAvailable(user ? false : true);
+    } catch (err) {
+      if ((err as any).name !== "AbortError") {
+        setError(err instanceof Error ? err.message : "检查用户名失败");
+        setIsAvailable(null);
       }
-    }, 500);
+    } finally {
+      setIsValidating(false);
+    }
   }, []);
+
+  // trigger validation when username state updates (after debounce)
+  useEffect(() => {
+    runValidation(username);
+  }, [username, runValidation]);
+
+  const validateUsername = useCallback(
+    (val: string) => {
+      debouncedSetUsername(val);
+    },
+    [debouncedSetUsername]
+  );
 
   const resetValidation = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setState({
-      isValidating: false,
-      isAvailable: null,
-      error: null,
-    });
-  }, []);
+    abortRef.current?.abort();
+    debouncedSetUsername.cancel();
+    setUsername("");
+    setIsAvailable(null);
+    setError(null);
+  }, [debouncedSetUsername]);
 
   return {
-    ...state,
+    isValidating,
+    isAvailable,
+    error,
     validateUsername,
     resetValidation,
   };
-}; 
+};
