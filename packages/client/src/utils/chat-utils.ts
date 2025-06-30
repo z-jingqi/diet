@@ -18,7 +18,7 @@ const enhanceUserMessages = (
   // 找到最后一条用户消息
   const lastUserMessageIndex = messages
     .map((msg, index) => ({ msg, index }))
-    .filter(({ msg }) => msg.isUser)
+    .filter(({ msg }) => msg.role === "user")
     .pop()?.index;
 
   if (lastUserMessageIndex === undefined) {
@@ -31,7 +31,7 @@ const enhanceUserMessages = (
   // 从最后一条用户消息往前查找，直到找到第一个包含饮食限制条件的消息
   for (let i = lastUserMessageIndex - 1; i >= 0; i--) {
     const message = messages[i];
-    if (!message.isUser) {
+    if (message.role !== "user") {
       continue; // 跳过AI消息
     }
 
@@ -82,7 +82,7 @@ export const toAIMessages = (
 
   // 第二步：转换为 AI 格式
   const result: ChatCompletionMessageParam[] = enhancedMessages.map((msg) => {
-    if (msg.isUser) {
+    if (msg.role === "user") {
       return { role: "user", content: msg.content };
     } else {
       return { role: "assistant", content: msg.content };

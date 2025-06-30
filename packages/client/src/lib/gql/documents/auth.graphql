@@ -1,16 +1,21 @@
+# 通用用户字段片段
+fragment UserBasicFields on User {
+  id
+  username
+  nickname
+  email
+  avatarUrl
+  isActive
+  isVerified
+  lastLoginAt
+  createdAt
+  updatedAt
+}
+
 # 获取当前用户信息
 query GetMe {
   me {
-    id
-    username
-    nickname
-    email
-    avatarUrl
-    isActive
-    isVerified
-    lastLoginAt
-    createdAt
-    updatedAt
+    ...UserBasicFields
   }
 }
 
@@ -30,16 +35,7 @@ query UserByUsername($username: String!) {
 mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
     user {
-      id
-      username
-      nickname
-      email
-      avatarUrl
-      isActive
-      isVerified
-      lastLoginAt
-      createdAt
-      updatedAt
+      ...UserBasicFields
     }
     sessionToken
     csrfToken
@@ -54,16 +50,7 @@ mutation Logout {
 mutation WechatLogin($code: String!) {
   wechatLogin(code: $code) {
     user {
-      id
-      username
-      nickname
-      email
-      avatarUrl
-      isActive
-      isVerified
-      lastLoginAt
-      createdAt
-      updatedAt
+      ...UserBasicFields
     }
     sessionToken
     csrfToken

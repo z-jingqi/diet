@@ -93,7 +93,7 @@ const ChatPage = () => {
     (() => {
       const last = messages[messages.length - 1];
       return (
-        !last.isUser &&
+        last.role !== "user" &&
         (last.status === "pending" || last.status === "streaming")
       );
     })();

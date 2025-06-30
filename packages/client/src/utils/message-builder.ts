@@ -1,4 +1,4 @@
-import type { Message, MessageType } from "@diet/shared";
+import { ChatMessage, MessageRole, MessageStatus, MessageType } from "@/lib/gql/graphql";
 import { nanoid } from "nanoid";
 
 /**
@@ -17,16 +17,16 @@ const generateRandomId = (): string => {
  */
 export const buildMessage = (
   type: MessageType,
-  isUser: boolean = false
-): Message => {
+  role: MessageRole = MessageRole.Assistant
+): ChatMessage => {
   return {
     id: generateRandomId(),
     type,
     content: "",
-    isUser,
+    role,
     createdAt: new Date(),
-    status: isUser ? "done" : "pending",
-  } as Message;
+    status: role === MessageRole.User ? MessageStatus.Done : MessageStatus.Pending,
+  } as ChatMessage;
 };
 
 /**
@@ -34,11 +34,11 @@ export const buildMessage = (
  * @param content 消息内容
  * @returns 用户消息对象
  */
-export const buildUserMessage = (content: string): Message => ({
+export const buildUserMessage = (content: string): ChatMessage => ({
   id: generateRandomId(),
   content,
-  type: "chat",
-  isUser: true,
+  type: MessageType.Chat,
+  role: MessageRole.User,
   createdAt: new Date(),
-  status: "done",
+  status: MessageStatus.Done,
 });

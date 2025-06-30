@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { buildMessage, buildUserMessage } from "@/utils/message-builder";
-import type { Message, ChatSession, Tag, RecipeDetail } from "@diet/shared";
 import {
   sendChatMessage,
   sendRecipeChatMessage,
@@ -11,7 +10,12 @@ import { ChatCompletionMessageParam } from "openai/resources";
 import useAuthStore from "@/store/auth-store";
 import { graphqlClient } from "@/lib/gql/client";
 import {
+  ChatMessage,
+  ChatSession,
   CreateChatSessionDocument,
+  MessageRole,
+  MessageStatus,
+  MessageType,
   UpdateChatSessionDocument,
   type CreateChatSessionMutation,
   type CreateChatSessionMutationVariables,
@@ -49,10 +53,13 @@ interface ChatState {
     AIMessages: ChatCompletionMessageParam[],
     isGuestMode?: boolean
   ) => Promise<void>;
-  handleError: (error: unknown, addMessage: (message: Message) => void) => void;
+  handleError: (
+    error: unknown,
+    addMessage: (message: ChatMessage) => void
+  ) => void;
 
   // --- util & persistence ---
-  generateSessionTitle: (messages: Message[]) => string;
+  generateSessionTitle: (messages: ChatMessage[]) => string;
   loadSessionsFromGraphQL: (graphqlSessions: any[]) => void;
   _persistSession: (session: ChatSession, isNew: boolean) => Promise<void>;
 }
@@ -83,8 +90,8 @@ const useChatStore = create<
       isGuestMode = false
     ) => {
       const { addMessage } = get();
-      const message = buildMessage("recipe");
-      message.status = "streaming";
+      const message = buildMessage(MessageType.Recipe);
+      message.status = MessageStatus.Streaming;
       addMessage(message);
 
       const newController = new AbortController();
@@ -129,8 +136,7 @@ const useChatStore = create<
 
         // 使用公共方法更新消息状态为完成，并添加recipeDetails
         const recipeDetails = extractRecipeDetails(result);
-        updateMessageStatus(message.id, "done", {
-          finishedAt: new Date(),
+        updateMessageStatus(message.id, MessageStatus.Done, {
           recipeDetails: recipeDetails,
         });
 
@@ -147,9 +153,7 @@ const useChatStore = create<
 
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
-          get().updateLastAIMessageStatus("error", {
-            finishedAt: new Date(),
-          });
+          get().updateLastAIMessageStatus(MessageStatus.Error);
         }
         throw error;
       }
@@ -205,9 +209,7 @@ const useChatStore = create<
         set({ abortController: undefined });
 
         // 使用公共方法更新消息状态为完成
-        get().updateMessageStatus(message.id, "done", {
-          finishedAt: new Date(),
-        });
+        get().updateMessageStatus(message.id, MessageStatus.Done);
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
@@ -222,9 +224,7 @@ const useChatStore = create<
 
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
-          get().updateLastAIMessageStatus("error", {
-            finishedAt: new Date(),
-          });
+          get().updateLastAIMessageStatus(MessageStatus.Error);
         }
         throw error;
       }
@@ -236,8 +236,8 @@ const useChatStore = create<
       isGuestMode = false
     ) => {
       const { addMessage } = get();
-      const message = buildMessage("chat");
-      message.status = "streaming";
+      const message = buildMessage(MessageType.Chat);
+      message.status = MessageStatus.Streaming;
       addMessage(message);
 
       const newController = new AbortController();
@@ -280,9 +280,7 @@ const useChatStore = create<
         set({ abortController: undefined });
 
         // 使用公共方法更新消息状态为完成
-        get().updateMessageStatus(message.id, "done", {
-          finishedAt: new Date(),
-        });
+        get().updateMessageStatus(message.id, MessageStatus.Done);
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
@@ -297,16 +295,17 @@ const useChatStore = create<
 
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
-          get().updateLastAIMessageStatus("error", {
-            finishedAt: new Date(),
-          });
+          get().updateLastAIMessageStatus(MessageStatus.Error);
         }
         throw error;
       }
     },
 
     // 处理错误
-    handleError: (error: unknown, addMessage: (message: Message) => void) => {
+    handleError: (
+      error: unknown,
+      addMessage: (message: ChatMessage) => void
+    ) => {
       console.error("Error:", error);
       set({ gettingIntent: false, abortController: undefined });
 
@@ -319,34 +318,31 @@ const useChatStore = create<
       const messages = getCurrentMessages();
       const lastMessage = messages[messages.length - 1];
 
-      if (lastMessage && !lastMessage.isUser) {
+      if (lastMessage && lastMessage.role !== MessageRole.User) {
         // 如果最后一条是 AI 消息，且不是因为abort导致的错误，才标记为 error
         if (!isAbortError) {
           // 使用公共方法更新最后一条AI消息状态为错误
-          get().updateLastAIMessageStatus("error", {
-            finishedAt: new Date(),
-          });
+          get().updateLastAIMessageStatus(MessageStatus.Error);
         }
       } else {
         // 如果没有 AI 消息（比如 getIntent 失败），且不是因为abort导致的错误，才添加错误消息
         if (!isAbortError) {
-          const errorMessage = buildMessage("chat");
-          errorMessage.status = "error";
+          const errorMessage = buildMessage(MessageType.Chat);
+          errorMessage.status = MessageStatus.Error;
           errorMessage.content = "抱歉，处理您的消息时出现了问题，请重试。";
-          errorMessage.finishedAt = new Date();
           addMessage(errorMessage);
         }
       }
     },
 
     // 新增：从 GraphQL 加载会话
-    loadSessionsFromGraphQL: (graphqlSessions: any[]) => {
+    loadSessionsFromGraphQL: (graphqlSessions: ChatSession[]) => {
       const convertedSessions: ChatSession[] = graphqlSessions.map(
         (session) => ({
           id: session.id,
           title: session.title || "新对话",
           messages: session.messages || [],
-          currentTags: session.currentTags || [],
+          tagIds: session.tagIds || [],
           createdAt: new Date(session.createdAt),
           updatedAt: new Date(session.updatedAt),
         })
@@ -376,9 +372,9 @@ const useChatStore = create<
           // 创建会话
           const variables: CreateChatSessionMutationVariables = {
             userId: user.id as string,
-            title: session.title,
+            title: session.title ?? "",
             messages: JSON.stringify(session.messages),
-            currentTags: JSON.stringify(session.currentTags ?? []),
+            tagIds: session.tagIds ?? [],
           };
           const result = await graphqlClient.request<CreateChatSessionMutation>(
             CreateChatSessionDocument,
@@ -401,10 +397,10 @@ const useChatStore = create<
         } else {
           // 更新会话
           const variables: UpdateChatSessionMutationVariables = {
-            id: session.id,
-            title: session.title,
+            id: session.id ?? "",
+            title: session.title ?? "",
             messages: JSON.stringify(session.messages),
-            currentTags: JSON.stringify(session.currentTags ?? []),
+            tagIds: session.tagIds ?? [],
           };
           await graphqlClient.request(UpdateChatSessionDocument, variables);
         }

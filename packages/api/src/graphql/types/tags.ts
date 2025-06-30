@@ -2,6 +2,7 @@ import { builder } from "../builder";
 import { tag_categories, tags, tag_conflicts } from "../../db/schema/tags";
 import { eq, and, like, asc, inArray } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
+import { DateTimeScalar } from "../builder";
 
 // Drizzle model types
 type TagCategoryModel = InferSelectModel<typeof tag_categories>;
@@ -20,7 +21,10 @@ export const TagCategoryRef = builder
       description: t.exposeString("description", { nullable: true }),
       sortOrder: t.exposeInt("sort_order", { nullable: true }),
       isActive: t.exposeBoolean("is_active", { nullable: true }),
-      createdAt: t.exposeString("created_at", { nullable: true }),
+      createdAt: t.expose("created_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
     }),
   });
 
@@ -36,8 +40,8 @@ export const TagRef = builder.objectRef<TagModel>("Tag").implement({
     aiPrompt: t.exposeString("ai_prompt", { nullable: true }),
     sortOrder: t.exposeInt("sort_order", { nullable: true }),
     isActive: t.exposeBoolean("is_active", { nullable: true }),
-    createdAt: t.exposeString("created_at", { nullable: true }),
-    updatedAt: t.exposeString("updated_at", { nullable: true }),
+    createdAt: t.expose("created_at", { type: DateTimeScalar, nullable: true }),
+    updatedAt: t.expose("updated_at", { type: DateTimeScalar, nullable: true }),
     restrictions: t.field({
       type: ["String"],
       nullable: true,
@@ -92,7 +96,10 @@ export const TagConflictRef = builder
       tagId2: t.exposeString("tag_id_2"),
       conflictType: t.exposeString("conflict_type"),
       description: t.exposeString("description", { nullable: true }),
-      createdAt: t.exposeString("created_at", { nullable: true }),
+      createdAt: t.expose("created_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
     }),
   });
 

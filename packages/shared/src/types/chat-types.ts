@@ -39,6 +39,8 @@ export interface RecipeDetail {
   recipeId?: string;
 }
 
+type MessageRole = "user" | "assistant" | "system";
+
 /**
  * 聊天消息
  */
@@ -51,6 +53,8 @@ export interface Message {
   type: MessageType;
   /** 是否为用户发送的消息 */
   isUser: boolean;
+
+  role: MessageRole;
   /** 消息创建时间 */
   createdAt: Date;
   /** 消息完成时间 */

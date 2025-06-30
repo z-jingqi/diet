@@ -24,12 +24,13 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  DateTime: { input: any; output: any; }
 };
 
 export type CsrfToken = {
   __typename?: 'CSRFToken';
-  createdAt?: Maybe<Scalars['String']['output']>;
-  expiresAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   token?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
@@ -38,8 +39,11 @@ export type CsrfToken = {
 export type ChatMessage = {
   __typename?: 'ChatMessage';
   content?: Maybe<Scalars['String']['output']>;
-  role?: Maybe<Scalars['String']['output']>;
-  timestamp?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  role?: Maybe<MessageRole>;
+  status?: Maybe<MessageStatus>;
+  type?: Maybe<MessageType>;
 };
 
 export type ChatResponse = {
@@ -50,13 +54,13 @@ export type ChatResponse = {
 
 export type ChatSession = {
   __typename?: 'ChatSession';
-  createdAt?: Maybe<Scalars['String']['output']>;
-  currentTags?: Maybe<Array<Scalars['String']['output']>>;
-  deletedAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   messages?: Maybe<Array<ChatMessage>>;
+  tagIds?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
 };
 
@@ -66,6 +70,26 @@ export type LoginResponse = {
   sessionToken?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
 };
+
+export enum MessageRole {
+  Assistant = 'ASSISTANT',
+  System = 'SYSTEM',
+  User = 'USER'
+}
+
+export enum MessageStatus {
+  Abort = 'ABORT',
+  Done = 'DONE',
+  Error = 'ERROR',
+  Pending = 'PENDING',
+  Streaming = 'STREAMING'
+}
+
+export enum MessageType {
+  Chat = 'CHAT',
+  HealthAdvice = 'HEALTH_ADVICE',
+  Recipe = 'RECIPE'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -103,8 +127,8 @@ export type MutationCreateCsrfTokenArgs = {
 
 
 export type MutationCreateChatSessionArgs = {
-  currentTags?: InputMaybe<Scalars['String']['input']>;
   messages: Scalars['String']['input'];
+  tagIds?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
   userId: Scalars['ID']['input'];
 };
@@ -204,7 +228,7 @@ export type MutationLoginArgs = {
 
 
 export type MutationRefreshSessionArgs = {
-  refreshToken: Scalars['String']['input'];
+  refreshToken?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -215,9 +239,9 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdateChatSessionArgs = {
-  currentTags?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   messages?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -257,14 +281,14 @@ export type MutationWechatLoginArgs = {
 export type OAuthAccount = {
   __typename?: 'OAuthAccount';
   accessToken?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
-  expiresAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   provider?: Maybe<Scalars['String']['output']>;
   providerUserData?: Maybe<Scalars['String']['output']>;
   providerUserId?: Maybe<Scalars['String']['output']>;
   refreshToken?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
 };
 
@@ -346,7 +370,7 @@ export type QueryUserSessionsArgs = {
 
 export type RefreshResponse = {
   __typename?: 'RefreshResponse';
-  sessionExpiresAt?: Maybe<Scalars['String']['output']>;
+  sessionExpiresAt?: Maybe<Scalars['DateTime']['output']>;
   sessionToken?: Maybe<Scalars['String']['output']>;
 };
 
@@ -355,19 +379,19 @@ export type Tag = {
   aiPrompt?: Maybe<Scalars['String']['output']>;
   category?: Maybe<TagCategory>;
   categoryId?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   isActive?: Maybe<Scalars['Boolean']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   restrictions?: Maybe<Array<Scalars['String']['output']>>;
   sortOrder?: Maybe<Scalars['Int']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type TagCategory = {
   __typename?: 'TagCategory';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   isActive?: Maybe<Scalars['Boolean']['output']>;
@@ -379,7 +403,7 @@ export type TagCategory = {
 export type TagConflict = {
   __typename?: 'TagConflict';
   conflictType?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   tag1?: Maybe<Tag>;
@@ -391,38 +415,40 @@ export type TagConflict = {
 export type User = {
   __typename?: 'User';
   avatarUrl?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   isActive?: Maybe<Scalars['Boolean']['output']>;
   isVerified?: Maybe<Scalars['Boolean']['output']>;
-  lastLoginAt?: Maybe<Scalars['String']['output']>;
+  lastLoginAt?: Maybe<Scalars['DateTime']['output']>;
   nickname?: Maybe<Scalars['String']['output']>;
   oauthAccounts?: Maybe<Array<OAuthAccount>>;
   phone?: Maybe<Scalars['String']['output']>;
   sessions?: Maybe<Array<UserSession>>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   username?: Maybe<Scalars['String']['output']>;
 };
 
 export type UserSession = {
   __typename?: 'UserSession';
-  createdAt?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   ipAddress?: Maybe<Scalars['String']['output']>;
-  refreshExpiresAt?: Maybe<Scalars['String']['output']>;
+  refreshExpiresAt?: Maybe<Scalars['DateTime']['output']>;
   refreshToken?: Maybe<Scalars['String']['output']>;
-  sessionExpiresAt?: Maybe<Scalars['String']['output']>;
+  sessionExpiresAt?: Maybe<Scalars['DateTime']['output']>;
   sessionToken?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
   userAgent?: Maybe<Scalars['String']['output']>;
 };
 
+export type UserBasicFieldsFragment = { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null };
+
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: string | null, createdAt?: string | null, updatedAt?: string | null } | null };
+export type GetMeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null } | null };
 
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -445,7 +471,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: string | null, createdAt?: string | null, updatedAt?: string | null } | null } | null };
+export type LoginMutation = { __typename?: 'Mutation', login?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null } | null } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -457,39 +483,41 @@ export type WechatLoginMutationVariables = Exact<{
 }>;
 
 
-export type WechatLoginMutation = { __typename?: 'Mutation', wechatLogin?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: string | null, createdAt?: string | null, updatedAt?: string | null } | null } | null };
+export type WechatLoginMutation = { __typename?: 'Mutation', wechatLogin?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null } | null } | null };
 
 export type RefreshSessionMutationVariables = Exact<{
   refreshToken: Scalars['String']['input'];
 }>;
 
 
-export type RefreshSessionMutation = { __typename?: 'Mutation', refreshSession?: { __typename?: 'RefreshResponse', sessionToken?: string | null, sessionExpiresAt?: string | null } | null };
+export type RefreshSessionMutation = { __typename?: 'Mutation', refreshSession?: { __typename?: 'RefreshResponse', sessionToken?: string | null, sessionExpiresAt?: any | null } | null };
+
+export type ChatMessageFieldsFragment = { __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null };
 
 export type GetMyChatSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, currentTags?: Array<string> | null, createdAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'ChatMessage', role?: string | null, content?: string | null, timestamp?: string | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
+export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
 
 export type CreateChatSessionMutationVariables = Exact<{
   userId: Scalars['ID']['input'];
   title: Scalars['String']['input'];
   messages: Scalars['String']['input'];
-  currentTags?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CreateChatSessionMutation = { __typename?: 'Mutation', createChatSession?: { __typename?: 'ChatSession', id?: string | null, title?: string | null, currentTags?: Array<string> | null, createdAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'ChatMessage', role?: string | null, content?: string | null, timestamp?: string | null }> | null } | null };
+export type CreateChatSessionMutation = { __typename?: 'Mutation', createChatSession?: { __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null } | null };
 
 export type UpdateChatSessionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   title?: InputMaybe<Scalars['String']['input']>;
   messages?: InputMaybe<Scalars['String']['input']>;
-  currentTags?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type UpdateChatSessionMutation = { __typename?: 'Mutation', updateChatSession?: { __typename?: 'ChatSession', id?: string | null, title?: string | null, currentTags?: Array<string> | null, createdAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'ChatMessage', role?: string | null, content?: string | null, timestamp?: string | null }> | null } | null };
+export type UpdateChatSessionMutation = { __typename?: 'Mutation', updateChatSession?: { __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null } | null };
 
 export type DeleteChatSessionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -498,30 +526,36 @@ export type DeleteChatSessionMutationVariables = Exact<{
 
 export type DeleteChatSessionMutation = { __typename?: 'Mutation', deleteChatSession?: boolean | null };
 
+export type TagFieldsFragment = { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null };
+
+export type TagCategoryFieldsFragment = { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null };
+
+export type TagBasicFieldsFragment = { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null };
+
 export type GetTagsQueryVariables = Exact<{
   categoryId?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetTagsQuery = { __typename?: 'Query', tags?: Array<{ __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: string | null, updatedAt?: string | null, restrictions?: Array<string> | null, category?: { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null } | null }> | null };
+export type GetTagsQuery = { __typename?: 'Query', tags?: Array<{ __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null, category?: { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null } | null }> | null };
 
 export type GetTagCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTagCategoriesQuery = { __typename?: 'Query', tagCategories?: Array<{ __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: string | null }> | null };
+export type GetTagCategoriesQuery = { __typename?: 'Query', tagCategories?: Array<{ __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null }> | null };
 
 export type GetTagQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTagQuery = { __typename?: 'Query', tag?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: string | null, updatedAt?: string | null, restrictions?: Array<string> | null, category?: { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null } | null } | null };
+export type GetTagQuery = { __typename?: 'Query', tag?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null, category?: { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null } | null } | null };
 
 export type GetTagConflictsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTagConflictsQuery = { __typename?: 'Query', tagConflicts?: Array<{ __typename?: 'TagConflict', id?: string | null, conflictType?: string | null, description?: string | null, createdAt?: string | null, tagId1?: string | null, tagId2?: string | null, tag1?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null, tag2?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null }> | null };
+export type GetTagConflictsQuery = { __typename?: 'Query', tagConflicts?: Array<{ __typename?: 'TagConflict', id?: string | null, conflictType?: string | null, description?: string | null, createdAt?: any | null, tagId1?: string | null, tagId2?: string | null, tag1?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null, tag2?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null } | null }> | null };
 
 export type CheckTagConflictsQueryVariables = Exact<{
   tagIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
@@ -540,26 +574,71 @@ export type CreateTagMutationVariables = Exact<{
 }>;
 
 
-export type CreateTagMutation = { __typename?: 'Mutation', createTag?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: string | null, updatedAt?: string | null, restrictions?: Array<string> | null } | null };
+export type CreateTagMutation = { __typename?: 'Mutation', createTag?: { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null } | null };
 
 
-
+export const UserBasicFieldsFragmentDoc = `
+    fragment UserBasicFields on User {
+  id
+  username
+  nickname
+  email
+  avatarUrl
+  isActive
+  isVerified
+  lastLoginAt
+  createdAt
+  updatedAt
+}
+    `;
+export const ChatMessageFieldsFragmentDoc = `
+    fragment ChatMessageFields on ChatMessage {
+  id
+  type
+  content
+  role
+  createdAt
+  status
+}
+    `;
+export const TagFieldsFragmentDoc = `
+    fragment TagFields on Tag {
+  id
+  name
+  description
+  categoryId
+  aiPrompt
+  sortOrder
+  isActive
+  createdAt
+  updatedAt
+  restrictions
+}
+    `;
+export const TagCategoryFieldsFragmentDoc = `
+    fragment TagCategoryFields on TagCategory {
+  id
+  name
+  description
+  sortOrder
+  isActive
+  createdAt
+}
+    `;
+export const TagBasicFieldsFragmentDoc = `
+    fragment TagBasicFields on Tag {
+  id
+  name
+  description
+}
+    `;
 export const GetMeDocument = `
     query GetMe {
   me {
-    id
-    username
-    nickname
-    email
-    avatarUrl
-    isActive
-    isVerified
-    lastLoginAt
-    createdAt
-    updatedAt
+    ...UserBasicFields
   }
 }
-    `;
+    ${UserBasicFieldsFragmentDoc}`;
 
 export const useGetMeQuery = <
       TData = GetMeQuery,
@@ -645,22 +724,13 @@ export const LoginDocument = `
     mutation Login($username: String!, $password: String!) {
   login(username: $username, password: $password) {
     user {
-      id
-      username
-      nickname
-      email
-      avatarUrl
-      isActive
-      isVerified
-      lastLoginAt
-      createdAt
-      updatedAt
+      ...UserBasicFields
     }
     sessionToken
     csrfToken
   }
 }
-    `;
+    ${UserBasicFieldsFragmentDoc}`;
 
 export const useLoginMutation = <
       TError = unknown,
@@ -712,22 +782,13 @@ export const WechatLoginDocument = `
     mutation WechatLogin($code: String!) {
   wechatLogin(code: $code) {
     user {
-      id
-      username
-      nickname
-      email
-      avatarUrl
-      isActive
-      isVerified
-      lastLoginAt
-      createdAt
-      updatedAt
+      ...UserBasicFields
     }
     sessionToken
     csrfToken
   }
 }
-    `;
+    ${UserBasicFieldsFragmentDoc}`;
 
 export const useWechatLoginMutation = <
       TError = unknown,
@@ -784,11 +845,9 @@ export const GetMyChatSessionsDocument = `
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
     user {
@@ -797,7 +856,7 @@ export const GetMyChatSessionsDocument = `
     }
   }
 }
-    `;
+    ${ChatMessageFieldsFragmentDoc}`;
 
 export const useGetMyChatSessionsQuery = <
       TData = GetMyChatSessionsQuery,
@@ -823,26 +882,24 @@ useGetMyChatSessionsQuery.getKey = (variables?: GetMyChatSessionsQueryVariables)
 useGetMyChatSessionsQuery.fetcher = (client: GraphQLClient, variables?: GetMyChatSessionsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyChatSessionsQuery, GetMyChatSessionsQueryVariables>(client, GetMyChatSessionsDocument, variables, headers);
 
 export const CreateChatSessionDocument = `
-    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $currentTags: String) {
+    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $tagIds: String) {
   createChatSession(
     userId: $userId
     title: $title
     messages: $messages
-    currentTags: $currentTags
+    tagIds: $tagIds
   ) {
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
   }
 }
-    `;
+    ${ChatMessageFieldsFragmentDoc}`;
 
 export const useCreateChatSessionMutation = <
       TError = unknown,
@@ -865,26 +922,19 @@ export const useCreateChatSessionMutation = <
 useCreateChatSessionMutation.fetcher = (client: GraphQLClient, variables: CreateChatSessionMutationVariables, headers?: RequestInit['headers']) => fetcher<CreateChatSessionMutation, CreateChatSessionMutationVariables>(client, CreateChatSessionDocument, variables, headers);
 
 export const UpdateChatSessionDocument = `
-    mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $currentTags: String) {
-  updateChatSession(
-    id: $id
-    title: $title
-    messages: $messages
-    currentTags: $currentTags
-  ) {
+    mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $tagIds: String) {
+  updateChatSession(id: $id, title: $title, messages: $messages, tagIds: $tagIds) {
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
   }
 }
-    `;
+    ${ChatMessageFieldsFragmentDoc}`;
 
 export const useUpdateChatSessionMutation = <
       TError = unknown,
@@ -935,24 +985,14 @@ useDeleteChatSessionMutation.fetcher = (client: GraphQLClient, variables: Delete
 export const GetTagsDocument = `
     query GetTags($categoryId: ID, $search: String) {
   tags(categoryId: $categoryId, search: $search) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
     category {
-      id
-      name
-      description
+      ...TagCategoryFields
     }
   }
 }
-    `;
+    ${TagFieldsFragmentDoc}
+${TagCategoryFieldsFragmentDoc}`;
 
 export const useGetTagsQuery = <
       TData = GetTagsQuery,
@@ -980,15 +1020,10 @@ useGetTagsQuery.fetcher = (client: GraphQLClient, variables?: GetTagsQueryVariab
 export const GetTagCategoriesDocument = `
     query GetTagCategories {
   tagCategories {
-    id
-    name
-    description
-    sortOrder
-    isActive
-    createdAt
+    ...TagCategoryFields
   }
 }
-    `;
+    ${TagCategoryFieldsFragmentDoc}`;
 
 export const useGetTagCategoriesQuery = <
       TData = GetTagCategoriesQuery,
@@ -1016,24 +1051,14 @@ useGetTagCategoriesQuery.fetcher = (client: GraphQLClient, variables?: GetTagCat
 export const GetTagDocument = `
     query GetTag($id: ID!) {
   tag(id: $id) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
     category {
-      id
-      name
-      description
+      ...TagCategoryFields
     }
   }
 }
-    `;
+    ${TagFieldsFragmentDoc}
+${TagCategoryFieldsFragmentDoc}`;
 
 export const useGetTagQuery = <
       TData = GetTagQuery,
@@ -1068,18 +1093,14 @@ export const GetTagConflictsDocument = `
     tagId1
     tagId2
     tag1 {
-      id
-      name
-      description
+      ...TagBasicFields
     }
     tag2 {
-      id
-      name
-      description
+      ...TagBasicFields
     }
   }
 }
-    `;
+    ${TagBasicFieldsFragmentDoc}`;
 
 export const useGetTagConflictsQuery = <
       TData = GetTagConflictsQuery,
@@ -1143,19 +1164,10 @@ export const CreateTagDocument = `
     restrictions: $restrictions
     sortOrder: $sortOrder
   ) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
   }
 }
-    `;
+    ${TagFieldsFragmentDoc}`;
 
 export const useCreateTagMutation = <
       TError = unknown,

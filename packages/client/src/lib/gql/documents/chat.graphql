@@ -1,13 +1,21 @@
+# 复用的消息字段片段
+fragment ChatMessageFields on ChatMessage {
+  id
+  type
+  content
+  role
+  createdAt
+  status
+}
+
 query GetMyChatSessions {
   myChatSessions {
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
     user {
@@ -21,22 +29,20 @@ mutation CreateChatSession(
   $userId: ID!
   $title: String!
   $messages: String!
-  $currentTags: String
+  $tagIds: [ID!]
 ) {
   createChatSession(
     userId: $userId
     title: $title
     messages: $messages
-    currentTags: $currentTags
+    tagIds: $tagIds
   ) {
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
   }
@@ -46,22 +52,20 @@ mutation UpdateChatSession(
   $id: ID!
   $title: String
   $messages: String
-  $currentTags: String
+  $tagIds: [ID!]
 ) {
   updateChatSession(
     id: $id
     title: $title
     messages: $messages
-    currentTags: $currentTags
+    tagIds: $tagIds
   ) {
     id
     title
     messages {
-      role
-      content
-      timestamp
+      ...ChatMessageFields
     }
-    currentTags
+    tagIds
     createdAt
     updatedAt
   }

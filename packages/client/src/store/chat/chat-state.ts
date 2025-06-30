@@ -1,4 +1,4 @@
-import { ChatSession } from "@diet/shared";
+import { ChatSession } from "@/lib/gql/graphql";
 
 export interface ChatDataState {
   sessions: ChatSession[];

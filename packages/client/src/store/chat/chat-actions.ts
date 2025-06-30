@@ -1,20 +1,21 @@
 import { nanoid } from "nanoid";
-import type {
-  ChatSession,
-  Message,
-  MessageStatus,
-  Tag,
-  RecipeDetail,
-} from "@diet/shared";
+import type { RecipeDetail } from "@diet/shared";
 import type { StateCreator } from "zustand";
 import { generateSessionTitle } from "./chat-utils";
 import type { FullChatStore } from "./types";
+import {
+  ChatMessage,
+  ChatSession,
+  MessageRole,
+  MessageStatus,
+  Tag,
+} from "@/lib/gql/graphql";
 
 // Utilities that depend on set/get will be defined inside factory
 
 export interface ChatActionSlice {
   // core synchronous reducers / selectors
-  addMessage: (message: Message) => void;
+  addMessage: (message: ChatMessage) => void;
   clearSession: (sessionId: string) => void;
   createSession: () => string;
   createTemporarySession: () => string;
@@ -27,21 +28,21 @@ export interface ChatActionSlice {
     recipeDetails: RecipeDetail[]
   ) => void;
   getCurrentSession: () => ChatSession | null;
-  getCurrentMessages: () => Message[];
+  getCurrentMessages: () => ChatMessage[];
   getSessions: () => ChatSession[];
   canSendMessage: () => boolean;
   // expose internal utils for effects layer
   updateMessageStatus: (
     messageId: string,
     status: MessageStatus,
-    extra?: Partial<Message>
+    extra?: Partial<ChatMessage>
   ) => void;
   updateCurrentSessionMessages: (
-    updater: (messages: Message[]) => Message[]
+    updater: (messages: ChatMessage[]) => ChatMessage[]
   ) => void;
   updateLastAIMessageStatus: (
     status: MessageStatus,
-    additionalProps?: Partial<Message>
+    additionalProps?: Partial<ChatMessage>
   ) => void;
 }
 
@@ -56,7 +57,7 @@ export const createChatActions: StateCreator<
     updateMessageStatus: (
       messageId: string,
       status: MessageStatus,
-      additionalProps: Partial<Message> = {}
+      additionalProps: Partial<ChatMessage> = {}
     ) => {
       set((state: FullChatStore) => {
         const current = get().getCurrentMessages();
@@ -72,12 +73,12 @@ export const createChatActions: StateCreator<
 
     updateLastAIMessageStatus: (
       status: MessageStatus,
-      additionalProps: Partial<Message> = {}
+      additionalProps: Partial<ChatMessage> = {}
     ) => {
       set((state: FullChatStore) => {
         const currentMessages = get().getCurrentMessages();
         const updatedMessages = currentMessages.map((msg, idx, arr) =>
-          !msg.isUser && idx === arr.length - 1
+          msg.role !== MessageRole.User && idx === arr.length - 1
             ? { ...msg, status, ...additionalProps }
             : msg
         );
@@ -92,7 +93,9 @@ export const createChatActions: StateCreator<
       });
     },
 
-    updateCurrentSessionMessages: (updater: (msg: Message[]) => Message[]) => {
+    updateCurrentSessionMessages: (
+      updater: (msg: ChatMessage[]) => ChatMessage[]
+    ) => {
       set((state: FullChatStore) => {
         const current = get().getCurrentMessages();
         const updated = updater(current);
@@ -126,7 +129,7 @@ export const createChatActions: StateCreator<
   };
 
   /* ---------------- reducers ---------------- */
-  const addMessage = (message: Message) => {
+  const addMessage = (message: ChatMessage) => {
     const { currentSessionId, isTemporarySession } = get();
 
     // ensure session exists
@@ -282,7 +285,7 @@ export const createChatActions: StateCreator<
     const messages = getCurrentMessages();
     if (messages.length === 0) return !gettingIntent;
     const last = messages[messages.length - 1];
-    if (last.isUser) return false;
+    if (last.role === "user") return false;
     if (last.status === "pending" || last.status === "streaming") return false;
     if (gettingIntent) return false;
     return true;

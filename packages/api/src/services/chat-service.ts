@@ -42,7 +42,7 @@ export class ChatService {
     userId: string;
     title: string;
     messages: string;
-    currentTags?: string | null;
+    tagIds?: string[] | null;
   }): Promise<ChatSessionModel> {
     const { generateId } = await import("../utils/id");
     const id = generateId();
@@ -53,7 +53,7 @@ export class ChatService {
         user_id: data.userId,
         title: data.title,
         messages: data.messages,
-        current_tags: data.currentTags || null,
+        tag_ids: data.tagIds ? JSON.stringify(data.tagIds) : null,
       })
       .returning();
     return session;
@@ -64,14 +64,14 @@ export class ChatService {
     data: Partial<{
       title: string;
       messages: string;
-      currentTags: string | null;
+      tagIds: string[] | null;
     }>
   ): Promise<ChatSessionModel | null> {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.messages !== undefined) updateData.messages = data.messages;
-    if (data.currentTags !== undefined)
-      updateData.current_tags = data.currentTags;
+    if (data.tagIds !== undefined)
+      updateData.tag_ids = data.tagIds ? JSON.stringify(data.tagIds) : null;
 
     const [session] = await this.db
       .update(chat_sessions)

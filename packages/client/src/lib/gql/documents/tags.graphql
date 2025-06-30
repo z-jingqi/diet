@@ -1,50 +1,54 @@
+# 通用标签字段片段
+fragment TagFields on Tag {
+  id
+  name
+  description
+  categoryId
+  aiPrompt
+  sortOrder
+  isActive
+  createdAt
+  updatedAt
+  restrictions
+}
+
+# 标签分类字段片段
+fragment TagCategoryFields on TagCategory {
+  id
+  name
+  description
+  sortOrder
+  isActive
+  createdAt
+}
+
+# 基础标签字段（仅 id name description）
+fragment TagBasicFields on Tag {
+  id
+  name
+  description
+}
+
 query GetTags($categoryId: ID, $search: String) {
   tags(categoryId: $categoryId, search: $search) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
     category {
-      id
-      name
-      description
+      ...TagCategoryFields
     }
   }
 }
 
 query GetTagCategories {
   tagCategories {
-    id
-    name
-    description
-    sortOrder
-    isActive
-    createdAt
+    ...TagCategoryFields
   }
 }
 
 query GetTag($id: ID!) {
   tag(id: $id) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
     category {
-      id
-      name
-      description
+      ...TagCategoryFields
     }
   }
 }
@@ -58,14 +62,10 @@ query GetTagConflicts {
     tagId1
     tagId2
     tag1 {
-      id
-      name
-      description
+      ...TagBasicFields
     }
     tag2 {
-      id
-      name
-      description
+      ...TagBasicFields
     }
   }
 }
@@ -90,15 +90,6 @@ mutation CreateTag(
     restrictions: $restrictions
     sortOrder: $sortOrder
   ) {
-    id
-    name
-    description
-    categoryId
-    aiPrompt
-    sortOrder
-    isActive
-    createdAt
-    updatedAt
-    restrictions
+    ...TagFields
   }
 }

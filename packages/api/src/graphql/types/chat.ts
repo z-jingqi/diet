@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth";
 import { UserRef } from "./auth"; // Import UserRef from auth.ts
+import { DateTimeScalar } from "../builder";
 
 // Drizzle model types
 type ChatSessionModel = InferSelectModel<typeof chat_sessions>;
@@ -12,9 +13,12 @@ type UserModel = InferSelectModel<typeof users>;
 
 // Chat message type for GraphQL
 type ChatMessage = {
-  role: string;
+  id: string;
+  type: "chat" | "recipe" | "health_advice";
   content: string;
-  timestamp: string;
+  role: "user" | "assistant" | "system";
+  createdAt: string;
+  status: "pending" | "streaming" | "done" | "error" | "abort";
 };
 
 // Chat response type
@@ -24,15 +28,51 @@ interface ChatResponse {
 }
 
 // ----------------------
+// Enums for message metadata
+// ----------------------
+
+// Message type enum
+export const MessageTypeEnum = builder.enumType("MessageType", {
+  values: {
+    CHAT: { value: "chat" },
+    RECIPE: { value: "recipe" },
+    HEALTH_ADVICE: { value: "health_advice" },
+  },
+});
+
+// Message role enum
+export const MessageRoleEnum = builder.enumType("MessageRole", {
+  values: {
+    USER: { value: "user" },
+    ASSISTANT: { value: "assistant" },
+    SYSTEM: { value: "system" },
+  },
+});
+
+// Message status enum
+export const MessageStatusEnum = builder.enumType("MessageStatus", {
+  values: {
+    PENDING: { value: "pending" },
+    STREAMING: { value: "streaming" },
+    DONE: { value: "done" },
+    ERROR: { value: "error" },
+    ABORT: { value: "abort" },
+  },
+});
+
+// ----------------------
 // ChatMessage type
 // ----------------------
 export const ChatMessageRef = builder
   .objectRef<ChatMessage>("ChatMessage")
   .implement({
     fields: (t) => ({
-      role: t.exposeString("role"),
+      id: t.exposeID("id"),
+      type: t.expose("type", { type: MessageTypeEnum }),
       content: t.exposeString("content"),
-      timestamp: t.exposeString("timestamp"),
+      role: t.expose("role", { type: MessageRoleEnum }),
+      createdAt: t.expose("createdAt", { type: DateTimeScalar }),
+      status: t.expose("status", { type: MessageStatusEnum }),
     }),
   });
 
@@ -57,13 +97,13 @@ export const ChatSessionRef = builder
     fields: (t) => ({
       id: t.exposeID("id"),
       title: t.exposeString("title"),
-      currentTags: t.field({
+      tagIds: t.field({
         type: ["String"],
         nullable: true,
         resolve: (parent) => {
-          if (!parent.current_tags) return null;
+          if (!parent.tag_ids) return null;
           try {
-            return JSON.parse(parent.current_tags);
+            return JSON.parse(parent.tag_ids);
           } catch {
             return null;
           }
@@ -81,9 +121,18 @@ export const ChatSessionRef = builder
           }
         },
       }),
-      createdAt: t.exposeString("created_at", { nullable: true }),
-      updatedAt: t.exposeString("updated_at", { nullable: true }),
-      deletedAt: t.exposeString("deleted_at", { nullable: true }),
+      createdAt: t.expose("created_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
+      updatedAt: t.expose("updated_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
+      deletedAt: t.expose("deleted_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
 
       // Relations
       user: t.field({
@@ -153,10 +202,11 @@ builder.mutationFields((t) => ({
       userId: t.arg.id({ required: true }),
       title: t.arg.string({ required: true }),
       messages: t.arg.string({ required: true }), // JSON string
-      currentTags: t.arg.string(), // JSON string
+      tagIds: t.arg.idList(),
     },
     resolve: async (_root, args, ctx) => {
-      return ctx.services.chat.createChatSession(args);
+      const { tagIds, ...rest } = args;
+      return ctx.services.chat.createChatSession({ ...rest, tagIds });
     },
   }),
 
@@ -167,13 +217,14 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
       title: t.arg.string(),
       messages: t.arg.string(), // JSON string
-      currentTags: t.arg.string(), // JSON string
+      tagIds: t.arg.idList(),
     },
     resolve: async (_root, args, ctx) => {
+      const { tagIds, ...rest } = args;
       return ctx.services.chat.updateChatSession(args.id, {
-        title: args.title ?? undefined,
-        messages: args.messages ?? undefined,
-        currentTags: args.currentTags ?? undefined,
+        title: rest.title ?? undefined,
+        messages: rest.messages ?? undefined,
+        tagIds: tagIds ?? undefined,
       });
     },
   }),

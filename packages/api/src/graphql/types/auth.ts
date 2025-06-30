@@ -33,9 +33,9 @@ export const OAuthAccountRef = builder
       }),
       accessToken: t.exposeString("access_token", { nullable: true }),
       refreshToken: t.exposeString("refresh_token", { nullable: true }),
-      expiresAt: t.exposeString("expires_at", { nullable: true }),
-      createdAt: t.exposeString("created_at", { nullable: true }),
-      updatedAt: t.exposeString("updated_at", { nullable: true }),
+      expiresAt: t.expose("expires_at", { type: "DateTime", nullable: true }),
+      createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
+      updatedAt: t.expose("updated_at", { type: "DateTime", nullable: true }),
     }),
   });
 
@@ -49,12 +49,12 @@ export const UserSessionRef = builder
       id: t.exposeID("id"),
       sessionToken: t.exposeString("session_token"),
       refreshToken: t.exposeString("refresh_token"),
-      sessionExpiresAt: t.exposeString("session_expires_at"),
-      refreshExpiresAt: t.exposeString("refresh_expires_at"),
+      sessionExpiresAt: t.expose("session_expires_at", { type: "DateTime" }),
+      refreshExpiresAt: t.expose("refresh_expires_at", { type: "DateTime" }),
       ipAddress: t.exposeString("ip_address", { nullable: true }),
       userAgent: t.exposeString("user_agent", { nullable: true }),
-      createdAt: t.exposeString("created_at", { nullable: true }),
-      updatedAt: t.exposeString("updated_at", { nullable: true }),
+      createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
+      updatedAt: t.expose("updated_at", { type: "DateTime", nullable: true }),
     }),
   });
 
@@ -67,8 +67,8 @@ export const CSRFTokenRef = builder
     fields: (t) => ({
       id: t.exposeID("id"),
       token: t.exposeString("token"),
-      expiresAt: t.exposeString("expires_at"),
-      createdAt: t.exposeString("created_at", { nullable: true }),
+      expiresAt: t.expose("expires_at", { type: "DateTime" }),
+      createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
     }),
   });
 
@@ -85,9 +85,12 @@ export const UserRef = builder.objectRef<GraphQLUser>("User").implement({
     phone: t.exposeString("phone", { nullable: true }),
     isActive: t.exposeBoolean("is_active", { nullable: true }),
     isVerified: t.exposeBoolean("is_verified", { nullable: true }),
-    lastLoginAt: t.exposeString("last_login_at", { nullable: true }),
-    createdAt: t.exposeString("created_at", { nullable: true }),
-    updatedAt: t.exposeString("updated_at", { nullable: true }),
+    lastLoginAt: t.expose("last_login_at", {
+      type: "DateTime",
+      nullable: true,
+    }),
+    createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
+    updatedAt: t.expose("updated_at", { type: "DateTime", nullable: true }),
 
     // Relations
     oauthAccounts: t.field({
@@ -280,7 +283,10 @@ export const RefreshResponseRef = builder
   .implement({
     fields: (t) => ({
       sessionToken: t.exposeString("sessionToken", { nullable: true }),
-      sessionExpiresAt: t.exposeString("sessionExpiresAt", { nullable: true }),
+      sessionExpiresAt: t.expose("sessionExpiresAt", {
+        type: "DateTime",
+        nullable: true,
+      }),
     }),
   });
 

@@ -1,8 +1,8 @@
 import type { ChatDataState } from "./chat-state";
 import type { ChatActionSlice } from "./chat-actions";
 import type { ChatEffectSlice } from "./chat-effects";
-import type { ChatSession, Message } from "@diet/shared";
 import type { ChatCompletionMessageParam } from "openai/resources";
+import { ChatMessage, ChatSession } from "@/lib/gql/graphql";
 
 // handlers defined in chat-store (high-level async intent handlers)
 export interface ChatHighLevelHandlers {
@@ -19,7 +19,7 @@ export interface ChatHighLevelHandlers {
     AIMessages: ChatCompletionMessageParam[],
     isGuestMode?: boolean
   ) => Promise<void>;
-  handleError: (error: unknown, addMessage: (msg: Message) => void) => void;
+  handleError: (error: unknown, addMessage: (msg: ChatMessage) => void) => void;
   _persistSession: (session: ChatSession, isNew: boolean) => Promise<void>;
 }
 

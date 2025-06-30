@@ -20,7 +20,7 @@ const MessageBubble = ({
   onDislike,
   onSaveHealthAdvice,
 }: MessageBubbleProps) => {
-  if (message.isUser) {
+  if (message.role === "user") {
     return <UserMessageBubble content={message.content} />;
   }
 
