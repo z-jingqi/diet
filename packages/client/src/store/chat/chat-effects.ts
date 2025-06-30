@@ -2,6 +2,7 @@ import type { StateCreator } from "zustand";
 import { getIntent } from "@/lib/api/chat-api";
 import { toAIMessages } from "@/utils/chat-utils";
 import type { FullChatStore } from "./types";
+import { MessageStatus } from "@/lib/gql/graphql";
 
 // 只拆分两大异步方法示例：abortCurrentMessage & sendMessage
 export interface ChatEffectSlice {
@@ -21,7 +22,7 @@ export const createChatEffects: StateCreator<
       if (abortController) {
         abortController.abort();
         set({ abortController: undefined, gettingIntent: false });
-        get().updateLastAIMessageStatus("abort", { finishedAt: new Date() });
+        get().updateLastAIMessageStatus(MessageStatus.Done);
       }
     },
 
@@ -60,11 +61,10 @@ export const createChatEffects: StateCreator<
           await _persistSession(session, true);
         }
       }
-
-      const AIMessages = toAIMessages(
-        [...getCurrentMessages()],
-        getCurrentSession()?.currentTags || []
-      );
+      const tagIds = getCurrentSession()?.tagIds || [];
+      // TODO: 需要从 tagIds 中获取 tags
+      const tags = tagIds.map((id) => ({ id }));
+      const AIMessages = toAIMessages([...getCurrentMessages()], tags);
       const controller = new AbortController();
       set({ abortController: controller });
 

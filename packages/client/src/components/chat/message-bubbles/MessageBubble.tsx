@@ -1,11 +1,11 @@
-import type { Message } from "@diet/shared";
 import RecipeMessageBubble from "./RecipeMessageBubble";
 import HealthAdviceMessageBubble from "./HealthAdviceMessageBubble";
 import UserMessageBubble from "./UserMessageBubble";
 import ChatMessageBubble from "./ChatMessageBubble";
+import { ChatMessage, MessageRole, MessageType } from "@/lib/gql/graphql";
 
 interface MessageBubbleProps {
-  message: Message;
+  message: ChatMessage;
   onLike?: (recipeName: string) => void;
   onDislike?: (recipeName: string) => void;
   onSaveHealthAdvice?: (content: string) => void;
@@ -20,11 +20,11 @@ const MessageBubble = ({
   onDislike,
   onSaveHealthAdvice,
 }: MessageBubbleProps) => {
-  if (message.role === "user") {
+  if (message.role === MessageRole.User) {
     return <UserMessageBubble content={message.content} />;
   }
 
-  if (message.type === "recipe") {
+  if (message.type === MessageType.Recipe) {
     return (
       <RecipeMessageBubble
         message={message}
@@ -34,7 +34,7 @@ const MessageBubble = ({
     );
   }
 
-  if (message.type === "health_advice") {
+  if (message.type === MessageType.HealthAdvice) {
     return (
       <HealthAdviceMessageBubble
         message={message}

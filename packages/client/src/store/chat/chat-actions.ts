@@ -23,17 +23,13 @@ export interface ChatActionSlice {
   deleteSession: (sessionId: string) => void;
   renameSession: (sessionId: string, title: string) => void;
   updateSessionTags: (tags: Tag[]) => void;
-  updateMessageRecipeDetails: (
-    messageId: string,
-    recipeDetails: RecipeDetail[]
-  ) => void;
   getCurrentSession: () => ChatSession | null;
   getCurrentMessages: () => ChatMessage[];
   getSessions: () => ChatSession[];
   canSendMessage: () => boolean;
   // expose internal utils for effects layer
   updateMessageStatus: (
-    messageId: string,
+    messageId: string | undefined | null,
     status: MessageStatus,
     extra?: Partial<ChatMessage>
   ) => void;
@@ -55,10 +51,13 @@ export const createChatActions: StateCreator<
   /* ---------------- message utils (local) ---------------- */
   const messageUtils = {
     updateMessageStatus: (
-      messageId: string,
+      messageId: string | undefined | null,
       status: MessageStatus,
       additionalProps: Partial<ChatMessage> = {}
     ) => {
+      if (!messageId) {
+        return;
+      }
       set((state: FullChatStore) => {
         const current = get().getCurrentMessages();
         const updated = current.map((msg) =>
@@ -141,11 +140,11 @@ export const createChatActions: StateCreator<
     sessionUtils.updateCurrentSession((session) => {
       let newTitle = session.title;
       if (session.title === "新对话") {
-        newTitle = generateSessionTitle([...session.messages, message]);
+        newTitle = generateSessionTitle([...(session.messages || []), message]);
       }
       return {
         ...session,
-        messages: [...session.messages, message],
+        messages: [...(session.messages || []), message],
         updatedAt: new Date(),
         title: newTitle,
       };
@@ -171,7 +170,7 @@ export const createChatActions: StateCreator<
       id,
       title: "新对话",
       messages: [],
-      currentTags: [],
+      tagIds: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -189,7 +188,7 @@ export const createChatActions: StateCreator<
       id,
       title: "新对话",
       messages: [],
-      currentTags: [],
+      tagIds: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -244,23 +243,6 @@ export const createChatActions: StateCreator<
     }));
   };
 
-  const updateMessageRecipeDetails = (
-    messageId: string,
-    recipeDetails: RecipeDetail[]
-  ) => {
-    set((state: FullChatStore) => {
-      const current = get().getCurrentMessages();
-      const updated = current.map((m) =>
-        m.id === messageId ? { ...m, recipeDetails } : m
-      );
-      return {
-        sessions: state.sessions.map((s) =>
-          s.id === state.currentSessionId ? { ...s, messages: updated } : s
-        ),
-      } as any;
-    });
-  };
-
   const getCurrentSession = () => {
     const { sessions, currentSessionId } = get();
     return currentSessionId
@@ -270,7 +252,7 @@ export const createChatActions: StateCreator<
 
   const getCurrentMessages = () => {
     const session = getCurrentSession();
-    return session ? session.messages : [];
+    return session?.messages?.length ? session.messages : [];
   };
 
   const getSessions = () => {
@@ -283,11 +265,22 @@ export const createChatActions: StateCreator<
   const canSendMessage = () => {
     const { gettingIntent } = get();
     const messages = getCurrentMessages();
-    if (messages.length === 0) return !gettingIntent;
+    if (messages.length === 0) {
+      return !gettingIntent;
+    }
     const last = messages[messages.length - 1];
-    if (last.role === "user") return false;
-    if (last.status === "pending" || last.status === "streaming") return false;
-    if (gettingIntent) return false;
+    if (last.role === MessageRole.User) {
+      return false;
+    }
+    if (
+      last.status === MessageStatus.Pending ||
+      last.status === MessageStatus.Streaming
+    ) {
+      return false;
+    }
+    if (gettingIntent) {
+      return false;
+    }
     return true;
   };
 
@@ -300,7 +293,6 @@ export const createChatActions: StateCreator<
     deleteSession,
     renameSession,
     updateSessionTags,
-    updateMessageRecipeDetails,
     getCurrentSession,
     getCurrentMessages,
     getSessions,

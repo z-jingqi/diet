@@ -1,5 +1,5 @@
 import { Markdown } from "@/components/ui/markdown";
-import { Message, RecipeDetail } from "@diet/shared";
+import { RecipeDetail } from "@diet/shared";
 import RecipeList from "./RecipeList";
 import {
   useRecipeDetails,
@@ -7,11 +7,11 @@ import {
   useRecipeDisplay,
   useRecipeInteractions,
 } from "./hooks";
-import useChatStore from "@/store/chat-store";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { ChatMessage, MessageType } from "@/lib/gql/graphql";
 
 interface StreamingRecipeMessageBubbleProps {
-  message: Message;
+  message: ChatMessage;
   onLike?: (recipeName: string) => void;
   onDislike?: (recipeName: string) => void;
 }
@@ -22,17 +22,9 @@ const RecipeMessageBubble = ({
   onDislike,
 }: StreamingRecipeMessageBubbleProps) => {
   const authNavigate = useAuthNavigate();
-  const { updateMessageRecipeDetails } = useChatStore();
 
   // 使用分离的 hooks
-  const { recipeDetails, updateRecipeDetail } = useRecipeDetails({ 
-    message, 
-    onUpdateMessage: (messageId, updates) => {
-      if (updates.recipeDetails) {
-        updateMessageRecipeDetails(messageId, updates.recipeDetails);
-      }
-    }
-  });
+  const { recipeDetails } = useRecipeDetails({ message });
   const { beforeText, afterText } = useRecipeContent(message);
   const { showCards } = useRecipeDisplay(message, recipeDetails.length);
   const {
@@ -45,7 +37,7 @@ const RecipeMessageBubble = ({
   } = useRecipeInteractions();
 
   // 只处理 type 为 recipe 的消息
-  if (message.type !== "recipe") {
+  if (message.type !== MessageType.Recipe) {
     return null;
   }
 
@@ -59,8 +51,9 @@ const RecipeMessageBubble = ({
     onDislike?.(recipeName);
   };
 
+  // TODO: 需要把生成的菜谱和菜谱详情关联起来
   const handleGenerateRecipeWithUpdate = async (recipeDetail: RecipeDetail) => {
-    await handleGenerateRecipe(recipeDetail, updateRecipeDetail);
+    await handleGenerateRecipe(recipeDetail);
   };
 
   const handleStartCooking = (recipeId: string) => {
@@ -73,7 +66,7 @@ const RecipeMessageBubble = ({
       <div className="flex w-full justify-start">
         <div className="max-w-[80%]">
           <div className="bg-white rounded-lg p-4">
-            <Markdown content={message.content} className="max-w-none" />
+            <Markdown content={message.content || ""} className="max-w-none" />
           </div>
         </div>
       </div>

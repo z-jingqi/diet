@@ -4,8 +4,12 @@ import useRecipeStore from "@/store/recipe-store";
 
 export const useRecipeInteractions = () => {
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
-  const [dislikedRecipes, setDislikedRecipes] = useState<Set<string>>(new Set());
-  const [generatingRecipes, setGeneratingRecipes] = useState<Set<string>>(new Set());
+  const [dislikedRecipes, setDislikedRecipes] = useState<Set<string>>(
+    new Set()
+  );
+  const [generatingRecipes, setGeneratingRecipes] = useState<Set<string>>(
+    new Set()
+  );
   const { generateRecipe } = useRecipeStore();
 
   const handleLike = (recipeName: string) => {
@@ -34,10 +38,8 @@ export const useRecipeInteractions = () => {
     });
   };
 
-  const handleGenerateRecipe = async (
-    recipeDetail: RecipeDetail,
-    updateRecipeDetail: (recipeId: string, updates: Partial<RecipeDetail>) => void
-  ) => {
+  // TODO: 需要把生成的菜谱和菜谱详情关联起来
+  const handleGenerateRecipe = async (recipeDetail: RecipeDetail) => {
     setGeneratingRecipes((prev) => {
       const newSet = new Set(prev);
       newSet.add(recipeDetail.id);
@@ -46,11 +48,6 @@ export const useRecipeInteractions = () => {
 
     try {
       const recipe = await generateRecipe(recipeDetail);
-      // 更新菜谱详情，添加生成时间和菜谱ID
-      updateRecipeDetail(recipeDetail.id, {
-        generatedAt: new Date(),
-        recipeId: recipe.id, // 使用生成的菜谱ID
-      });
     } catch (error) {
       console.error("Failed to generate recipe:", error);
     } finally {
@@ -70,4 +67,4 @@ export const useRecipeInteractions = () => {
     handleDislike,
     handleGenerateRecipe,
   };
-}; 
+};

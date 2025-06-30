@@ -1,8 +1,8 @@
-import type { Message } from "@diet/shared";
+import { ChatMessage, MessageRole } from "@/lib/gql/graphql";
 
 // 生成会话标题：取第一条用户消息前 20 个字符
-export const generateSessionTitle = (messages: Message[]): string => {
-  const firstUserMessage = messages.find((m) => m.role === "user");
+export const generateSessionTitle = (messages: ChatMessage[]): string => {
+  const firstUserMessage = messages.find((m) => m.role === MessageRole.User);
   if (!firstUserMessage || !firstUserMessage.content) {
     return "新对话";
   }

@@ -7,6 +7,7 @@ import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import useChatStore from "@/store/chat-store";
 import useAuthStore from "@/store/auth-store";
 import { useMyChatSessions } from "@/lib/gql/hooks/chat";
+import { MessageRole, MessageStatus } from "@/lib/gql/graphql";
 
 const ChatPage = () => {
   const confirm = useConfirmDialog();
@@ -48,8 +49,7 @@ const ChatPage = () => {
               (msg): msg is NonNullable<typeof msg> => msg !== null
             ) || [],
           currentTags:
-            session.currentTags?.filter((tag): tag is string => tag !== null) ||
-            [],
+            session.tagIds?.filter((tag): tag is string => tag !== null) || [],
           createdAt: session.createdAt,
           updatedAt: session.updatedAt,
         }));
@@ -93,8 +93,9 @@ const ChatPage = () => {
     (() => {
       const last = messages[messages.length - 1];
       return (
-        last.role !== "user" &&
-        (last.status === "pending" || last.status === "streaming")
+        last.role !== MessageRole.User &&
+        (last.status === MessageStatus.Pending ||
+          last.status === MessageStatus.Streaming)
       );
     })();
 

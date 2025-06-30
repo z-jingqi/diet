@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Message } from "@diet/shared";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { Typography } from "@/components/ui/typography";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChatMessage, MessageStatus } from "@/lib/gql/graphql";
 
 interface StreamingHealthMessageBubbleProps {
-  message: Message;
+  message: ChatMessage;
   onSave?: (content: string) => void;
 }
 
@@ -19,7 +19,7 @@ const HealthAdviceMessageBubble = ({
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setContent(message.content);
+    setContent(message.content || "");
   }, [message.content]);
 
   const handleSave = () => {
@@ -35,14 +35,11 @@ const HealthAdviceMessageBubble = ({
         <div className="bg-white rounded-lg p-4">
           {/* 健康建议内容 */}
           <div className="mb-4">
-            <Markdown
-              content={content}
-              className="max-w-none"
-            />
+            <Markdown content={content} className="max-w-none" />
           </div>
 
           {/* 操作按钮 - 只在生成完成后显示 */}
-          {message.status === "done" && (
+          {message.status === MessageStatus.Done && (
             <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
               <Button
                 variant="ghost"
@@ -71,4 +68,4 @@ const HealthAdviceMessageBubble = ({
   );
 };
 
-export default HealthAdviceMessageBubble; 
+export default HealthAdviceMessageBubble;

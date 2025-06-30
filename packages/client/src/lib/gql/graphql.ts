@@ -128,7 +128,7 @@ export type MutationCreateCsrfTokenArgs = {
 
 export type MutationCreateChatSessionArgs = {
   messages: Scalars['String']['input'];
-  tagIds?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   title: Scalars['String']['input'];
   userId: Scalars['ID']['input'];
 };
@@ -241,7 +241,7 @@ export type MutationRegisterArgs = {
 export type MutationUpdateChatSessionArgs = {
   id: Scalars['ID']['input'];
   messages?: InputMaybe<Scalars['String']['input']>;
-  tagIds?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -503,7 +503,7 @@ export type CreateChatSessionMutationVariables = Exact<{
   userId: Scalars['ID']['input'];
   title: Scalars['String']['input'];
   messages: Scalars['String']['input'];
-  tagIds?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
 }>;
 
 
@@ -513,7 +513,7 @@ export type UpdateChatSessionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   title?: InputMaybe<Scalars['String']['input']>;
   messages?: InputMaybe<Scalars['String']['input']>;
-  tagIds?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
 }>;
 
 
@@ -882,7 +882,7 @@ useGetMyChatSessionsQuery.getKey = (variables?: GetMyChatSessionsQueryVariables)
 useGetMyChatSessionsQuery.fetcher = (client: GraphQLClient, variables?: GetMyChatSessionsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyChatSessionsQuery, GetMyChatSessionsQueryVariables>(client, GetMyChatSessionsDocument, variables, headers);
 
 export const CreateChatSessionDocument = `
-    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $tagIds: String) {
+    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $tagIds: [ID!]) {
   createChatSession(
     userId: $userId
     title: $title
@@ -922,7 +922,7 @@ export const useCreateChatSessionMutation = <
 useCreateChatSessionMutation.fetcher = (client: GraphQLClient, variables: CreateChatSessionMutationVariables, headers?: RequestInit['headers']) => fetcher<CreateChatSessionMutation, CreateChatSessionMutationVariables>(client, CreateChatSessionDocument, variables, headers);
 
 export const UpdateChatSessionDocument = `
-    mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $tagIds: String) {
+    mutation UpdateChatSession($id: ID!, $title: String, $messages: String, $tagIds: [ID!]) {
   updateChatSession(id: $id, title: $title, messages: $messages, tagIds: $tagIds) {
     id
     title

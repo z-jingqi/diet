@@ -5,7 +5,6 @@ import {
   sendRecipeChatMessage,
   sendHealthAdviceChatMessage,
 } from "@/lib/api/chat-api";
-import { extractRecipeDetails } from "@/utils/recipe-parser";
 import { ChatCompletionMessageParam } from "openai/resources";
 import useAuthStore from "@/store/auth-store";
 import { graphqlClient } from "@/lib/gql/client";
@@ -133,12 +132,7 @@ const useChatStore = create<
         );
 
         set({ abortController: undefined });
-
-        // 使用公共方法更新消息状态为完成，并添加recipeDetails
-        const recipeDetails = extractRecipeDetails(result);
-        updateMessageStatus(message.id, MessageStatus.Done, {
-          recipeDetails: recipeDetails,
-        });
+        updateMessageStatus(message.id, MessageStatus.Done);
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
@@ -165,8 +159,8 @@ const useChatStore = create<
       isGuestMode = false
     ) => {
       const { addMessage } = get();
-      const message = buildMessage("health_advice");
-      message.status = "streaming";
+      const message = buildMessage(MessageType.HealthAdvice);
+      message.status = MessageStatus.Streaming;
       addMessage(message);
 
       const newController = new AbortController();
