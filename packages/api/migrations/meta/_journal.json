@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1750770574789,
-      "tag": "0000_small_ricochet",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1750777575555,
-      "tag": "0001_curly_master_mold",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1751188314982,
-      "tag": "0002_gorgeous_korg",
+      "when": 1751290959599,
+      "tag": "0000_rich_vertigo",
       "breakpoints": true
     }
   ]

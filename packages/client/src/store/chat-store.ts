@@ -365,7 +365,6 @@ const useChatStore = create<
         if (isNew) {
           // 创建会话
           const variables: CreateChatSessionMutationVariables = {
-            userId: user.id as string,
             title: session.title ?? "",
             messages: JSON.stringify(session.messages),
             tagIds: session.tagIds ?? [],

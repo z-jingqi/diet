@@ -48,14 +48,3 @@ export const user_sessions = sqliteTable("user_sessions", {
   created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
-
-// CSRF Token 表
-export const csrf_tokens = sqliteTable("csrf_tokens", {
-  id: text("id").primaryKey(),
-  user_id: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  token: text("token").notNull().unique(),
-  expires_at: text("expires_at").notNull(), // DATETIME
-  created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-});

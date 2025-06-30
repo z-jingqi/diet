@@ -172,7 +172,6 @@ export const createChatActions: StateCreator<
       messages: [],
       tagIds: [],
       createdAt: now,
-      updatedAt: now,
     };
     set((state: FullChatStore) => ({
       sessions: [...state.sessions, newSession],
@@ -190,7 +189,6 @@ export const createChatActions: StateCreator<
       messages: [],
       tagIds: [],
       createdAt: now,
-      updatedAt: now,
     };
     set((state: FullChatStore) => ({
       sessions: [...state.sessions, newSession],

@@ -26,17 +26,11 @@ query GetMyChatSessions {
 }
 
 mutation CreateChatSession(
-  $userId: ID!
   $title: String!
   $messages: String!
   $tagIds: [ID!]
 ) {
-  createChatSession(
-    userId: $userId
-    title: $title
-    messages: $messages
-    tagIds: $tagIds
-  ) {
+  createChatSession(title: $title, messages: $messages, tagIds: $tagIds) {
     id
     title
     messages {

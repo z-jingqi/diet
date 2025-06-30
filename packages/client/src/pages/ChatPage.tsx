@@ -145,7 +145,6 @@ const ChatPage = () => {
   return (
     <div className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout
-        title={isGuestMode ? "游客体验" : "新对话"}
         onClearSession={handleClearSession}
         onDeleteSession={handleDeleteSession}
         onCreateNewSession={handleCreateNewSession}

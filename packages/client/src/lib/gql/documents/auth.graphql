@@ -21,7 +21,13 @@ query GetMe {
 
 # 用户注册
 mutation Register($username: String!, $password: String!) {
-  register(username: $username, password: $password)
+  register(username: $username, password: $password) {
+    user {
+      ...UserBasicFields
+    }
+    sessionToken
+    csrfToken
+  }
 }
 
 # 根据用户名获取用户（用于检查用户名是否已存在）

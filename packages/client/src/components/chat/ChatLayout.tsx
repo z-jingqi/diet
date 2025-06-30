@@ -7,7 +7,6 @@ import useChatStore from "@/store/chat-store";
 
 interface ChatLayoutProps {
   children: React.ReactNode;
-  title?: string;
   onClearSession?: (sessionId: string) => void;
   onCreateNewSession?: () => void;
   onSelectSession?: (sessionId: string) => void;
@@ -17,7 +16,6 @@ interface ChatLayoutProps {
 
 const ChatLayout = ({
   children,
-  title = "新对话",
   onClearSession,
   onCreateNewSession,
   onSelectSession,
@@ -39,13 +37,7 @@ const ChatLayout = ({
   return (
     <div className="flex flex-col h-[100dvh] w-full overflow-hidden">
       {/* Header */}
-      <ChatHeader
-        onMenuClick={handleMenuClick}
-        title={title}
-        onRenameSession={() => onRenameSession?.(currentSessionId ?? "")}
-        onClearSession={() => onClearSession?.(currentSessionId ?? "")}
-        onDeleteSession={() => onDeleteSession?.(currentSessionId ?? "")}
-      />
+      <ChatHeader onMenuClick={handleMenuClick} />
 
       {/* Main Content */}
       <div className="flex-1 min-h-0 w-full">{children}</div>

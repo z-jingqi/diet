@@ -27,15 +27,6 @@ export type Scalars = {
   DateTime: { input: any; output: any; }
 };
 
-export type CsrfToken = {
-  __typename?: 'CSRFToken';
-  createdAt?: Maybe<Scalars['DateTime']['output']>;
-  expiresAt?: Maybe<Scalars['DateTime']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
-  token?: Maybe<Scalars['String']['output']>;
-  user?: Maybe<User>;
-};
-
 export type ChatMessage = {
   __typename?: 'ChatMessage';
   content?: Maybe<Scalars['String']['output']>;
@@ -93,7 +84,6 @@ export enum MessageType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createCSRFToken?: Maybe<CsrfToken>;
   createChatSession?: Maybe<ChatSession>;
   createOAuthAccount?: Maybe<OAuthAccount>;
   createTag?: Maybe<Tag>;
@@ -101,7 +91,6 @@ export type Mutation = {
   createTagConflict?: Maybe<TagConflict>;
   createUser?: Maybe<User>;
   createUserSession?: Maybe<UserSession>;
-  deleteCSRFToken?: Maybe<Scalars['Boolean']['output']>;
   deleteChatSession?: Maybe<Scalars['Boolean']['output']>;
   deleteTag?: Maybe<Scalars['Boolean']['output']>;
   deleteTagCategory?: Maybe<Scalars['Boolean']['output']>;
@@ -110,7 +99,7 @@ export type Mutation = {
   login?: Maybe<LoginResponse>;
   logout?: Maybe<Scalars['Boolean']['output']>;
   refreshSession?: Maybe<RefreshResponse>;
-  register?: Maybe<Scalars['String']['output']>;
+  register?: Maybe<LoginResponse>;
   updateChatSession?: Maybe<ChatSession>;
   updateTag?: Maybe<Tag>;
   updateTagCategory?: Maybe<TagCategory>;
@@ -119,18 +108,10 @@ export type Mutation = {
 };
 
 
-export type MutationCreateCsrfTokenArgs = {
-  expiresAt: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
-};
-
-
 export type MutationCreateChatSessionArgs = {
   messages: Scalars['String']['input'];
   tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   title: Scalars['String']['input'];
-  userId: Scalars['ID']['input'];
 };
 
 
@@ -188,11 +169,6 @@ export type MutationCreateUserSessionArgs = {
   sessionToken: Scalars['String']['input'];
   userAgent?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['String']['input'];
-};
-
-
-export type MutationDeleteCsrfTokenArgs = {
-  token: Scalars['String']['input'];
 };
 
 
@@ -456,7 +432,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register?: string | null };
+export type RegisterMutation = { __typename?: 'Mutation', register?: { __typename?: 'LoginResponse', sessionToken?: string | null, csrfToken?: string | null, user?: { __typename?: 'User', id?: string | null, username?: string | null, nickname?: string | null, email?: string | null, avatarUrl?: string | null, isActive?: boolean | null, isVerified?: boolean | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null } | null } | null };
 
 export type UserByUsernameQueryVariables = Exact<{
   username: Scalars['String']['input'];
@@ -500,7 +476,6 @@ export type GetMyChatSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
 
 export type CreateChatSessionMutationVariables = Exact<{
-  userId: Scalars['ID']['input'];
   title: Scalars['String']['input'];
   messages: Scalars['String']['input'];
   tagIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
@@ -665,9 +640,15 @@ useGetMeQuery.fetcher = (client: GraphQLClient, variables?: GetMeQueryVariables,
 
 export const RegisterDocument = `
     mutation Register($username: String!, $password: String!) {
-  register(username: $username, password: $password)
+  register(username: $username, password: $password) {
+    user {
+      ...UserBasicFields
+    }
+    sessionToken
+    csrfToken
+  }
 }
-    `;
+    ${UserBasicFieldsFragmentDoc}`;
 
 export const useRegisterMutation = <
       TError = unknown,
@@ -882,13 +863,8 @@ useGetMyChatSessionsQuery.getKey = (variables?: GetMyChatSessionsQueryVariables)
 useGetMyChatSessionsQuery.fetcher = (client: GraphQLClient, variables?: GetMyChatSessionsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyChatSessionsQuery, GetMyChatSessionsQueryVariables>(client, GetMyChatSessionsDocument, variables, headers);
 
 export const CreateChatSessionDocument = `
-    mutation CreateChatSession($userId: ID!, $title: String!, $messages: String!, $tagIds: [ID!]) {
-  createChatSession(
-    userId: $userId
-    title: $title
-    messages: $messages
-    tagIds: $tagIds
-  ) {
+    mutation CreateChatSession($title: String!, $messages: String!, $tagIds: [ID!]) {
+  createChatSession(title: $title, messages: $messages, tagIds: $tagIds) {
     id
     title
     messages {

@@ -53,7 +53,7 @@ export class ChatService {
         user_id: data.userId,
         title: data.title,
         messages: data.messages,
-        tag_ids: data.tagIds ? JSON.stringify(data.tagIds) : null,
+        tag_ids: JSON.stringify(data.tagIds ?? []),
       })
       .returning();
     return session;
@@ -70,8 +70,9 @@ export class ChatService {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.messages !== undefined) updateData.messages = data.messages;
-    if (data.tagIds !== undefined)
-      updateData.tag_ids = data.tagIds ? JSON.stringify(data.tagIds) : null;
+    if (data.tagIds !== undefined) {
+      updateData.tag_ids = JSON.stringify(data.tagIds ?? []);
+    }
 
     const [session] = await this.db
       .update(chat_sessions)

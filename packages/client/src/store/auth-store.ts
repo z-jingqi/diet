@@ -84,10 +84,18 @@ const useAuthStore = create<AuthState>((set, get) => ({
       const client = getAuthClient();
       const variables: RegisterMutationVariables = { username, password };
 
-      // 使用生成的 mutation fetcher
-      await useRegisterMutation.fetcher(client, variables)();
+      const res = await useRegisterMutation.fetcher(client, variables)();
 
-      set({ isLoading: false });
+      if (!res.register || !res.register.user) {
+        throw new Error("注册失败");
+      }
+
+      set({
+        user: res.register.user as User,
+        isAuthenticated: true,
+        isGuestMode: false,
+        isLoading: false,
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "注册失败",

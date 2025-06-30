@@ -14,11 +14,11 @@ type UserModel = InferSelectModel<typeof users>;
 // Chat message type for GraphQL
 type ChatMessage = {
   id: string;
-  type: "chat" | "recipe" | "health_advice";
+  type: "CHAT" | "RECIPE" | "HEALTH_ADVICE";
   content: string;
-  role: "user" | "assistant" | "system";
+  role: "USER" | "ASSISTANT" | "SYSTEM";
   createdAt: string;
-  status: "pending" | "streaming" | "done" | "error" | "abort";
+  status: "PENDING" | "STREAMING" | "DONE" | "ERROR" | "ABORT";
 };
 
 // Chat response type
@@ -34,29 +34,29 @@ interface ChatResponse {
 // Message type enum
 export const MessageTypeEnum = builder.enumType("MessageType", {
   values: {
-    CHAT: { value: "chat" },
-    RECIPE: { value: "recipe" },
-    HEALTH_ADVICE: { value: "health_advice" },
+    CHAT: { value: "CHAT" },
+    RECIPE: { value: "RECIPE" },
+    HEALTH_ADVICE: { value: "HEALTH_ADVICE" },
   },
 });
 
 // Message role enum
 export const MessageRoleEnum = builder.enumType("MessageRole", {
   values: {
-    USER: { value: "user" },
-    ASSISTANT: { value: "assistant" },
-    SYSTEM: { value: "system" },
+    USER: { value: "USER" },
+    ASSISTANT: { value: "ASSISTANT" },
+    SYSTEM: { value: "SYSTEM" },
   },
 });
 
 // Message status enum
 export const MessageStatusEnum = builder.enumType("MessageStatus", {
   values: {
-    PENDING: { value: "pending" },
-    STREAMING: { value: "streaming" },
-    DONE: { value: "done" },
-    ERROR: { value: "error" },
-    ABORT: { value: "abort" },
+    PENDING: { value: "PENDING" },
+    STREAMING: { value: "STREAMING" },
+    DONE: { value: "DONE" },
+    ERROR: { value: "ERROR" },
+    ABORT: { value: "ABORT" },
   },
 });
 
@@ -195,18 +195,22 @@ builder.queryFields((t) => ({
 // Mutations
 // ----------------------
 builder.mutationFields((t) => ({
-  // Create chat session
+  // Create chat session (authenticated)
   createChatSession: t.field({
     type: ChatSessionRef,
     args: {
-      userId: t.arg.id({ required: true }),
       title: t.arg.string({ required: true }),
       messages: t.arg.string({ required: true }), // JSON string
       tagIds: t.arg.idList(),
     },
-    resolve: async (_root, args, ctx) => {
-      const { tagIds, ...rest } = args;
-      return ctx.services.chat.createChatSession({ ...rest, tagIds });
+    resolve: async (_root, { title, messages, tagIds }, ctx) => {
+      const { user } = requireAuth(ctx);
+      return ctx.services.chat.createChatSession({
+        userId: user.id,
+        title,
+        messages,
+        tagIds,
+      });
     },
   }),
 

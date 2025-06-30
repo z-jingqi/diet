@@ -1,11 +1,6 @@
 import { builder } from "../builder";
-import {
-  users,
-  oauth_accounts,
-  user_sessions,
-  csrf_tokens,
-} from "../../db/schema/auth";
-import { eq, and, isNull } from "drizzle-orm";
+import { users, oauth_accounts, user_sessions } from "../../db/schema/auth";
+import { eq } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth";
 
@@ -13,7 +8,6 @@ import { requireAuth } from "../middleware/auth";
 type UserModel = InferSelectModel<typeof users>;
 type OAuthAccountModel = InferSelectModel<typeof oauth_accounts>;
 type UserSessionModel = InferSelectModel<typeof user_sessions>;
-type CSRFTokenModel = InferSelectModel<typeof csrf_tokens>;
 
 // GraphQL User type (excluding sensitive fields)
 type GraphQLUser = Omit<UserModel, "password_hash">;
@@ -55,20 +49,6 @@ export const UserSessionRef = builder
       userAgent: t.exposeString("user_agent", { nullable: true }),
       createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
       updatedAt: t.expose("updated_at", { type: "DateTime", nullable: true }),
-    }),
-  });
-
-// ----------------------
-// CSRFToken type
-// ----------------------
-export const CSRFTokenRef = builder
-  .objectRef<CSRFTokenModel>("CSRFToken")
-  .implement({
-    fields: (t) => ({
-      id: t.exposeID("id"),
-      token: t.exposeString("token"),
-      expiresAt: t.expose("expires_at", { type: "DateTime" }),
-      createdAt: t.expose("created_at", { type: "DateTime", nullable: true }),
     }),
   });
 
@@ -137,20 +117,6 @@ builder.objectField(OAuthAccountRef, "user", (t) =>
 );
 
 builder.objectField(UserSessionRef, "user", (t) =>
-  t.field({
-    type: UserRef,
-    resolve: async (parent, _args, ctx) => {
-      const [user] = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, parent.user_id))
-        .limit(1);
-      return user ? toGraphQLUser(user) : null;
-    },
-  })
-);
-
-builder.objectField(CSRFTokenRef, "user", (t) =>
   t.field({
     type: UserRef,
     resolve: async (parent, _args, ctx) => {
@@ -289,6 +255,57 @@ export const RefreshResponseRef = builder
       }),
     }),
   });
+
+// ----------------------
+// Helper: set cookies & build LoginResponse
+// ----------------------
+function issueLoginResponse(ctx: any, result: any) {
+  const secure = process.env.NODE_ENV === "production" ? "Secure" : "";
+
+  if (result.sessionToken) {
+    ctx.responseCookies.push(
+      [
+        `session_token=${result.sessionToken}`,
+        "Path=/",
+        "HttpOnly",
+        secure,
+        "SameSite=Lax",
+      ]
+        .filter(Boolean)
+        .join("; ")
+    );
+  }
+
+  if (result.refreshToken) {
+    ctx.responseCookies.push(
+      [
+        `refresh_token=${result.refreshToken}`,
+        "Path=/",
+        "HttpOnly",
+        secure,
+        "SameSite=Lax",
+      ]
+        .filter(Boolean)
+        .join("; ")
+    );
+  }
+
+  if (result.csrfToken) {
+    ctx.responseCookies.push(
+      [`csrf-token=${result.csrfToken}`, "Path=/", secure, "SameSite=Lax"]
+        .filter(Boolean)
+        .join("; ")
+    );
+  }
+
+  return {
+    user: result.user
+      ? (toGraphQLUser(result.user as any) as GraphQLUser)
+      : null,
+    sessionToken: result.sessionToken,
+    csrfToken: result.csrfToken,
+  };
+}
 
 // ----------------------
 // Mutations
@@ -437,57 +454,24 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  // Create CSRF token
-  createCSRFToken: t.field({
-    type: CSRFTokenRef,
-    args: {
-      userId: t.arg.string({ required: true }),
-      token: t.arg.string({ required: true }),
-      expiresAt: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { generateId } = await import("../../utils/id");
-      const csrfId = generateId();
-
-      const [csrfToken] = await ctx.db
-        .insert(csrf_tokens)
-        .values({
-          id: csrfId,
-          user_id: args.userId,
-          token: args.token,
-          expires_at: args.expiresAt,
-        })
-        .returning();
-
-      return csrfToken;
-    },
-  }),
-
-  // Delete CSRF token
-  deleteCSRFToken: t.field({
-    type: "Boolean",
-    args: {
-      token: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, { token }, ctx) => {
-      await ctx.db.delete(csrf_tokens).where(eq(csrf_tokens.token, token));
-      return true;
-    },
-  }),
-
   // ----------------------
   // Authentication mutations compatible with client
   // ----------------------
 
   register: t.field({
-    type: "String",
+    type: LoginResponseRef,
     args: {
       username: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
     },
     resolve: async (_root, { username, password }, ctx) => {
+      // 1. 创建用户
       await ctx.services.auth.register({ username, password });
-      return "success";
+
+      // 2. 直接登录获取 session & tokens
+      const result = await ctx.services.auth.login({ username, password });
+
+      return issueLoginResponse(ctx, result);
     },
   }),
 
@@ -499,51 +483,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, { username, password }, ctx) => {
       const result = await ctx.services.auth.login({ username, password });
-
-      // Set cookies ------------------------------------------
-      const secure = process.env.NODE_ENV === "production" ? "Secure" : "";
-
-      if (result.sessionToken) {
-        ctx.responseCookies.push(
-          [
-            `session_token=${result.sessionToken}`,
-            "Path=/",
-            "HttpOnly",
-            secure,
-            "SameSite=Lax",
-          ]
-            .filter(Boolean)
-            .join("; ")
-        );
-      }
-
-      if (result.refreshToken) {
-        ctx.responseCookies.push(
-          [
-            `refresh_token=${result.refreshToken}`,
-            "Path=/",
-            "HttpOnly",
-            secure,
-            "SameSite=Lax",
-          ]
-            .filter(Boolean)
-            .join("; ")
-        );
-      }
-
-      if (result.csrfToken) {
-        ctx.responseCookies.push(
-          [`csrf-token=${result.csrfToken}`, "Path=/", secure, "SameSite=Lax"]
-            .filter(Boolean)
-            .join("; ")
-        );
-      }
-
-      return {
-        user: result.user
-          ? (toGraphQLUser(result.user as any) as GraphQLUser)
-          : null,
-      };
+      return issueLoginResponse(ctx, result);
     },
   }),
 
