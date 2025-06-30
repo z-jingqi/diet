@@ -6,11 +6,11 @@ import { Search, MessageSquare, User, Plus } from "lucide-react";
 import SessionHistoryItem from "./SessionHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
-import { ChatSession } from "@diet/shared";
 import { useAuthNavigate } from "@/hooks";
 import { createAuthCheck } from "@/utils/auth-utils";
 import useAuthStore from "@/store/auth-store";
 import { categorizeSessions } from "@/utils/time-utils";
+import { ChatSession } from "@/lib/gql/graphql";
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -67,8 +67,6 @@ const ChatSidebar = ({
     return () => clearTimeout(timer);
   }, []);
 
-
-
   const categorizedSessions = categorizeSessions(sessions);
 
   const timeCategories = [
@@ -107,7 +105,7 @@ const ChatSidebar = ({
       (session) => session.id === currentSessionId
     );
 
-    if (currentSession && currentSession.messages.length === 0) {
+    if (currentSession && currentSession.messages?.length === 0) {
       // 如果当前会话没有消息，只关闭侧边栏
       onCloseSidebar?.();
       return;

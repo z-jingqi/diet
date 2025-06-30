@@ -7,13 +7,13 @@ import { Tag } from "@/lib/gql/graphql";
 import { toast } from "sonner";
 
 interface TagSelectorProps {
-  selectedTags: Tag[];
+  selectedTagIds: string[];
   onTagsChange: (tags: Tag[]) => void;
   disabled?: boolean;
 }
 
 const TagSelector = ({
-  selectedTags,
+  selectedTagIds,
   onTagsChange,
   disabled,
 }: TagSelectorProps) => {
@@ -67,13 +67,19 @@ const TagSelector = ({
     [categoriesQueryData?.tagCategories]
   );
 
+  // 根据 selectedTagIds 计算已选标签对象列表
+  const selectedTags = useMemo(
+    () => tags.filter((tag) => selectedTagIds.includes(tag.id || "")),
+    [tags, selectedTagIds]
+  );
+
   // 使用 useMemo 计算冲突状态，基于本地冲突数据
   const { conflictTagIds, warningTagIds, conflictDescriptions } = useMemo(() => {
-    if (!conflictsData?.tagConflicts || selectedTags.length === 0) {
+    if (!conflictsData?.tagConflicts || selectedTagIds.length === 0) {
       return { conflictTagIds: [], warningTagIds: [], conflictDescriptions: {} };
     }
 
-    const selectedTagIds = selectedTags.map(tag => tag.id || '').filter(Boolean);
+    const selectedIdsSet = new Set(selectedTagIds.filter(Boolean));
     
     // 收集与已选标签冲突的其他标签
     const mutualExclusiveIds = new Set<string>();
@@ -87,8 +93,8 @@ const TagSelector = ({
       const description = conflict.description || '';
       
       // 检查是否与已选标签有冲突
-      const hasSelectedTag1 = selectedTagIds.includes(tagId1);
-      const hasSelectedTag2 = selectedTagIds.includes(tagId2);
+      const hasSelectedTag1 = selectedIdsSet.has(tagId1);
+      const hasSelectedTag2 = selectedIdsSet.has(tagId2);
       
       if (hasSelectedTag1 && !hasSelectedTag2) {
         // tagId2 与已选的 tagId1 冲突
@@ -126,10 +132,10 @@ const TagSelector = ({
       warningTagIds: Array.from(warningIds),
       conflictDescriptions: descriptions,
     };
-  }, [conflictsData?.tagConflicts, selectedTags]);
+  }, [conflictsData?.tagConflicts, selectedTagIds]);
 
   const handleTagToggle = useCallback((tag: Tag) => {
-    const isSelected = selectedTags.some((t: Tag) => t.id === tag.id);
+    const isSelected = selectedTagIds.includes(tag.id || "");
     
     if (isSelected) {
       onTagsChange(selectedTags.filter((t: Tag) => t.id !== tag.id));
@@ -153,7 +159,7 @@ const TagSelector = ({
 
       onTagsChange([...selectedTags, tag]);
     }
-  }, [selectedTags, conflictTagIds, warningTagIds, conflictDescriptions, onTagsChange]);
+  }, [selectedTagIds, selectedTags, conflictTagIds, warningTagIds, conflictDescriptions, onTagsChange]);
 
   const handleRemoveTag = useCallback((tagId: string) => {
     onTagsChange(selectedTags.filter((t: Tag) => t.id !== tagId));

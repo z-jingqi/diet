@@ -60,7 +60,7 @@ const ChatMessages = () => {
       // 更新引用
       lastMessageLengthRef.current = currentMessageCount;
       if (lastMessage) {
-        lastMessageIdRef.current = lastMessage.id;
+        lastMessageIdRef.current = lastMessage.id || "";
       }
     }
 

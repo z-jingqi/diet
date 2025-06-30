@@ -1,7 +1,6 @@
 import { sendMessage } from "./base-api";
 import {
   HealthAdvice,
-  MessageType,
   CHAT_PROMPT,
   INTENT_PROMPT,
   RECIPE_CHAT_PROMPT,
@@ -9,6 +8,7 @@ import {
   HEALTH_ADVICE_CHAT_PROMPT,
 } from "@diet/shared";
 import { ChatCompletionMessageParam } from "openai/resources";
+import { MessageType } from "@/lib/gql/graphql";
 
 // 获取意图 - 通过发送带有INTENT_PROMPT的消息
 export const getIntent = async (
@@ -26,13 +26,19 @@ export const getIntent = async (
     });
     const intent = result.intent?.trim()?.toLowerCase();
 
-    if (!["chat", "recipe", "health_advice"].includes(intent)) {
-      return "chat";
+    if (
+      ![
+        MessageType.Chat,
+        MessageType.Recipe,
+        MessageType.HealthAdvice,
+      ].includes(intent)
+    ) {
+      return MessageType.Chat;
     }
     return intent as MessageType;
   } catch (error) {
     console.error("Failed to parse intent response:", error);
-    return "chat";
+    return MessageType.Chat;
   }
 };
 

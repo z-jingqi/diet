@@ -7,8 +7,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { ChatSession } from "@diet/shared";
 import { formatSessionTime } from "@/utils/time-utils";
+import { ChatSession } from "@/lib/gql/graphql";
 
 interface SessionHistoryItemProps {
   session: ChatSession;
@@ -25,8 +25,6 @@ const SessionHistoryItem = ({
   onRenameChat,
   onDeleteChat,
 }: SessionHistoryItemProps) => {
-
-
   return (
     <div
       className={`group relative flex items-center w-full px-2 py-1 rounded-md transition-colors ${
@@ -36,7 +34,7 @@ const SessionHistoryItem = ({
       <Button
         variant="ghost"
         className="flex-1 justify-start h-auto p-0"
-        onClick={() => onSelectChat(session.id)}
+        onClick={() => onSelectChat(session.id ?? "")}
       >
         <div className="flex items-center w-full">
           <div className="flex-1 min-w-0 text-left">
@@ -62,14 +60,14 @@ const SessionHistoryItem = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={() => onRenameChat?.(session.id)}>
+            <DropdownMenuItem onClick={() => onRenameChat?.(session.id ?? "")}>
               <Edit className="mr-2 h-3 w-3" />
               <Typography variant="span" className="text-sm">
                 重命名
               </Typography>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onDeleteChat?.(session.id)}
+              onClick={() => onDeleteChat?.(session.id ?? "")}
               className="text-destructive"
             >
               <Trash2 className="mr-2 h-3 w-3" />

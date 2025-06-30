@@ -2,7 +2,7 @@ import type { StateCreator } from "zustand";
 import { getIntent } from "@/lib/api/chat-api";
 import { toAIMessages } from "@/utils/chat-utils";
 import type { FullChatStore } from "./types";
-import { MessageStatus } from "@/lib/gql/graphql";
+import { MessageStatus, MessageType } from "@/lib/gql/graphql";
 
 // 只拆分两大异步方法示例：abortCurrentMessage & sendMessage
 export interface ChatEffectSlice {
@@ -78,10 +78,10 @@ export const createChatEffects: StateCreator<
         set({ gettingIntent: false, abortController: undefined });
 
         switch (intent) {
-          case "recipe":
+          case MessageType.Recipe:
             await handleRecipeChatIntent(AIMessages, isGuestMode);
             break;
-          case "health_advice":
+          case MessageType.HealthAdvice:
             await handleHealthAdviceChatIntent(AIMessages, isGuestMode);
             break;
           default:

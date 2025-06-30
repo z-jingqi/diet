@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { User } from "@diet/shared";
 import { graphqlClient, createAuthenticatedClient } from "@/lib/gql/client";
 import {
   useGetMeQuery,
   useLoginMutation,
   useLogoutMutation,
+  User,
   useRegisterMutation,
   type LoginMutationVariables,
   type LogoutMutationVariables,

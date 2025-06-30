@@ -23,7 +23,7 @@ const ChatInput = ({
   const [input, setInput] = useState("");
   const { getCurrentSession, updateSessionTags } = useChatStore();
   const currentSession = getCurrentSession();
-  const selectedTags = currentSession?.currentTags || [];
+  const selectedTagIds = currentSession?.tagIds || [];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 自动调整textarea高度
@@ -105,7 +105,7 @@ const ChatInput = ({
           {/* Bottom Section - Tags and Send Button */}
           <div className="flex justify-between items-center mt-4">
             <TagSelector
-              selectedTags={selectedTags}
+              selectedTagIds={selectedTagIds}
               onTagsChange={handleTagsChange}
               disabled={disabled}
             />
