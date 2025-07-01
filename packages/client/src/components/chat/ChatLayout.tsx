@@ -22,9 +22,8 @@ const ChatLayout = ({
   onRenameSession,
   onDeleteSession,
 }: ChatLayoutProps) => {
-  const { getSessions, currentSessionId } = useChatStore();
+  const { currentSessionId } = useChatStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const sessions = getSessions();
 
   const handleMenuClick = () => {
     setIsSidebarOpen(true);
@@ -47,7 +46,6 @@ const ChatLayout = ({
         <SheetContent side="left" className="w-80 p-0">
           <SheetTitle className="sr-only"></SheetTitle>
           <ChatSidebar
-            sessions={sessions}
             currentSessionId={currentSessionId ?? ""}
             onCreateNewSession={onCreateNewSession}
             onSelectSession={(sessionId) => {

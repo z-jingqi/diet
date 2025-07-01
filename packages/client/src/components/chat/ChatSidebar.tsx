@@ -11,9 +11,9 @@ import { createAuthCheck } from "@/utils/auth-utils";
 import useAuthStore from "@/store/auth-store";
 import { categorizeSessions } from "@/utils/time-utils";
 import { ChatSession } from "@/lib/gql/graphql";
+import { useMyChatSessions } from "@/lib/gql/hooks";
 
 interface ChatSidebarProps {
-  sessions: ChatSession[];
   currentSessionId: string;
   onCreateNewSession?: () => void;
   onSelectSession?: (sessionId: string) => void;
@@ -23,7 +23,6 @@ interface ChatSidebarProps {
 }
 
 const ChatSidebar = ({
-  sessions,
   currentSessionId,
   onCreateNewSession,
   onSelectSession,
@@ -66,6 +65,12 @@ const ChatSidebar = ({
 
     return () => clearTimeout(timer);
   }, []);
+
+  // 从后端获取会话列表
+  const { data: sessionsData } = useMyChatSessions();
+  const sessions: ChatSession[] = (sessionsData?.myChatSessions ?? []).filter(
+    (s): s is NonNullable<typeof s> => s !== null
+  );
 
   const categorizedSessions = categorizeSessions(sessions);
 

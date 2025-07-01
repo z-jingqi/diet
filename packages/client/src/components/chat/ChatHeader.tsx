@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useChatStore from "@/store/chat-store";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
+import { useUpdateChatSession, useDeleteChatSession } from "@/lib/gql/hooks";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
@@ -25,15 +26,19 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
     renameSession,
     clearSession,
     deleteSession,
+    isTemporarySession,
   } = useChatStore((state) => ({
     currentSessionId: state.currentSessionId,
     sessionTitle: state.getCurrentSession()?.title || "新对话",
     renameSession: state.renameSession,
     clearSession: state.clearSession,
     deleteSession: state.deleteSession,
+    isTemporarySession: state.isTemporarySession,
   }));
 
   const confirm = useConfirmDialog();
+  const { mutateAsync: updateChatSession } = useUpdateChatSession();
+  const { mutateAsync: deleteChatSession } = useDeleteChatSession();
 
   return (
     <header className="flex items-center justify-between px-4 py-1.5 bg-background min-h-0 h-10">
@@ -69,7 +74,14 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                 }
                 const newTitle = prompt("请输入新的标题:");
                 if (newTitle) {
-                  renameSession(currentSessionId, newTitle);
+                  if (isTemporarySession) {
+                    renameSession(currentSessionId, newTitle);
+                  } else {
+                    void updateChatSession({
+                      id: currentSessionId,
+                      title: newTitle,
+                    });
+                  }
                 }
               }}
             >
@@ -91,7 +103,14 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                   confirmVariant: "destructive",
                 });
                 if (ok) {
-                  clearSession(currentSessionId);
+                  if (isTemporarySession) {
+                    clearSession(currentSessionId);
+                  } else {
+                    void updateChatSession({
+                      id: currentSessionId,
+                      messages: "[]",
+                    });
+                  }
                 }
               }}
             >
@@ -112,7 +131,11 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                   confirmVariant: "destructive",
                 });
                 if (ok) {
-                  deleteSession(currentSessionId);
+                  if (isTemporarySession) {
+                    deleteSession(currentSessionId);
+                  } else {
+                    void deleteChatSession({ id: currentSessionId });
+                  }
                 }
               }}
               className="text-destructive"

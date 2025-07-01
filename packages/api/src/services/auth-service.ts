@@ -1,7 +1,8 @@
 import type { DB } from "../db";
 import { users, user_sessions } from "../db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import {
+import { generateId } from "../utils/id";
+import type {
   User,
   UserSession,
   LoginRequest,
@@ -9,8 +10,7 @@ import {
   LoginResponse,
   AuthContext,
   RefreshTokenResponse,
-} from "@diet/shared";
-import { generateId } from "../utils/id";
+} from "../types";
 
 type SessionWithUser = {
   users: typeof users.$inferSelect;
@@ -205,9 +205,6 @@ export class AuthService {
     return {
       user: this.mapUserToResponse(user),
       sessionToken: session.sessionToken,
-      refreshToken: session.refreshToken,
-      sessionExpiresAt: session.sessionExpiresAt,
-      refreshExpiresAt: session.refreshExpiresAt,
       csrfToken,
     };
   }

@@ -1,15 +1,11 @@
 import { nanoid } from "nanoid";
-import type { RecipeDetail } from "@diet/shared";
 import type { StateCreator } from "zustand";
 import { generateSessionTitle } from "./chat-utils";
 import type { FullChatStore } from "./types";
-import {
-  ChatMessage,
-  ChatSession,
-  MessageRole,
-  MessageStatus,
-  Tag,
-} from "@/lib/gql/graphql";
+import type { ChatMessage, ChatSession, Tag } from "@/lib/gql/graphql";
+import { MessageRole, MessageStatus } from "@/lib/gql/graphql";
+import { chatSessionSdk } from "@/lib/gql/sdk/chat-session";
+import useAuthStore from "@/store/auth-store";
 
 // Utilities that depend on set/get will be defined inside factory
 
@@ -25,7 +21,6 @@ export interface ChatActionSlice {
   updateSessionTags: (tags: Tag[]) => void;
   getCurrentSession: () => ChatSession | null;
   getCurrentMessages: () => ChatMessage[];
-  getSessions: () => ChatSession[];
   canSendMessage: () => boolean;
   // expose internal utils for effects layer
   updateMessageStatus: (
@@ -159,24 +154,67 @@ export const createChatActions: StateCreator<
     sessionUtils.updateSession(sessionId, (session) => ({
       ...session,
       messages: [],
-      updatedAt: new Date(),
     }));
+
+    // 后端更新
+    const session = get().sessions.find((s) => s.id === sessionId);
+    if (session && !get().isTemporarySession) {
+      void chatSessionSdk
+        .update({ id: sessionId, messages: "[]" })
+        .catch((e) => console.error("clearSession update error", e));
+    }
   };
 
   const createSession = (): string => {
     const id = nanoid();
-    const now = new Date();
     const newSession: ChatSession = {
       id,
       title: "新对话",
       messages: [],
       tagIds: [],
-      createdAt: now,
-    };
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any;
+
+    // 先本地写入，保证 UI 及时更新
     set((state: FullChatStore) => ({
       sessions: [...state.sessions, newSession],
       currentSessionId: id,
     }));
+
+    // 若已登录且非游客模式，立即持久化
+    const { isAuthenticated, isGuestMode } = useAuthStore.getState();
+    if (isAuthenticated && !isGuestMode) {
+      void chatSessionSdk
+        .create({
+          title: newSession.title ?? "",
+          messages: JSON.stringify(newSession.messages),
+          tagIds: newSession.tagIds ?? [],
+        })
+        .then((result) => {
+          const created = result.createChatSession;
+          if (created) {
+            set((state) => ({
+              sessions: state.sessions.map((s) =>
+                s.id === newSession.id
+                  ? {
+                      ...s,
+                      id: created.id,
+                      createdAt: new Date(created.createdAt),
+                      updatedAt: new Date(created.updatedAt),
+                    }
+                  : s
+              ),
+              currentSessionId:
+                state.currentSessionId === newSession.id
+                  ? created.id
+                  : state.currentSessionId,
+            }));
+          }
+        })
+        .catch((err) => console.error("createSession create error", err));
+    }
+
     return id;
   };
 
@@ -223,22 +261,45 @@ export const createChatActions: StateCreator<
         currentSessionId: updated.length ? updated[0].id : null,
       } as any;
     });
+
+    const { isAuthenticated, isGuestMode } = useAuthStore.getState();
+    if (!isAuthenticated || isGuestMode) {
+      return;
+    }
+
+    // 向后端删除（忽略结果）
+    void chatSessionSdk
+      .delete(sessionId)
+      .catch((err) => console.error("deleteSession error", err));
   };
 
   const renameSession = (sessionId: string, title: string) => {
     sessionUtils.updateSession(sessionId, (s) => ({
       ...s,
       title,
-      updatedAt: new Date(),
     }));
+
+    const session = get().sessions.find((s) => s.id === sessionId);
+    if (session && !get().isTemporarySession) {
+      void chatSessionSdk
+        .update({ id: sessionId, title })
+        .catch((e) => console.error("renameSession update error", e));
+    }
   };
 
   const updateSessionTags = (tags: Tag[]) => {
+    const tagIds = tags.flatMap((t) => (t.id ? [t.id] : []));
     sessionUtils.updateCurrentSession((s) => ({
       ...s,
-      currentTags: tags,
-      updatedAt: new Date(),
+      tagIds,
     }));
+
+    const session = get().getCurrentSession();
+    if (session && !get().isTemporarySession) {
+      void chatSessionSdk
+        .update({ id: session.id!, tagIds })
+        .catch((e) => console.error("updateSessionTags update error", e));
+    }
   };
 
   const getCurrentSession = () => {
@@ -251,13 +312,6 @@ export const createChatActions: StateCreator<
   const getCurrentMessages = () => {
     const session = getCurrentSession();
     return session?.messages?.length ? session.messages : [];
-  };
-
-  const getSessions = () => {
-    const { sessions, currentSessionId, isTemporarySession } = get();
-    return sessions.filter(
-      (s: ChatSession) => !(isTemporarySession && s.id === currentSessionId)
-    );
   };
 
   const canSendMessage = () => {
@@ -293,7 +347,6 @@ export const createChatActions: StateCreator<
     updateSessionTags,
     getCurrentSession,
     getCurrentMessages,
-    getSessions,
     canSendMessage,
     updateMessageStatus: messageUtils.updateMessageStatus,
     updateCurrentSessionMessages: messageUtils.updateCurrentSessionMessages,

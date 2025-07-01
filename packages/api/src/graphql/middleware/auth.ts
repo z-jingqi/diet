@@ -1,4 +1,4 @@
-import type { AuthContext } from "@diet/shared";
+import type { AuthContext } from "../../types";
 
 // 认证装饰器 - 用于需要认证的字段
 export function requireAuth<T extends { user?: AuthContext | null }>(

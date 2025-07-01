@@ -11,21 +11,7 @@ import { DateTimeScalar } from "../builder";
 type ChatSessionModel = InferSelectModel<typeof chat_sessions>;
 type UserModel = InferSelectModel<typeof users>;
 
-// Chat message type for GraphQL
-type ChatMessage = {
-  id: string;
-  type: "CHAT" | "RECIPE" | "HEALTH_ADVICE";
-  content: string;
-  role: "USER" | "ASSISTANT" | "SYSTEM";
-  createdAt: string;
-  status: "PENDING" | "STREAMING" | "DONE" | "ERROR" | "ABORT";
-};
-
-// Chat response type
-interface ChatResponse {
-  response: string;
-  sessionId?: string | null;
-}
+import type { ChatMessage, ChatResponse } from "../../types";
 
 // ----------------------
 // Enums for message metadata
@@ -240,7 +226,8 @@ builder.mutationFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (_root, { id }, ctx) => {
-      return ctx.services.chat.deleteChatSession(id);
+      const result = await ctx.services.chat.deleteChatSession(id);
+      return result !== null;
     },
   }),
 }));

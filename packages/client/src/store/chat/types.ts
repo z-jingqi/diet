@@ -20,7 +20,6 @@ export interface ChatHighLevelHandlers {
     isGuestMode?: boolean
   ) => Promise<void>;
   handleError: (error: unknown, addMessage: (msg: ChatMessage) => void) => void;
-  _persistSession: (session: ChatSession, isNew: boolean) => Promise<void>;
 }
 
 export type FullChatStore = ChatDataState &

@@ -1,20 +1,10 @@
 import type { DB } from "../db";
 import { user_sessions, users } from "../db/schema";
 import { eq, and } from "drizzle-orm";
-import type { AuthContext } from "@diet/shared";
+import type { AuthContext, GraphQLContext } from "../types";
 
 // Services are created per-request to avoid connection/state sharing
-export interface GraphQLContext {
-  db: DB;
-  user?: AuthContext | null;
-  responseCookies: string[];
-  headers: Headers;
-  services: {
-    auth: import("../services/auth-service").AuthService;
-    chat: import("../services/chat-service").ChatService;
-    tag: import("../services/tag-service").TagService;
-  };
-}
+export type { GraphQLContext };
 
 // ----- helpers -------------------------------------------------------------
 function extractSessionToken(headers: Headers): string | null {

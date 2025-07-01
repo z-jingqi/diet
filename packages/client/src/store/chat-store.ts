@@ -11,19 +11,15 @@ import { graphqlClient } from "@/lib/gql/client";
 import {
   ChatMessage,
   ChatSession,
-  CreateChatSessionDocument,
   MessageRole,
   MessageStatus,
   MessageType,
-  UpdateChatSessionDocument,
-  type CreateChatSessionMutation,
-  type CreateChatSessionMutationVariables,
-  type UpdateChatSessionMutationVariables,
 } from "@/lib/gql/graphql";
 import { initialChatState } from "./chat/chat-state";
 import { generateSessionTitle } from "./chat/chat-utils";
 import { createChatActions, ChatActionSlice } from "./chat/chat-actions";
 import { createChatEffects, ChatEffectSlice } from "./chat/chat-effects";
+import { chatSessionSdk } from "@/lib/gql/sdk/chat-session";
 
 interface ChatState {
   // --- core data ---
@@ -57,10 +53,9 @@ interface ChatState {
     addMessage: (message: ChatMessage) => void
   ) => void;
 
-  // --- util & persistence ---
+  // --- util ---
   generateSessionTitle: (messages: ChatMessage[]) => string;
   loadSessionsFromGraphQL: (graphqlSessions: any[]) => void;
-  _persistSession: (session: ChatSession, isNew: boolean) => Promise<void>;
 }
 
 const useChatStore = create<
@@ -136,8 +131,15 @@ const useChatStore = create<
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
-        if (currentSession) {
-          await get()._persistSession(currentSession, false);
+        if (currentSession && !isGuestMode) {
+          try {
+            await chatSessionSdk.update({
+              id: currentSession.id!,
+              messages: JSON.stringify(currentSession.messages),
+            });
+          } catch (err) {
+            console.error("Failed to persist chat session:", err);
+          }
         }
       } catch (error) {
         set({ abortController: undefined });
@@ -207,8 +209,15 @@ const useChatStore = create<
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
-        if (currentSession) {
-          await get()._persistSession(currentSession, false);
+        if (currentSession && !isGuestMode) {
+          try {
+            await chatSessionSdk.update({
+              id: currentSession.id!,
+              messages: JSON.stringify(currentSession.messages),
+            });
+          } catch (err) {
+            console.error("Failed to persist chat session:", err);
+          }
         }
       } catch (error) {
         set({ abortController: undefined });
@@ -278,8 +287,15 @@ const useChatStore = create<
 
         // 持久化会话更新
         const currentSession = get().getCurrentSession();
-        if (currentSession) {
-          await get()._persistSession(currentSession, false);
+        if (currentSession && !isGuestMode) {
+          try {
+            await chatSessionSdk.update({
+              id: currentSession.id!,
+              messages: JSON.stringify(currentSession.messages),
+            });
+          } catch (err) {
+            console.error("Failed to persist chat session:", err);
+          }
         }
       } catch (error) {
         set({ abortController: undefined });
@@ -350,55 +366,6 @@ const useChatStore = create<
           currentSessionId: state.currentSessionId || convertedSessions[0].id,
           isTemporarySession: false,
         }));
-      }
-    },
-
-    // 内部辅助：将当前会话持久化到后端
-    _persistSession: async (session: ChatSession, isNew: boolean) => {
-      // 仅在已登录且非游客模式下持久化
-      const { isAuthenticated, isGuestMode, user } = useAuthStore.getState();
-      if (!isAuthenticated || isGuestMode || !user || !user.id) {
-        return;
-      }
-
-      try {
-        if (isNew) {
-          // 创建会话
-          const variables: CreateChatSessionMutationVariables = {
-            title: session.title ?? "",
-            messages: JSON.stringify(session.messages),
-            tagIds: session.tagIds ?? [],
-          };
-          const result = await graphqlClient.request<CreateChatSessionMutation>(
-            CreateChatSessionDocument,
-            variables
-          );
-
-          const newId = result.createChatSession?.id;
-          if (newId) {
-            // 更新本地会话 ID
-            set((state) => ({
-              sessions: state.sessions.map((s) =>
-                s.id === session.id ? { ...s, id: newId } : s
-              ),
-              currentSessionId:
-                state.currentSessionId === session.id
-                  ? newId
-                  : state.currentSessionId,
-            }));
-          }
-        } else {
-          // 更新会话
-          const variables: UpdateChatSessionMutationVariables = {
-            id: session.id ?? "",
-            title: session.title ?? "",
-            messages: JSON.stringify(session.messages),
-            tagIds: session.tagIds ?? [],
-          };
-          await graphqlClient.request(UpdateChatSessionDocument, variables);
-        }
-      } catch (err) {
-        console.error("Failed to persist chat session:", err);
       }
     },
 

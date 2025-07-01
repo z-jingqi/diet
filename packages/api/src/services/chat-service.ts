@@ -3,6 +3,10 @@ import { DB } from "../db";
 import { chat_sessions } from "../db/schema/chat";
 import { users } from "../db/schema/auth";
 import { eq, and, isNull } from "drizzle-orm";
+import type {
+  CreateChatSessionRequest,
+  UpdateChatSessionRequest,
+} from "../types";
 
 type ChatSessionModel = typeof chat_sessions.$inferSelect;
 
@@ -38,14 +42,13 @@ export class ChatService {
       .orderBy(chat_sessions.updated_at);
   }
 
-  async createChatSession(data: {
-    userId: string;
-    title: string;
-    messages: string;
-    tagIds?: string[] | null;
-  }): Promise<ChatSessionModel> {
+  async createChatSession(
+    data: CreateChatSessionRequest
+  ): Promise<ChatSessionModel> {
     const { generateId } = await import("../utils/id");
     const id = generateId();
+    const now = new Date().toISOString();
+
     const [session] = await this.db
       .insert(chat_sessions)
       .values({
@@ -54,18 +57,17 @@ export class ChatService {
         title: data.title,
         messages: data.messages,
         tag_ids: JSON.stringify(data.tagIds ?? []),
+        created_at: now,
+        updated_at: now,
       })
       .returning();
+
     return session;
   }
 
   async updateChatSession(
     id: string,
-    data: Partial<{
-      title: string;
-      messages: string;
-      tagIds: string[] | null;
-    }>
+    data: UpdateChatSessionRequest
   ): Promise<ChatSessionModel | null> {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
@@ -73,6 +75,9 @@ export class ChatService {
     if (data.tagIds !== undefined) {
       updateData.tag_ids = JSON.stringify(data.tagIds ?? []);
     }
+
+    // 每次更新都刷新 updated_at
+    updateData.updated_at = new Date().toISOString();
 
     const [session] = await this.db
       .update(chat_sessions)
@@ -82,11 +87,12 @@ export class ChatService {
     return session ?? null;
   }
 
-  async deleteChatSession(id: string): Promise<boolean> {
-    await this.db
+  async deleteChatSession(id: string): Promise<ChatSessionModel | null> {
+    const [session] = await this.db
       .update(chat_sessions)
       .set({ deleted_at: new Date().toISOString() })
-      .where(eq(chat_sessions.id, id));
-    return true;
+      .where(eq(chat_sessions.id, id))
+      .returning();
+    return session ?? null;
   }
 }

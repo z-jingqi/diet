@@ -3,6 +3,7 @@ import { getIntent } from "@/lib/api/chat-api";
 import { toAIMessages } from "@/utils/chat-utils";
 import type { FullChatStore } from "./types";
 import { MessageStatus, MessageType } from "@/lib/gql/graphql";
+import { chatSessionSdk } from "@/lib/gql/sdk/chat-session";
 
 // 只拆分两大异步方法示例：abortCurrentMessage & sendMessage
 export interface ChatEffectSlice {
@@ -36,7 +37,6 @@ export const createChatEffects: StateCreator<
         handleChatIntent,
         handleError,
         canSendMessage,
-        _persistSession,
       } = get();
 
       if (!canSendMessage()) {
@@ -57,8 +57,35 @@ export const createChatEffects: StateCreator<
 
       if (wasTemporarySession) {
         const session = getCurrentSession();
-        if (session) {
-          await _persistSession(session, true);
+        if (session && !isGuestMode) {
+          try {
+            const result = await chatSessionSdk.create({
+              title: session.title ?? "",
+              messages: JSON.stringify(session.messages),
+              tagIds: session.tagIds ?? [],
+            });
+            const newSession = result.createChatSession;
+            if (newSession) {
+              set((state) => ({
+                sessions: state.sessions.map((s) =>
+                  s.id === session.id
+                    ? {
+                        ...s,
+                        id: newSession.id,
+                        createdAt: new Date(newSession.createdAt),
+                        updatedAt: new Date(newSession.updatedAt),
+                      }
+                    : s
+                ),
+                currentSessionId:
+                  state.currentSessionId === session.id
+                    ? newSession.id
+                    : state.currentSessionId,
+              }));
+            }
+          } catch (err) {
+            console.error("Failed to create chat session:", err);
+          }
         }
       }
       const tagIds = getCurrentSession()?.tagIds || [];
