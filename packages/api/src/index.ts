@@ -100,7 +100,7 @@ app.all("/graphql", async (c) => {
 
   // Append cookies set during resolvers
   if (context.responseCookies.length) {
-    context.responseCookies.forEach((cookie) => {
+    context.responseCookies.forEach((cookie: string) => {
       response.headers.append("Set-Cookie", cookie);
     });
   }

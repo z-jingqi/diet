@@ -419,15 +419,15 @@ export class AuthService {
     return {
       id: user.id,
       username: user.username,
-      email: user.email || undefined,
-      nickname: user.nickname || undefined,
-      avatarUrl: user.avatar_url || undefined,
-      phone: user.phone || undefined,
+      email: user.email || null,
+      nickname: user.nickname || null,
+      avatarUrl: user.avatar_url || null,
+      phone: user.phone || null,
       isActive: user.is_active || false,
       isVerified: user.is_verified || false,
-      lastLoginAt: user.last_login_at || undefined,
-      createdAt: user.created_at || undefined,
-      updatedAt: user.updated_at || undefined,
+      lastLoginAt: user.last_login_at || null,
+      createdAt: user.created_at || null,
+      updatedAt: user.updated_at || null,
     };
   }
 

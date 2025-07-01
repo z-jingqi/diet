@@ -11,7 +11,19 @@ import { DateTimeScalar } from "../builder";
 type ChatSessionModel = InferSelectModel<typeof chat_sessions>;
 type UserModel = InferSelectModel<typeof users>;
 
-import type { ChatMessage, ChatResponse } from "../../types";
+type ChatMessage = {
+  id: string;
+  type: "CHAT" | "RECIPE" | "HEALTH_ADVICE";
+  content: string;
+  role: "USER" | "ASSISTANT" | "SYSTEM";
+  createdAt: string;
+  status: "PENDING" | "STREAMING" | "DONE" | "ERROR" | "ABORT";
+};
+
+interface ChatResponse {
+  response: string;
+  sessionId?: string | null;
+}
 
 // ----------------------
 // Enums for message metadata

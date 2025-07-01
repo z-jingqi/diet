@@ -520,7 +520,7 @@ builder.mutationFields((t) => ({
         // try from cookie
         const cookieHeader = ctx.headers.get("cookie") || "";
         const cookieMap = Object.fromEntries(
-          cookieHeader.split(";").map((c) => {
+          cookieHeader.split(";").map((c: string) => {
             const [k, v] = c.trim().split("=");
             return [k, v];
           })
