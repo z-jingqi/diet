@@ -1,15 +1,19 @@
-import useChatStore from "@/store/chat-store";
 import MessageBubble from "./message-bubbles/MessageBubble";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChatMessage, MessageStatus } from "@/lib/gql/graphql";
 
-const ChatMessages = () => {
-  const { getCurrentMessages, gettingIntent } = useChatStore();
-  const messages = getCurrentMessages();
+interface ChatMessagesProps {
+  messages: ChatMessage[];
+  gettingIntent?: boolean;
+}
+
+const ChatMessages = ({ messages, gettingIntent = false }: ChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const lastMessageIdRef = useRef<string>("");
   const lastMessageLengthRef = useRef<number>(0);
+  const lastContentLengthRef = useRef<number>(0);
   const isUserScrollingRef = useRef<boolean>(false);
 
   // 处理滚动事件
@@ -49,8 +53,16 @@ const ChatMessages = () => {
     // 检查是否是新的消息ID（新消息开始）
     const isNewMessageId =
       lastMessage && lastMessage.id !== lastMessageIdRef.current;
+      
+    // 检查最后一条消息的内容是否更新（流式响应）
+    const hasContentUpdate = lastMessage && 
+      lastMessage.content && 
+      lastMessage.content.length > lastContentLengthRef.current;
+    
+    // 检查是否有消息正在流式传输
+    const hasStreamingMessage = messages.some(msg => msg.status === MessageStatus.Streaming);
 
-    if (hasNewMessage || isNewMessageId) {
+    if (hasNewMessage || isNewMessageId || hasContentUpdate || hasStreamingMessage) {
       // 新消息开始时，重置用户滚动状态并启用自动滚动
       if (isNewMessageId) {
         isUserScrollingRef.current = false;
@@ -61,11 +73,18 @@ const ChatMessages = () => {
       lastMessageLengthRef.current = currentMessageCount;
       if (lastMessage) {
         lastMessageIdRef.current = lastMessage.id || "";
+        lastContentLengthRef.current = lastMessage.content?.length || 0;
+      }
+      
+      // 流式响应时，总是滚动到底部
+      if (hasStreamingMessage) {
+        isUserScrollingRef.current = false;
+        setShouldAutoScroll(true);
       }
     }
 
     // 只有在用户没有主动滚动时才自动滚动
-    if (!isUserScrollingRef.current) {
+    if (!isUserScrollingRef.current || hasStreamingMessage) {
       scrollToBottom();
     }
   }, [messages, scrollToBottom]);

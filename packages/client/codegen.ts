@@ -11,7 +11,17 @@ const config: CodegenConfig = {
             content: '// @ts-nocheck',
           },
         },
-        'typescript',
+        {
+          typescript: {
+            enumValues: {
+              MessageRole: {
+                USER: 'user',
+                ASSISTANT: 'assistant',
+                SYSTEM: 'system'
+              }
+            }
+          }
+        },
         'typescript-operations',
         {
           'typescript-react-query': {

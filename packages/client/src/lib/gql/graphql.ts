@@ -63,9 +63,9 @@ export type LoginResponse = {
 };
 
 export enum MessageRole {
-  Assistant = 'ASSISTANT',
-  System = 'SYSTEM',
-  User = 'USER'
+  Assistant = 'assistant',
+  System = 'system',
+  User = 'user'
 }
 
 export enum MessageStatus {

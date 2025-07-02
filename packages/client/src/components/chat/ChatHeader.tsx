@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Text, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
@@ -19,22 +19,18 @@ interface ChatHeaderProps {
 const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // 从 store 中一次性选择所需值，避免多次订阅
-  const {
-    currentSessionId,
-    sessionTitle,
-    renameSession,
-    clearSession,
-    deleteSession,
-    isTemporarySession,
-  } = useChatStore((state) => ({
-    currentSessionId: state.currentSessionId,
-    sessionTitle: state.getCurrentSession()?.title || "新对话",
-    renameSession: state.renameSession,
-    clearSession: state.clearSession,
-    deleteSession: state.deleteSession,
-    isTemporarySession: state.isTemporarySession,
-  }));
+  // Fix: Use separate selectors for each value to prevent unnecessary rerenders
+  const currentSessionId = useChatStore((state) => state.currentSessionId);
+  const isTemporarySession = useChatStore((state) => state.isTemporarySession);
+  const renameSession = useChatStore((state) => state.renameSession);
+  const clearSession = useChatStore((state) => state.clearSession);
+  const deleteSession = useChatStore((state) => state.deleteSession);
+  
+  // Get the current session title separately
+  const sessionTitle = useChatStore(useCallback((state) => {
+    const currentSession = state.getCurrentSession();
+    return currentSession?.title || "新对话";
+  }, [currentSessionId])); // Only recalculate when session ID changes
 
   const confirm = useConfirmDialog();
   const { mutateAsync: updateChatSession } = useUpdateChatSession();
