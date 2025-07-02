@@ -69,7 +69,7 @@ const ChatContainerV2 = ({ sessionId }: ChatContainerV2Props) => {
         {messages.length === 0 ? (
           <TypingPrompt />
         ) : (
-          <ChatMessages />
+          <ChatMessages messages={messages} />
         )}
       </div>
 
