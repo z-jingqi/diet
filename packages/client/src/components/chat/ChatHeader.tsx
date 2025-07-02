@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Text, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
@@ -8,9 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useChatStore from "@/store/chat-store";
+import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
+import useChatMessageStoreV2 from "@/store/chat-message-store-v2";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import { useUpdateChatSession, useDeleteChatSession } from "@/lib/gql/hooks";
+import { useChatSessionsV2 } from "@/lib/gql/hooks/chat-v2";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
@@ -19,18 +21,23 @@ interface ChatHeaderProps {
 const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Fix: Use separate selectors for each value to prevent unnecessary rerenders
-  const currentSessionId = useChatStore((state) => state.currentSessionId);
-  const isTemporarySession = useChatStore((state) => state.isTemporarySession);
-  const renameSession = useChatStore((state) => state.renameSession);
-  const clearSession = useChatStore((state) => state.clearSession);
-  const deleteSession = useChatStore((state) => state.deleteSession);
+  // 使用 V2 版本的 store
+  const currentSessionId = useChatSessionStoreV2((state) => state.currentSessionId);
+  const isTemporarySession = useChatSessionStoreV2((state) => state.isTemporarySession);
+  const renameSession = useChatSessionStoreV2((state) => state.renameSession);
+  const deleteSession = useChatSessionStoreV2((state) => state.deleteSession);
   
-  // Get the current session title separately
-  const sessionTitle = useChatStore(useCallback((state) => {
-    const currentSession = state.getCurrentSession();
+  // 使用消息 store 来清除消息
+  const clearMessages = useChatMessageStoreV2((state) => state.clearMessages);
+  
+  // 获取会话列表以查找当前会话标题
+  const { sessions } = useChatSessionsV2();
+  
+  // 使用 useMemo 获取当前会话标题
+  const sessionTitle = useMemo(() => {
+    const currentSession = sessions.find(s => s.id === currentSessionId);
     return currentSession?.title || "新对话";
-  }, [currentSessionId])); // Only recalculate when session ID changes
+  }, [currentSessionId, sessions]);
 
   const confirm = useConfirmDialog();
   const { mutateAsync: updateChatSession } = useUpdateChatSession();
@@ -100,7 +107,7 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                 });
                 if (ok) {
                   if (isTemporarySession) {
-                    clearSession(currentSessionId);
+                    clearMessages(currentSessionId);
                   } else {
                     void updateChatSession({
                       id: currentSessionId,

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
 import ChatSidebar from "./ChatSidebar";
-import useChatStore from "@/store/chat-store";
+import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ const ChatLayout = ({
   onRenameSession,
   onDeleteSession,
 }: ChatLayoutProps) => {
-  const { currentSessionId } = useChatStore();
+  const { currentSessionId } = useChatSessionStoreV2();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleMenuClick = () => {
