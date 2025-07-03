@@ -14,6 +14,7 @@ import {
   MessageStatus,
   MessageType,
   ChatMessage,
+  ChatSession,
 } from "@/lib/gql/graphql";
 import { canSendMessageV2, createAIMessageV2 } from "@/utils/chat-utils-v2";
 import { createUserMessageV2 } from "@/utils/chat-utils-v2";
@@ -106,37 +107,78 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
   // Local state for messages
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
+  // 保存上一次的currentSessionId，避免不必要的更新
+  const prevSessionIdRef = useRef<string | null>(null);
+
+  // Update messages when currentSessionId changes
+  useEffect(() => {
+    if (!currentSessionId) {
+      setMessages([]);
+      return;
+    }
+
+    // 如果会话ID没有变化，不做任何处理
+    if (prevSessionIdRef.current === currentSessionId) {
+      return;
+    }
+
+    // 更新上一次的会话ID
+    prevSessionIdRef.current = currentSessionId;
+
+    // 从会话列表中查找当前会话
+    const currentSession = sessions.find((s) => s.id === currentSessionId);
+
+    if (currentSession && currentSession.messages) {
+      // 如果找到会话，将其消息加载到store中
+      console.log(`Loading messages for session ${currentSessionId}`);
+
+      // 使用setTimeout避免在渲染周期内触发状态更新
+      setTimeout(() => {
+        const messages = currentSession.messages || [];
+        messageStore.setMessages(currentSessionId, messages);
+        setMessages(messages);
+      }, 0);
+    } else {
+      // 如果找不到会话或没有消息，从store中获取
+      const sessionMessages = getSessionMessages(currentSessionId);
+      console.log(
+        `Current session ${currentSessionId}, found ${sessionMessages.length} messages in store`
+      );
+      setMessages(sessionMessages);
+    }
+  }, [currentSessionId, sessions]);
+
   // When the component mounts, handle URL session ID or create temporary session
   useEffect(() => {
     // 避免重复初始化
     if (initializedRef.current) return;
 
+    // 标记为已初始化，避免重复执行
+    initializedRef.current = true;
+
     const initializeSession = async () => {
       // 只在组件首次挂载或URL参数/会话列表变化时执行
       if (sessionId && sessions.some((s) => s.id === sessionId)) {
-        // If URL has a valid session ID, switch to that session
+        // 如果URL有有效的会话ID，切换到该会话
+        // 注意：消息加载已经在另一个useEffect中处理
         switchSession(sessionId);
-      } else {
-        // 如果没有会话ID参数，创建临时会话
-        createTemporarySession();
+      } else if (!currentSessionId) {
+        // 只有在没有当前会话ID时才创建临时会话
+        // 使用setTimeout避免在渲染周期内触发状态更新
+        setTimeout(() => {
+          createTemporarySession();
+        }, 0);
       }
-
-      // 标记为已初始化
-      initializedRef.current = true;
     };
 
     initializeSession();
-  }, [sessionId, sessions, switchSession, createTemporarySession]);
-
-  // Update messages when currentSessionId changes
-  useEffect(() => {
-    if (currentSessionId) {
-      const sessionMessages = getSessionMessages(currentSessionId);
-      setMessages(sessionMessages);
-    } else {
-      setMessages([]);
-    }
-  }, [currentSessionId, getSessionMessages]);
+  }, [
+    sessionId,
+    sessions,
+    switchSession,
+    createTemporarySession,
+    currentSessionId,
+  ]);
 
   // If user is not authenticated and not in guest mode, enable guest mode
   useEffect(() => {
@@ -383,15 +425,9 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
 
   // Switch to a different session
   const handleSelectSession = (sessionId: string) => {
-    // 切换会话
+    // 切换会话，消息加载由currentSessionId的useEffect处理
+    console.log(`Switching to session ${sessionId}`);
     switchSession(sessionId);
-
-    // 立即更新消息显示
-    const sessionMessages = getSessionMessages(sessionId);
-    console.log(
-      `Switching to session ${sessionId}, loading ${sessionMessages.length} messages`
-    );
-    setMessages(sessionMessages);
   };
 
   // Rename current session

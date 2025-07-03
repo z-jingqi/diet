@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { ChatMessage, MessageStatus } from "@/lib/gql/graphql";
+import { ChatMessage, MessageStatus, ChatSession } from "@/lib/gql/graphql";
 import chatSessionServiceV2 from "@/services/chat-session-service-v2";
 import useAuthStore from "@/store/auth-store";
 import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
