@@ -26,7 +26,7 @@ const ChatLayout = ({
 }: ChatLayoutProps) => {
   const { currentSessionId } = useChatSessionStoreV2();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   // Fetch sessions from backend
   const { data: sessionsData } = useMyChatSessions();
   const sessions: ChatSession[] = (sessionsData?.myChatSessions ?? []).filter(

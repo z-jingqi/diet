@@ -1,11 +1,11 @@
 import { ChatCompletionMessageParam } from "openai/resources";
-import { 
-  ChatMessage, 
-  MessageRole, 
-  MessageStatus, 
+import {
+  ChatMessage,
+  MessageRole,
+  MessageStatus,
   MessageType,
   ChatSession,
-  Tag
+  Tag,
 } from "@/lib/gql/graphql";
 
 /**
@@ -96,10 +96,9 @@ export interface ChatIntentHandlers {
 /**
  * Combined chat store type
  */
-export type ChatStoreV2 = 
-  ChatSessionState & 
-  ChatMessagingState & 
-  ChatSessionOperations & 
+export type ChatStoreV2 = ChatSessionState &
+  ChatMessagingState &
+  ChatSessionOperations &
   ChatMessagingOperations &
   ChatActions &
   ChatIntentHandlers;
@@ -107,7 +106,6 @@ export type ChatStoreV2 =
 /**
  * Combined session store type
  */
-export type ChatSessionStoreV2 = 
-  ChatSessionState & 
-  ChatSessionOperations & 
-  ChatSessionActions; 
+export type ChatSessionStoreV2 = ChatSessionState &
+  ChatSessionOperations &
+  ChatSessionActions;

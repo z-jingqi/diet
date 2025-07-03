@@ -1,25 +1,14 @@
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 import {
   ChatStoreV2,
   ChatMessagingState,
   ChatSessionState,
-  ChatMessagingOperations,
-  ChatSessionOperations,
-  ChatActions,
-  ChatIntentHandlers,
 } from "./chat-types-v2";
-import {
-  ChatMessage,
-  ChatSession,
-  MessageRole,
-  MessageStatus,
-  MessageType,
-} from "@/lib/gql/graphql";
+import { ChatMessage, MessageStatus, MessageType } from "@/lib/gql/graphql";
 import useAuthStore from "@/store/auth-store";
 import chatServiceV2 from "@/services/chat-service-v2";
 import chatSessionServiceV2 from "@/services/chat-session-service-v2";
-import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
 import {
   createUserMessageV2,
   createAIMessageV2,
