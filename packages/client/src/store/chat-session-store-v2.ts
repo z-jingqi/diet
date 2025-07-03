@@ -50,34 +50,38 @@ const createChatSessionActions = (set: any, get: any): ChatSessionActions => ({
   createSession: async (initialMessageContent) => {
     const { isAuthenticated, isGuestMode } = useAuthStore.getState();
 
-    // Convert initial message content to ChatMessage if provided
-    const initialMessages: ChatMessage[] = initialMessageContent
-      ? [createUserMessageV2(initialMessageContent)]
-      : [];
+    // 先创建一个临时会话，让界面可以立即响应
+    const tempSession = chatSessionServiceV2.createTemporarySession();
+    const tempId = tempSession.id || nanoid();
 
-    // For guest mode or unauthenticated users, create a temporary session
+    // 立即更新状态，使UI可以响应
+    set({
+      currentSessionId: tempId,
+      isTemporarySession: true,
+      isNewSession: false,
+    });
+
+    // 如果是游客模式或未登录用户，直接使用临时会话
     if (!isAuthenticated || isGuestMode) {
-      const tempSession = chatSessionServiceV2.createTemporarySession();
-      const id = tempSession.id || nanoid(); // Ensure we always have an ID
-
-      set({
-        currentSessionId: id,
-        isTemporarySession: true,
-        isNewSession: false,
-      });
-
-      return id;
+      return tempId;
     }
 
-    // For authenticated users, create a persistent session
+    // 对于已登录用户，在后台转换为永久会话
     try {
+      // Convert initial message content to ChatMessage if provided
+      const initialMessages: ChatMessage[] = initialMessageContent
+        ? [createUserMessageV2(initialMessageContent)]
+        : [];
+
+      // 创建永久会话
       const newSession = await chatSessionServiceV2.createSession(
         "New Chat",
         initialMessages
       );
 
-      const sessionId = newSession.id || nanoid(); // Ensure we always have an ID
+      const sessionId = newSession.id || tempId; // 如果API调用失败，保留临时ID
 
+      // 更新状态为永久会话
       set({
         currentSessionId: sessionId,
         isTemporarySession: false,
@@ -86,19 +90,9 @@ const createChatSessionActions = (set: any, get: any): ChatSessionActions => ({
 
       return sessionId;
     } catch (error) {
-      console.error("Error creating session:", error);
-
-      // Fallback to temporary session if API call fails
-      const tempSession = chatSessionServiceV2.createTemporarySession();
-      const fallbackId = tempSession.id || nanoid(); // Ensure we always have an ID
-
-      set({
-        currentSessionId: fallbackId,
-        isTemporarySession: true,
-        isNewSession: false,
-      });
-
-      return fallbackId;
+      console.error("Error creating permanent session:", error);
+      // 发生错误时继续使用临时会话
+      return tempId;
     }
   },
 

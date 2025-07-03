@@ -100,18 +100,10 @@ const ChatSidebar = ({
   };
 
   const handleNewChat = () => {
-    // 检查当前会话是否有消息
-    const currentSession = sessions.find(
-      (session) => session.id === currentSessionId
-    );
-
-    if (currentSession && currentSession.messages?.length === 0) {
-      // 如果当前会话没有消息，只关闭侧边栏
-      onCloseSidebar?.();
-      return;
-    }
-
+    // 创建新会话
     onCreateNewSession?.();
+    // 总是关闭侧边栏，无论当前会话是否有消息
+    onCloseSidebar?.();
   };
 
   const handleRenameChat = (sessionId: string) => {

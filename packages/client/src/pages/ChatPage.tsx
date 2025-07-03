@@ -152,35 +152,31 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
 
       processingMessageRef.current = true;
 
-      // Create a permanent session for logged-in users if we're in a temporary session
-      if (isAuthenticated && (!currentSessionId || isTemporarySession)) {
-        await createSession(content);
-      } else if (!currentSessionId) {
-        // For guest users, ensure we have a temporary session
-        createTemporarySession();
+      // 1. 创建会话或确保当前会话有效
+      let sessionId = currentSessionId;
+
+      if (!sessionId || isTemporarySession) {
+        // 对于任何用户（包括登录用户），先创建一个会话（可能是临时的）
+        // createSession内部会自动判断是临时还是永久
+        sessionId = await createSession(content);
+        // 如果是登录用户创建了新会话，刷新会话列表
+        if (isAuthenticated && !isGuestMode) {
+          handleRefreshSessions();
+        }
       }
 
-      // Ensure we have a session ID after creation
-      if (!currentSessionId) {
-        console.error("Failed to create or get session ID");
-        processingMessageRef.current = false;
-        return;
-      }
-
-      // 1. Add user message to local state and store
+      // 2. 添加用户消息到本地状态和store
       const userMessage = createUserMessageV2(content);
-      addMessageToStore(currentSessionId, userMessage);
+      addMessageToStore(sessionId, userMessage);
 
-      // 2. Update local state
+      // 3. 更新本地状态显示用户消息
       setMessages((prev) => [...prev, userMessage]);
 
-      // 3. Begin intent detection
-      const sessionMessages = getSessionMessages(currentSessionId);
-
-      // 4. 获取意图 - 只传递用户消息，不包含空的 AI 消息
+      // 4. 开始意图检测
+      const sessionMessages = getSessionMessages(sessionId);
       const AIMessages = toAIMessagesV2(sessionMessages);
 
-      // 确定意图类型
+      // 5. 确定意图类型
       const controller = new AbortController();
       const intent = await chatServiceV2.determineIntent(
         AIMessages,
@@ -188,16 +184,16 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
         isGuestMode
       );
 
-      // 5. 创建 AI 消息占位符 - 在确定意图后
+      // 6. 创建AI消息占位符
       const aiMessage = createAIMessageV2(intent);
       aiMessage.status = MessageStatus.Streaming;
       aiMessage.content = "";
 
-      // 6. 添加 AI 消息到 store 和本地状态
-      addMessageToStore(currentSessionId, aiMessage);
+      // 7. 添加AI消息到store和本地状态
+      addMessageToStore(sessionId, aiMessage);
       setMessages((prev) => [...prev, aiMessage]);
 
-      // 7. 存储 AI 消息 ID 用于流式更新
+      // 8. 存储AI消息ID用于流式更新
       currentAIMessageIdRef.current = aiMessage.id || null;
 
       if (!currentAIMessageIdRef.current) {
@@ -205,11 +201,11 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
         return;
       }
 
-      // 8. 流式响应
-      await streamResponse(currentSessionId, aiMessage.id!, intent, AIMessages);
+      // 9. 流式响应
+      await streamResponse(sessionId, aiMessage.id!, intent, AIMessages);
 
-      // 9. 更新本地状态
-      const finalMessages = getSessionMessages(currentSessionId);
+      // 10. 更新本地状态
+      const finalMessages = getSessionMessages(sessionId);
       setMessages(finalMessages);
 
       processingMessageRef.current = false;
@@ -230,11 +226,17 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
       let content = "";
       const controller = new AbortController();
 
+      // 确保我们使用最新的会话ID（可能已从临时会话转换为永久会话）
+      const currentId =
+        useChatSessionStoreV2.getState().currentSessionId || sessionId;
+
       console.log(
         "Starting streaming response for message:",
         messageId,
         "with intent:",
-        intent
+        intent,
+        "in session:",
+        currentId
       );
 
       // Make sure messages are in the correct format for the API
@@ -252,12 +254,14 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
       await streamFunction(
         formattedMessages,
         (data) => {
-          console.log("Stream chunk received:", data);
+          // 获取最新的会话ID，因为会话ID可能在流式传输过程中发生变化
+          const latestSessionId =
+            useChatSessionStoreV2.getState().currentSessionId || currentId;
 
           if (data.done) {
             console.log("Stream completed for message:", messageId);
             // Complete the message
-            updateMessageInStore(sessionId, messageId, {
+            updateMessageInStore(latestSessionId, messageId, {
               status: MessageStatus.Done,
             });
             return;
@@ -265,12 +269,9 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
 
           if (data.response) {
             content += data.response;
-            console.log(
-              `Appending content to message ${messageId}, new length: ${content.length}`
-            );
 
             // Update the message content in store
-            appendToMessageInStore(sessionId, messageId, data.response);
+            appendToMessageInStore(latestSessionId, messageId, data.response);
 
             // Force update local state for immediate UI update
             setMessages((prev) => {
@@ -288,8 +289,11 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
           }
         },
         (error) => {
+          // 获取最新的会话ID处理错误
+          const latestSessionId =
+            useChatSessionStoreV2.getState().currentSessionId || currentId;
           console.error("Streaming error:", error);
-          updateMessageInStore(sessionId, messageId, {
+          updateMessageInStore(latestSessionId, messageId, {
             status: MessageStatus.Error,
           });
         },
@@ -297,15 +301,24 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
         isGuestMode
       );
 
-      // Final update to ensure message is marked as complete
-      console.log("Final message update for:", messageId);
-      updateMessageInStore(sessionId, messageId, {
+      // Final update with the latest session ID
+      const latestSessionId =
+        useChatSessionStoreV2.getState().currentSessionId || currentId;
+      console.log(
+        "Final message update for:",
+        messageId,
+        "in session:",
+        latestSessionId
+      );
+      updateMessageInStore(latestSessionId, messageId, {
         content,
         status: MessageStatus.Done,
       });
     } catch (error) {
+      const latestSessionId =
+        useChatSessionStoreV2.getState().currentSessionId || sessionId;
       console.error("Error streaming response:", error);
-      updateMessageInStore(sessionId, messageId, {
+      updateMessageInStore(latestSessionId, messageId, {
         status: MessageStatus.Error,
       });
     }
@@ -370,7 +383,15 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
 
   // Switch to a different session
   const handleSelectSession = (sessionId: string) => {
+    // 切换会话
     switchSession(sessionId);
+
+    // 立即更新消息显示
+    const sessionMessages = getSessionMessages(sessionId);
+    console.log(
+      `Switching to session ${sessionId}, loading ${sessionMessages.length} messages`
+    );
+    setMessages(sessionMessages);
   };
 
   // Rename current session
@@ -381,6 +402,12 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
     }
   };
 
+  // Refresh sessions list
+  const handleRefreshSessions = () => {
+    // This will be handled by ChatLayout's built-in refresh logic
+    console.log("Refreshing sessions list");
+  };
+
   return (
     <div className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout
@@ -389,6 +416,7 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
         onCreateNewSession={handleCreateNewSession}
         onSelectSession={handleSelectSession}
         onRenameSession={handleRenameSession}
+        onRefreshSessions={handleRefreshSessions}
       >
         <div className="flex flex-col h-full w-full">
           {/* Main content area */}
