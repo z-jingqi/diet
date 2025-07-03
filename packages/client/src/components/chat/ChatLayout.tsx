@@ -4,6 +4,8 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
 import ChatSidebar from "./ChatSidebar";
 import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
+import { useMyChatSessions } from "@/lib/gql/hooks";
+import { ChatSession } from "@/lib/gql/graphql";
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -24,6 +26,12 @@ const ChatLayout = ({
 }: ChatLayoutProps) => {
   const { currentSessionId } = useChatSessionStoreV2();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Fetch sessions from backend
+  const { data: sessionsData } = useMyChatSessions();
+  const sessions: ChatSession[] = (sessionsData?.myChatSessions ?? []).filter(
+    (s): s is NonNullable<typeof s> => s !== null
+  );
 
   const handleMenuClick = () => {
     setIsSidebarOpen(true);
@@ -47,6 +55,7 @@ const ChatLayout = ({
           <SheetTitle className="sr-only"></SheetTitle>
           <ChatSidebar
             currentSessionId={currentSessionId ?? ""}
+            sessions={sessions}
             onCreateNewSession={onCreateNewSession}
             onSelectSession={(sessionId) => {
               onSelectSession?.(sessionId);

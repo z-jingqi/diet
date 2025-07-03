@@ -117,10 +117,25 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
   // Custom send message implementation to handle streaming responses
   const handleSendMessage = async (content: string) => {
     try {
-      if (!currentSessionId || processingMessageRef.current) return;
+      if (processingMessageRef.current) return;
       
       processingMessageRef.current = true;
 
+      // Create a permanent session for logged-in users if we're in a temporary session
+      if (isAuthenticated && (!currentSessionId || isTemporarySession)) {
+        await createSession();
+      } else if (!currentSessionId) {
+        // For guest users, ensure we have a temporary session
+        createTemporarySession();
+      }
+      
+      // Ensure we have a session ID after creation
+      if (!currentSessionId) {
+        console.error("Failed to create or get session ID");
+        processingMessageRef.current = false;
+        return;
+      }
+      
       // 1. Add user message to local state and store
       const userMessage = createUserMessageV2(content);
       addMessageToStore(currentSessionId, userMessage);
@@ -286,7 +301,14 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
     });
     
     if (ok) {
-      await deleteSession(currentSessionId);
+      const deletedSessionId = currentSessionId;
+      await deleteSession(deletedSessionId);
+      
+      // Reset to initial state - clear messages and create temporary session for guest users
+      setMessages([]);
+      if (isGuestMode) {
+        createTemporarySession();
+      }
     }
   };
 

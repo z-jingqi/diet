@@ -26,7 +26,10 @@ const ChatContainerV2 = ({ sessionId }: ChatContainerV2Props) => {
 
   // Session store selectors
   const {
-    currentSessionId
+    currentSessionId,
+    isTemporarySession,
+    createSession,
+    createTemporarySession
   } = useChatSessionStoreV2();
 
   // Message store selectors
@@ -35,7 +38,7 @@ const ChatContainerV2 = ({ sessionId }: ChatContainerV2Props) => {
   } = useChatMessageStoreV2();
 
   // Auth state
-  const { isGuestMode } = useAuthStore();
+  const { isAuthenticated, isGuestMode } = useAuthStore();
 
   // Get current session ID (from props or store)
   const activeSessionId = sessionId || currentSessionId;
@@ -45,11 +48,34 @@ const ChatContainerV2 = ({ sessionId }: ChatContainerV2Props) => {
     ? getMessagesForSession(activeSessionId) 
     : [];
 
+  // Initialize session if needed
+  useEffect(() => {
+    const initializeSession = async () => {
+      if (!activeSessionId) {
+        if (isAuthenticated && !isGuestMode) {
+          // For logged-in users, create a permanent session
+          await createSession();
+        } else {
+          // For guest users, create a temporary session
+          createTemporarySession();
+        }
+      }
+    };
+    
+    initializeSession();
+  }, [activeSessionId, isAuthenticated, isGuestMode, createSession, createTemporarySession]);
+
   // Send message handler
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
     
     try {
+      // If logged-in user with temporary session, convert to permanent
+      if (isAuthenticated && !isGuestMode && isTemporarySession) {
+        await createSession(content);
+        return;
+      }
+      
       await sendMessage(content);
     } catch (err) {
       console.error('Error sending message:', err);
