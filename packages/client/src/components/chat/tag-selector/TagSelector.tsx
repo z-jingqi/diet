@@ -135,28 +135,37 @@ const TagSelector = ({
   }, [conflictsData?.tagConflicts, selectedTagIds]);
 
   const handleTagToggle = useCallback((tag: Tag) => {
-    const isSelected = selectedTagIds.includes(tag.id || "");
+    // 确保标签有ID
+    const tagId = tag.id;
+    if (!tagId) {
+      console.error("尝试切换没有ID的标签:", tag);
+      return;
+    }
+    
+    const isSelected = selectedTagIds.includes(tagId);
     
     if (isSelected) {
-      onTagsChange(selectedTags.filter((t: Tag) => t.id !== tag.id));
+      // 如果标签已选中，则移除
+      onTagsChange(selectedTags.filter((t: Tag) => t.id !== tagId));
     } else {
       // 检查要添加的标签是否与已选标签有互斥冲突
-      const isMutualExclusive = conflictTagIds.includes(tag.id || '');
+      const isMutualExclusive = conflictTagIds.includes(tagId);
       
       if (isMutualExclusive) {
-        const description = conflictDescriptions[tag.id || ''] || '标签冲突，无法同时选择';
+        const description = conflictDescriptions[tagId] || '标签冲突，无法同时选择';
         toast.error(description);
         return;
       }
 
       // 检查要添加的标签是否与已选标签有警告冲突
-      const isWarning = warningTagIds.includes(tag.id || '');
+      const isWarning = warningTagIds.includes(tagId);
       
       if (isWarning) {
-        const description = conflictDescriptions[tag.id || ''] || '标签组合可能存在冲突，请谨慎选择';
+        const description = conflictDescriptions[tagId] || '标签组合可能存在冲突，请谨慎选择';
         toast.warning(description);
       }
 
+      // 如果标签未选中，则添加
       onTagsChange([...selectedTags, tag]);
     }
   }, [selectedTagIds, selectedTags, conflictTagIds, warningTagIds, conflictDescriptions, onTagsChange]);

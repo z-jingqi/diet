@@ -4,6 +4,7 @@ import { Typography } from "@/components/ui/typography";
 import { Tag, TagCategory } from "@/lib/gql/graphql";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface TagListProps {
   categories: TagCategory[];
@@ -27,20 +28,20 @@ const TagList = memo(({
   warningTagIds = [],
   conflictDescriptions = {},
 }: TagListProps) => {
-  // 使用 useMemo 优化 selectedTagIds 的计算
+  // 使用 useMemo 优化 selectedTagIds 的计算，过滤掉空值
   const selectedTagIds = useMemo(() => 
-    new Set(selectedTags.map(tag => tag.id)), 
+    new Set(selectedTags.map(tag => tag.id).filter(Boolean)), 
     [selectedTags]
   );
 
-  // 使用 useMemo 优化 disabledTagIds 和 warningTagIds 的 Set
+  // 使用 useMemo 优化 disabledTagIds 和 warningTagIds 的 Set，过滤掉空值
   const disabledTagIdsSet = useMemo(() => 
-    new Set(disabledTagIds), 
+    new Set(disabledTagIds.filter(Boolean)), 
     [disabledTagIds]
   );
   
   const warningTagIdsSet = useMemo(() => 
-    new Set(warningTagIds), 
+    new Set(warningTagIds.filter(Boolean)), 
     [warningTagIds]
   );
 
@@ -55,27 +56,29 @@ const TagList = memo(({
             {tagsData?.tags
               ?.filter((tag) => tag.categoryId === category.id)
               .map((tag) => {
-                const isSelected = selectedTagIds.has(tag.id || '');
-                const isDisabled = tag.id && disabledTagIdsSet.has(tag.id);
-                const isWarning = tag.id && warningTagIdsSet.has(tag.id);
+                // 跳过没有ID的标签
+                if (!tag.id) {
+                  return null;
+                }
+                
+                const isSelected = selectedTagIds.has(tag.id);
+                const isDisabled = disabledTagIdsSet.has(tag.id);
+                const isWarning = warningTagIdsSet.has(tag.id);
                 
                 return (
                   <Badge
                     key={tag.id}
                     variant={isSelected ? "default" : "outline"}
-                    className={`cursor-pointer transition-colors px-4 py-2 text-sm ${
-                      isSelected ? "bg-primary text-primary-foreground" : ""
-                    } ${
-                      isDisabled ? "opacity-50 bg-muted hover:bg-muted/80" : ""
-                    } ${
-                      isWarning && !isSelected ? "border-orange-300 text-orange-700" : ""
-                    } ${
-                      !isSelected && !isDisabled ? "hover:bg-muted" : ""
-                    }`}
+                    className={cn(
+                      "cursor-pointer transition-colors px-4 py-2 text-sm",
+                      isDisabled && "opacity-50 bg-muted hover:bg-muted/80",
+                      isWarning && !isSelected && "border-orange-300 text-orange-700",
+                      !isSelected && !isDisabled && "hover:bg-muted"
+                    )}
                     onClick={() => {
                       if (isDisabled) {
                         // 显示禁用原因
-                        const description = conflictDescriptions[tag.id || ''] || '标签冲突，无法同时选择';
+                        const description = tag.id && conflictDescriptions[tag.id] || '标签冲突，无法同时选择';
                         toast.error(description);
                       } else {
                         onTagToggle(tag);
