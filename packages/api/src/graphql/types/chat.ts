@@ -41,9 +41,9 @@ export const MessageTypeEnum = builder.enumType("MessageType", {
 // Message role enum
 export const MessageRoleEnum = builder.enumType("MessageRole", {
   values: {
-    USER: { value: "user" },
-    ASSISTANT: { value: "assistant" },
-    SYSTEM: { value: "system" },
+    user: { value: "user" },
+    assistant: { value: "assistant" },
+    system: { value: "system" },
   },
 });
 
