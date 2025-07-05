@@ -44,4 +44,4 @@ export const chatSessionSdkV2 = {
       throw error;
     }
   },
-}; 
+};
