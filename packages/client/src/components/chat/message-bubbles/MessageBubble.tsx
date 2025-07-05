@@ -14,24 +14,13 @@ interface MessageBubbleProps {
 /**
  * 消息气泡组件
  */
-const MessageBubble = ({
-  message,
-  onLike,
-  onDislike,
-  onSaveHealthAdvice,
-}: MessageBubbleProps) => {
+const MessageBubble = ({ message, onSaveHealthAdvice }: MessageBubbleProps) => {
   if (message.role === MessageRole.User) {
     return <UserMessageBubble content={message.content} />;
   }
 
   if (message.type === MessageType.Recipe) {
-    return (
-      <RecipeMessageBubble
-        message={message}
-        onLike={onLike}
-        onDislike={onDislike}
-      />
-    );
+    return <RecipeMessageBubble message={message} />;
   }
 
   if (message.type === MessageType.HealthAdvice) {

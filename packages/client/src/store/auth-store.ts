@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import { graphqlClient, createAuthenticatedClient } from "@/lib/gql/client";
 import {
   useGetMeQuery,
@@ -11,13 +12,17 @@ import {
   type RegisterMutationVariables,
 } from "@/lib/gql/graphql";
 
+// 1. 定义状态接口
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isGuestMode: boolean;
   isLoading: boolean;
   error: string | null;
+}
 
+// 2. 定义行为接口
+interface AuthActions {
   // 认证方法
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
@@ -36,18 +41,25 @@ interface AuthState {
   clearSession: () => void;
 }
 
-// 获取认证客户端
-function getAuthClient() {
-  return createAuthenticatedClient();
-}
+// 3. 合并完整的Store类型
+export type AuthStore = AuthState & AuthActions;
 
-const useAuthStore = create<AuthState>((set, get) => ({
+// 4. 初始状态
+const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isGuestMode: false,
   isLoading: false,
   error: null,
+};
 
+// 获取认证客户端
+function getAuthClient() {
+  return createAuthenticatedClient();
+}
+
+// 5. 创建行为工厂函数 - 提供静态引用点
+const createAuthActions = (set: any, get: any): AuthActions => ({
   login: async (username: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
@@ -180,6 +192,79 @@ const useAuthStore = create<AuthState>((set, get) => ({
   clearSession: () => {
     // 清除 session token
   },
-}));
+});
+
+// 6. 创建选择器 - 提供更好的性能和引用追踪
+export const authSelectors = {
+  // 状态选择器
+  user: (state: AuthStore) => state.user,
+  isAuthenticated: (state: AuthStore) => state.isAuthenticated,
+  isGuestMode: (state: AuthStore) => state.isGuestMode,
+  isLoading: (state: AuthStore) => state.isLoading,
+  error: (state: AuthStore) => state.error,
+
+  // 行为选择器
+  login: (state: AuthStore) => state.login,
+  register: (state: AuthStore) => state.register,
+  logout: (state: AuthStore) => state.logout,
+  checkAuth: (state: AuthStore) => state.checkAuth,
+  enableGuest: (state: AuthStore) => state.enableGuest,
+  canUseFeatures: (state: AuthStore) => state.canUseFeatures,
+  requireAuth: (state: AuthStore) => state.requireAuth,
+  clearError: (state: AuthStore) => state.clearError,
+  clearSession: (state: AuthStore) => state.clearSession,
+};
+
+// 7. 创建自定义Hook - 提供更好的封装和模块化
+export const useAuth = () => {
+  const user = useAuthStore(authSelectors.user);
+  const isAuthenticated = useAuthStore(authSelectors.isAuthenticated);
+  const isGuestMode = useAuthStore(authSelectors.isGuestMode);
+  const isLoading = useAuthStore(authSelectors.isLoading);
+  const error = useAuthStore(authSelectors.error);
+
+  const login = useAuthStore(authSelectors.login);
+  const register = useAuthStore(authSelectors.register);
+  const logout = useAuthStore(authSelectors.logout);
+  const checkAuth = useAuthStore(authSelectors.checkAuth);
+  const enableGuest = useAuthStore(authSelectors.enableGuest);
+  const canUseFeatures = useAuthStore(authSelectors.canUseFeatures);
+  const requireAuth = useAuthStore(authSelectors.requireAuth);
+  const clearError = useAuthStore(authSelectors.clearError);
+  const clearSession = useAuthStore(authSelectors.clearSession);
+
+  return {
+    // 状态
+    user,
+    isAuthenticated,
+    isGuestMode,
+    isLoading,
+    error,
+
+    // 行为
+    login,
+    register,
+    logout,
+    checkAuth,
+    enableGuest,
+    canUseFeatures,
+    requireAuth,
+    clearError,
+    clearSession,
+  };
+};
+
+// 8. 创建Store
+const useAuthStore = create<AuthStore>()(
+  devtools(
+    (set, get) => ({
+      ...initialState,
+      ...createAuthActions(set, get),
+    }),
+    {
+      name: "auth-store",
+    }
+  )
+);
 
 export default useAuthStore;

@@ -14,6 +14,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KitchenToolsRouteImport } from './routes/kitchen-tools'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as SessionIdRouteImport } from './routes/$sessionId'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipeIdRouteImport } from './routes/recipe.$id'
 
@@ -42,6 +43,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SessionIdRoute = SessionIdRouteImport.update({
+  id: '/$sessionId',
+  path: '/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +61,7 @@ const RecipeIdRoute = RecipeIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
   '/favorites': typeof FavoritesRoute
   '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
   '/favorites': typeof FavoritesRoute
   '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
   '/favorites': typeof FavoritesRoute
   '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$sessionId'
     | '/favorites'
     | '/kitchen-tools'
     | '/login'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$sessionId'
     | '/favorites'
     | '/kitchen-tools'
     | '/login'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$sessionId'
     | '/favorites'
     | '/kitchen-tools'
     | '/login'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SessionIdRoute: typeof SessionIdRoute
   FavoritesRoute: typeof FavoritesRoute
   KitchenToolsRoute: typeof KitchenToolsRoute
   LoginRoute: typeof LoginRoute
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$sessionId': {
+      id: '/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/$sessionId'
+      preLoaderRoute: typeof SessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SessionIdRoute: SessionIdRoute,
   FavoritesRoute: FavoritesRoute,
   KitchenToolsRoute: KitchenToolsRoute,
   LoginRoute: LoginRoute,

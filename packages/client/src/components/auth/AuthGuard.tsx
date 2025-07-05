@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useAuthState } from "@/lib/gql/hooks/auth";
+import useAuthStore from "@/store/auth-store";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -7,12 +7,9 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthState();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
-  useEffect(() => {
-    // 检查认证状态
-    checkAuth();
-  }, [checkAuth]);
+  // No need to call checkAuth() here since it's already being called in App.tsx
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -63,9 +63,9 @@ export type LoginResponse = {
 };
 
 export enum MessageRole {
-  Assistant = 'ASSISTANT',
-  System = 'SYSTEM',
-  User = 'USER'
+  Assistant = 'assistant',
+  System = 'system',
+  User = 'user'
 }
 
 export enum MessageStatus {
@@ -475,6 +475,13 @@ export type GetMyChatSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
 
+export type GetChatSessionQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetChatSessionQuery = { __typename?: 'Query', chatSession?: { __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null } | null };
+
 export type CreateChatSessionMutationVariables = Exact<{
   title: Scalars['String']['input'];
   messages: Scalars['String']['input'];
@@ -861,6 +868,48 @@ useGetMyChatSessionsQuery.getKey = (variables?: GetMyChatSessionsQueryVariables)
 
 
 useGetMyChatSessionsQuery.fetcher = (client: GraphQLClient, variables?: GetMyChatSessionsQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyChatSessionsQuery, GetMyChatSessionsQueryVariables>(client, GetMyChatSessionsDocument, variables, headers);
+
+export const GetChatSessionDocument = `
+    query GetChatSession($id: ID!) {
+  chatSession(id: $id) {
+    id
+    title
+    messages {
+      ...ChatMessageFields
+    }
+    tagIds
+    createdAt
+    updatedAt
+    user {
+      id
+      username
+    }
+  }
+}
+    ${ChatMessageFieldsFragmentDoc}`;
+
+export const useGetChatSessionQuery = <
+      TData = GetChatSessionQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables: GetChatSessionQueryVariables,
+      options?: Omit<UseQueryOptions<GetChatSessionQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetChatSessionQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<GetChatSessionQuery, TError, TData>(
+      {
+    queryKey: ['GetChatSession', variables],
+    queryFn: fetcher<GetChatSessionQuery, GetChatSessionQueryVariables>(client, GetChatSessionDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useGetChatSessionQuery.getKey = (variables: GetChatSessionQueryVariables) => ['GetChatSession', variables];
+
+
+useGetChatSessionQuery.fetcher = (client: GraphQLClient, variables: GetChatSessionQueryVariables, headers?: RequestInit['headers']) => fetcher<GetChatSessionQuery, GetChatSessionQueryVariables>(client, GetChatSessionDocument, variables, headers);
 
 export const CreateChatSessionDocument = `
     mutation CreateChatSession($title: String!, $messages: String!, $tagIds: [ID!]) {

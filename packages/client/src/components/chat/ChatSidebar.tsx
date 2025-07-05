@@ -11,10 +11,10 @@ import { createAuthCheck } from "@/utils/auth-utils";
 import useAuthStore from "@/store/auth-store";
 import { categorizeSessions } from "@/utils/time-utils";
 import { ChatSession } from "@/lib/gql/graphql";
-import { useMyChatSessions } from "@/lib/gql/hooks";
 
 interface ChatSidebarProps {
   currentSessionId: string;
+  sessions: ChatSession[];
   onCreateNewSession?: () => void;
   onSelectSession?: (sessionId: string) => void;
   onRenameSession?: (sessionId: string) => void;
@@ -24,6 +24,7 @@ interface ChatSidebarProps {
 
 const ChatSidebar = ({
   currentSessionId,
+  sessions,
   onCreateNewSession,
   onSelectSession,
   onRenameSession,
@@ -66,12 +67,6 @@ const ChatSidebar = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // 从后端获取会话列表
-  const { data: sessionsData } = useMyChatSessions();
-  const sessions: ChatSession[] = (sessionsData?.myChatSessions ?? []).filter(
-    (s): s is NonNullable<typeof s> => s !== null
-  );
-
   const categorizedSessions = categorizeSessions(sessions);
 
   const timeCategories = [
@@ -105,18 +100,10 @@ const ChatSidebar = ({
   };
 
   const handleNewChat = () => {
-    // 检查当前会话是否有消息
-    const currentSession = sessions.find(
-      (session) => session.id === currentSessionId
-    );
-
-    if (currentSession && currentSession.messages?.length === 0) {
-      // 如果当前会话没有消息，只关闭侧边栏
-      onCloseSidebar?.();
-      return;
-    }
-
+    // 创建新会话
     onCreateNewSession?.();
+    // 总是关闭侧边栏，无论当前会话是否有消息
+    onCloseSidebar?.();
   };
 
   const handleRenameChat = (sessionId: string) => {

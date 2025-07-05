@@ -1,21 +1,31 @@
-import { CodegenConfig } from '@graphql-codegen/cli';
+import { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema: 'http://127.0.0.1:8787/api/graphql',
-  documents: ['src/**/*.{ts,tsx,graphql}'],
+  schema: "http://127.0.0.1:8787/api/graphql",
+  documents: ["src/**/*.{ts,tsx,graphql}"],
   generates: {
-    './src/lib/gql/graphql.ts': {
+    "./src/lib/gql/graphql.ts": {
       plugins: [
         {
           add: {
-            content: '// @ts-nocheck',
+            content: "// @ts-nocheck",
           },
         },
-        'typescript',
-        'typescript-operations',
         {
-          'typescript-react-query': {
-            fetcher: 'graphql-request',
+          typescript: {
+            enumValues: {
+              MessageRole: {
+                user: "user",
+                assistant: "assistant",
+                system: "system",
+              },
+            },
+          },
+        },
+        "typescript-operations",
+        {
+          "typescript-react-query": {
+            fetcher: "graphql-request",
             exposeQueryKeys: true,
             exposeFetcher: true,
             addInfiniteQueryParam: true,
@@ -24,7 +34,7 @@ const config: CodegenConfig = {
             useTypeImports: true,
             reactQueryVersion: 5,
             legacyMode: false,
-            documentMode: 'documentNode',
+            documentMode: "documentNode",
             importTypes: true,
             dedupeFragments: true,
             avoidOptionals: {
@@ -32,15 +42,15 @@ const config: CodegenConfig = {
               inputValue: false,
               object: false,
             },
-          }
-        }
+          },
+        },
       ],
     },
   },
   ignoreNoDocuments: true,
   hooks: {
-    afterOneFileWrite: ['node ./scripts/add-ts-nocheck.mjs'],
+    afterOneFileWrite: ["node ./scripts/add-ts-nocheck.mjs"],
   },
 };
 
-export default config; 
+export default config;

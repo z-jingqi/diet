@@ -15,7 +15,7 @@ type ChatMessage = {
   id: string;
   type: "CHAT" | "RECIPE" | "HEALTH_ADVICE";
   content: string;
-  role: "USER" | "ASSISTANT" | "SYSTEM";
+  role: "user" | "assistant" | "system";
   createdAt: string;
   status: "PENDING" | "STREAMING" | "DONE" | "ERROR" | "ABORT";
 };
@@ -41,9 +41,9 @@ export const MessageTypeEnum = builder.enumType("MessageType", {
 // Message role enum
 export const MessageRoleEnum = builder.enumType("MessageRole", {
   values: {
-    USER: { value: "USER" },
-    ASSISTANT: { value: "ASSISTANT" },
-    SYSTEM: { value: "SYSTEM" },
+    user: { value: "user" },
+    assistant: { value: "assistant" },
+    system: { value: "system" },
   },
 });
 
