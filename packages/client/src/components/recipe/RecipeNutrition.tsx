@@ -4,10 +4,23 @@ import type { GeneratedRecipe } from '@diet/shared';
 import { MutedText } from '@/components/ui/typography';
 
 interface RecipeNutritionProps {
-  nutrition: GeneratedRecipe["nutrition"];
+  nutrition?: GeneratedRecipe["nutrition"];
 }
 
 const RecipeNutrition = ({ nutrition }: RecipeNutritionProps) => {
+  if (!nutrition) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>营养成分</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MutedText>暂无营养信息</MutedText>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

@@ -1,152 +1,199 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
 import ChatLayout from "@/components/chat/ChatLayout";
-import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
-import useChatStore from "@/store/chat-store";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  useChatSession,
+  useChatMessaging,
+  useCreateChatSession,
+} from "@/lib/gql/hooks/chat-hooks";
+import { ChatMessage, MessageRole, MessageStatus } from "@/lib/gql/graphql";
+import { buildUserMessage } from "@/utils/message-builder";
 
-const ChatPage = () => {
-  const confirm = useConfirmDialog();
-  const { isAuthenticated, isGuestMode, enableGuest } = useAuthStore();
+interface ChatPageProps {
+  sessionId?: string;
+}
 
+const ChatPage = ({ sessionId }: ChatPageProps) => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isGuestMode } = useAuth();
+
+  // 当前会话状态
+  const [currentSessionId, setCurrentSessionId] = useState<string>(
+    sessionId || ""
+  );
+  const [isTemporarySession, setIsTemporarySession] = useState(!sessionId);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  // 从hooks获取会话数据和方法
+  const { session, isLoading: isSessionLoading } =
+    useChatSession(currentSessionId);
+  const { mutateAsync: createChatSession } = useCreateChatSession();
   const {
-    getCurrentMessages,
     sendMessage,
-    canSendMessage,
+    isLoading: isMessageLoading,
     abortCurrentMessage,
-    currentSessionId,
+    isGettingIntent,
     createTemporarySession,
-    switchSession,
-    deleteSession,
-    renameSession,
-    clearSession,
-  } = useChatStore();
+    abortController,
+  } = useChatMessaging();
 
-  const messages = getCurrentMessages();
-
-  // 进入页面时创建临时会话
+  // 如果URL中没有sessionId，创建一个临时会话
   useEffect(() => {
-    if (!currentSessionId && (isAuthenticated || isGuestMode)) {
-      createTemporarySession();
+    if (!currentSessionId) {
+      const tempSession = createTemporarySession();
+      setCurrentSessionId(tempSession.id || "");
+      setIsTemporarySession(true);
+      setMessages([]);
     }
-  }, [currentSessionId, createTemporarySession, isAuthenticated, isGuestMode]);
+  }, [createTemporarySession, currentSessionId]);
 
-  // 离开页面时清理临时会话
+  // 当从后端获取到会话时，更新消息列表
   useEffect(() => {
-    return () => {
-      // 组件卸载时，如果当前是临时会话则删除
-      const { isTemporarySession, currentSessionId } = useChatStore.getState();
-      if (isTemporarySession && currentSessionId) {
-        useChatStore.getState().deleteSession(currentSessionId);
+    if (session && session.messages && !isStreaming) {
+      setMessages(session.messages as ChatMessage[]);
+      setIsTemporarySession(false);
+    }
+  }, [session, isStreaming]);
+
+  // 发送消息处理函数
+  const handleSendMessage = async (content: string, tagIds?: string[]) => {
+    if (!content.trim() || !currentSessionId) return;
+
+    // 乐观更新：立即添加用户消息到本地状态
+    const userMessage = buildUserMessage(content);
+    const previousMessages = [...messages];
+    const optimisticMessages = [...previousMessages, userMessage];
+    setMessages(optimisticMessages);
+
+    // 如果是临时会话且用户已登录，先创建正式会话
+    let targetSessionId = currentSessionId;
+    let newSessionId: string | null = null;
+
+    if (isTemporarySession && isAuthenticated && !isGuestMode) {
+      try {
+        // 创建正式会话
+        const result = await createChatSession({
+          title: content.slice(0, 20) + (content.length > 20 ? "..." : ""),
+          messages: JSON.stringify([userMessage]),
+          tagIds: tagIds || [],
+        });
+
+        if (result.createChatSession) {
+          // 保存新的 sessionId，但不立即更新状态
+          newSessionId = result.createChatSession.id || "";
+          targetSessionId = newSessionId;
+        }
+      } catch (error) {
+        console.error("Failed to create session:", error);
+        // 如果创建失败，继续使用临时会话
       }
-    };
-  }, []);
-
-  // 如果用户未认证且未启用游客模式，自动启用游客模式
-  useEffect(() => {
-    if (!isAuthenticated && !isGuestMode) {
-      enableGuest();
     }
-  }, [isAuthenticated, isGuestMode, enableGuest]);
 
-  const handleSendMessage = async (content: string) => {
-    await sendMessage(content);
-  };
+    try {
+      setIsStreaming(true);
 
-  // 判断是否可终止
-  const canAbort =
-    messages.length > 0 &&
-    (() => {
-      const last = messages[messages.length - 1];
-      return (
-        !last.isUser &&
-        (last.status === "pending" || last.status === "streaming")
-      );
-    })();
-
-  const handleClearSession = async () => {
-    const ok = await confirm({
-      title: "确定要清空当前对话吗？",
-      description: "此操作无法撤销，当前对话的所有消息将被永久删除。",
-      confirmText: "清空",
-      cancelText: "取消",
-      confirmVariant: "destructive",
-    });
-    if (ok && currentSessionId) {
-      clearSession(currentSessionId);
-    }
-  };
-
-  const handleDeleteSession = async () => {
-    if (currentSessionId) {
-      const ok = await confirm({
-        title: "确定要删除这个对话吗？",
-        description: "此操作无法撤销，删除后对话将永久丢失。",
-        confirmText: "删除",
-        cancelText: "取消",
-        confirmVariant: "destructive",
+      // 使用 hook 的 sendMessage 方法，它会自动处理意图判断和消息发送
+      const result = await sendMessage({
+        sessionId: targetSessionId,
+        content,
+        existingMessages: previousMessages,
+        onStreamStart: (aiMsg) => {
+          // 把流式 AI 消息插入列表（初始为空内容）
+          setMessages((prev) => [...prev, { ...aiMsg, content: "" }]);
+        },
+        onChunkReceived: (chunk) => {
+          setMessages((prev) => {
+            if (prev.length === 0) return prev;
+            const updated = [...prev];
+            const lastIdx = updated.length - 1;
+            const last = updated[lastIdx];
+            if (last.role === MessageRole.Assistant) {
+              updated[lastIdx] = {
+                ...last,
+                content: `${last.content || ""}${chunk}`,
+                status: MessageStatus.Streaming,
+              } as ChatMessage;
+            }
+            return updated;
+          });
+        },
+        isGuestMode,
       });
-      if (ok) {
-        deleteSession(currentSessionId);
+
+      // 更新本地消息列表
+      if (result && result.allMessages) {
+        setMessages(result.allMessages);
       }
+
+      // AI 响应完成后，再更新 sessionId 和 URL（避免竞态条件）
+      if (newSessionId) {
+        setCurrentSessionId(newSessionId);
+        setIsTemporarySession(false);
+        navigate({ to: `/${newSessionId}` });
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // 错误处理：保持乐观更新的消息，让用户知道发送失败
+    } finally {
+      setIsStreaming(false);
     }
   };
 
-  const handleCreateNewSession = () => {
-    createTemporarySession();
-  };
-
-  const handleSelectSession = (sessionId: string) => {
-    switchSession(sessionId);
-  };
-
-  const handleRenameSession = (sessionId: string) => {
-    const newTitle = prompt("请输入新的标题:");
-    if (newTitle) {
-      renameSession(sessionId, newTitle);
-    }
+  // 处理中止消息
+  const handleAbortMessage = () => {
+    abortCurrentMessage();
   };
 
   return (
     <div className="h-[100dvh] w-full overflow-hidden">
       <ChatLayout
-        title={isGuestMode ? "游客体验" : "新对话"}
-        onClearSession={handleClearSession}
-        onDeleteSession={handleDeleteSession}
-        onCreateNewSession={handleCreateNewSession}
-        onSelectSession={handleSelectSession}
-        onRenameSession={handleRenameSession}
+        currentSessionId={currentSessionId}
+        isTemporarySession={isTemporarySession}
       >
         <div className="flex flex-col h-full w-full">
-          {/* 主要内容区域 */}
+          {/* Main content area */}
           <div className="flex-1 flex items-center justify-center overflow-hidden w-full">
-            {messages.length === 0 ? <TypingPrompt /> : <ChatMessages />}
+            {messages.length === 0 ? (
+              <TypingPrompt />
+            ) : (
+              <ChatMessages
+                messages={messages}
+                gettingIntent={isGettingIntent}
+              />
+            )}
           </div>
 
-          {/* 输入框区域 - 固定在底部 */}
+          {/* Input area - fixed at bottom */}
           <div className="w-full max-w-3xl mx-auto p-4">
             <ChatInput
               onSendMessage={handleSendMessage}
-              disabled={!canSendMessage()}
-              canAbort={canAbort}
-              onAbort={abortCurrentMessage}
-              placeholder={isGuestMode ? "输入消息开始体验..." : "输入消息..."}
+              disabled={isMessageLoading || isSessionLoading}
+              canAbort={!!abortController}
+              onAbort={handleAbortMessage}
+              placeholder={
+                isGuestMode
+                  ? "Enter message to start chatting..."
+                  : "Enter message..."
+              }
             />
 
-            {/* 游客模式底部提示 */}
+            {/* Guest mode notice */}
             {isGuestMode && (
               <div className="mt-2 text-center">
                 <p className="text-xs text-gray-500">
-                  游客模式下无法保存对话历史，
-                  <button
-                    onClick={() => (window.location.href = "/login")}
+                  Guest mode: Conversations aren't saved.{" "}
+                  <a
+                    href="/login"
                     className="text-blue-600 hover:text-blue-700 underline"
                   >
-                    登录
-                  </button>
-                  可保存和管理对话记录
+                    Login
+                  </a>{" "}
+                  to save your conversations.
                 </p>
               </div>
             )}

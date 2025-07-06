@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Text, ChevronRight, UserIcon, LogInIcon } from "lucide-react";
+import { useMemo } from "react";
+import { Text, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import {
@@ -8,36 +8,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
+import {
+  useUpdateChatSession,
+  useDeleteChatSession,
+  useChatSessions,
+} from "@/lib/gql/hooks/chat-hooks";
 import { useNavigate } from "@tanstack/react-router";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
-  title?: string;
-  onRenameSession?: () => void;
-  onClearSession?: () => void;
-  onDeleteSession?: () => void;
+  currentSessionId: string;
 }
 
-const ChatHeader = ({
-  onMenuClick,
-  title = "新对话",
-  onRenameSession,
-  onClearSession,
-  onDeleteSession,
-}: ChatHeaderProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const ChatHeader = ({ onMenuClick, currentSessionId }: ChatHeaderProps) => {
   const navigate = useNavigate();
-  const { isGuestMode } = useAuthStore();
+  const confirm = useConfirmDialog();
 
-  const handleLoginClick = () => {
-    navigate({ to: "/login" });
-  };
+  // 使用新的hooks
+  const { sessions } = useChatSessions();
+  const { mutateAsync: updateChatSession } = useUpdateChatSession();
+  const { mutateAsync: deleteChatSession } = useDeleteChatSession();
+
+  // 使用 useMemo 获取当前会话标题
+  const sessionTitle = useMemo(() => {
+    if (!currentSessionId) return "新对话";
+    const currentSession = sessions.find((s) => s.id === currentSessionId);
+    return currentSession?.title || "新对话";
+  }, [currentSessionId, sessions]);
 
   return (
     <header className="flex items-center justify-between px-4 py-1.5 bg-background min-h-0 h-10">
-      {/* 左侧菜单按钮 */}
       <Button
         variant="ghost"
         size="icon"
@@ -49,31 +51,88 @@ const ChatHeader = ({
 
       {/* 中间标题区域 */}
       <div className="flex-1 flex justify-center">
-        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               className="h-auto p-1 hover:bg-accent flex items-center"
             >
-              <Typography variant="span" className="text-base font-normal mr-1">
-                {title}
+              <Typography variant="span" className="text-base font-normal">
+                {sessionTitle}
               </Typography>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center" className="w-32">
-            <DropdownMenuItem onClick={onRenameSession}>
+            <DropdownMenuItem
+              onClick={() => {
+                if (!currentSessionId) {
+                  return;
+                }
+                const newTitle = prompt("请输入新的标题:");
+                if (newTitle) {
+                  updateChatSession({
+                    id: currentSessionId,
+                    title: newTitle,
+                  }).catch((error) => {
+                    console.error("Failed to rename session:", error);
+                  });
+                }
+              }}
+            >
               <Typography variant="span" className="text-sm">
                 重命名
               </Typography>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onClearSession}>
+            <DropdownMenuItem
+              onClick={async () => {
+                if (!currentSessionId) {
+                  return;
+                }
+                const ok = await confirm({
+                  title: "确定要清空当前对话吗？",
+                  description:
+                    "此操作无法撤销，当前对话的所有消息将被永久删除。",
+                  confirmText: "清空",
+                  cancelText: "取消",
+                  confirmVariant: "destructive",
+                });
+                if (ok) {
+                  updateChatSession({
+                    id: currentSessionId,
+                    messages: "[]",
+                  }).catch((error) => {
+                    console.error("Failed to clear messages:", error);
+                  });
+                }
+              }}
+            >
               <Typography variant="span" className="text-sm">
                 清空聊天
               </Typography>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={onDeleteSession}
+              onClick={async () => {
+                if (!currentSessionId) {
+                  return;
+                }
+                const ok = await confirm({
+                  title: "确定要删除这个对话吗？",
+                  description: "此操作无法撤销，删除后对话将永久丢失。",
+                  confirmText: "删除",
+                  cancelText: "取消",
+                  confirmVariant: "destructive",
+                });
+                if (ok) {
+                  try {
+                    await deleteChatSession({ id: currentSessionId });
+                    // 删除成功后，重定向到根路径
+                    navigate({ to: "/" });
+                  } catch (error) {
+                    console.error("Failed to delete session:", error);
+                  }
+                }
+              }}
               className="text-destructive"
             >
               <Typography variant="span" className="text-sm">
@@ -83,28 +142,6 @@ const ChatHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* 右侧占位符，保持布局平衡 */}
-      <div className="w-6" />
-
-      {/* 用户状态指示器 - 只在游客模式时显示 */}
-      {isGuestMode && (
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="flex items-center space-x-1">
-            <UserIcon className="w-3 h-3" />
-            <span>游客模式</span>
-          </Badge>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleLoginClick}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          >
-            <LogInIcon className="w-4 h-4 mr-1" />
-            登录
-          </Button>
-        </div>
-      )}
     </header>
   );
 };

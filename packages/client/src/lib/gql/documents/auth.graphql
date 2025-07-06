@@ -1,0 +1,72 @@
+# 通用用户字段片段
+fragment UserBasicFields on User {
+  id
+  username
+  nickname
+  email
+  avatarUrl
+  isActive
+  isVerified
+  lastLoginAt
+  createdAt
+  updatedAt
+}
+
+# 获取当前用户信息
+query GetMe {
+  me {
+    ...UserBasicFields
+  }
+}
+
+# 用户注册
+mutation Register($username: String!, $password: String!) {
+  register(username: $username, password: $password) {
+    user {
+      ...UserBasicFields
+    }
+    sessionToken
+    csrfToken
+  }
+}
+
+# 根据用户名获取用户（用于检查用户名是否已存在）
+query UserByUsername($username: String!) {
+  userByUsername(username: $username) {
+    id
+  }
+}
+
+# 用户登录
+mutation Login($username: String!, $password: String!) {
+  login(username: $username, password: $password) {
+    user {
+      ...UserBasicFields
+    }
+    sessionToken
+    csrfToken
+  }
+}
+
+# 用户登出
+mutation Logout {
+  logout
+}
+
+mutation WechatLogin($code: String!) {
+  wechatLogin(code: $code) {
+    user {
+      ...UserBasicFields
+    }
+    sessionToken
+    csrfToken
+  }
+}
+
+# 刷新会话
+mutation RefreshSession($refreshToken: String!) {
+  refreshSession(refreshToken: $refreshToken) {
+    sessionToken
+    sessionExpiresAt
+  }
+}

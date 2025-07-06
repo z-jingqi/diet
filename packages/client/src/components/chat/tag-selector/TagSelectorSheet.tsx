@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,17 +11,17 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { MutedText } from "@/components/ui/typography";
-import type { Tag, TagCategory } from "@diet/shared";
 import TagSkeleton from "./TagSkeleton";
 import TagList from "./TagList";
+import { Tag, TagCategory } from "@/lib/gql/graphql";
 
 interface TagSelectorSheetProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   tagsData?: {
-    tags: Tag[];
-    categories: TagCategory[];
+    tags?: Tag[];
+    categories?: TagCategory[];
   };
   categories: TagCategory[];
   selectedTags: Tag[];
@@ -28,9 +29,12 @@ interface TagSelectorSheetProps {
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  disabledTagIds?: string[];
+  warningTagIds?: string[];
+  conflictDescriptions?: Record<string, string>;
 }
 
-const TagSelectorSheet = ({
+const TagSelectorSheet = memo(({
   isOpen,
   onOpenChange,
   disabled,
@@ -41,6 +45,9 @@ const TagSelectorSheet = ({
   isLoading,
   error,
   onRetry,
+  disabledTagIds = [],
+  warningTagIds = [],
+  conflictDescriptions = {},
 }: TagSelectorSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -56,7 +63,10 @@ const TagSelectorSheet = ({
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0">
+      <SheetContent
+        side="bottom"
+        className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0"
+      >
         <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between">
           <SheetTitle>选择标签</SheetTitle>
           <SheetClose asChild>
@@ -84,6 +94,9 @@ const TagSelectorSheet = ({
                 tagsData={tagsData}
                 selectedTags={selectedTags}
                 onTagToggle={onTagToggle}
+                disabledTagIds={disabledTagIds}
+                warningTagIds={warningTagIds}
+                conflictDescriptions={conflictDescriptions}
               />
             )}
           </div>
@@ -98,6 +111,8 @@ const TagSelectorSheet = ({
       </SheetContent>
     </Sheet>
   );
-};
+});
 
-export default TagSelectorSheet; 
+TagSelectorSheet.displayName = "TagSelectorSheet";
+
+export default TagSelectorSheet;

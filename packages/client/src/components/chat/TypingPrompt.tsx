@@ -22,9 +22,11 @@ const TypingPrompt = () => {
       // 清理之前的timer
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
       if (pauseTimerRef.current) {
         clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = null;
       }
 
       const currentPromptText = prompts[currentPrompt];
@@ -35,9 +37,11 @@ const TypingPrompt = () => {
 
       const typeText = () => {
         if (!isTypingRef.current) return;
-        
+
         if (currentIndexRef.current < currentPromptText.length) {
-          setDisplayText(currentPromptText.slice(0, currentIndexRef.current + 1));
+          setDisplayText(
+            currentPromptText.slice(0, currentIndexRef.current + 1)
+          );
           currentIndexRef.current++;
           timerRef.current = setTimeout(typeText, 100);
         } else {
@@ -45,6 +49,7 @@ const TypingPrompt = () => {
           isTypingRef.current = false;
           // 暂停2秒后切换到下一个prompt
           pauseTimerRef.current = setTimeout(() => {
+            // 使用函数式更新，避免依赖currentPrompt
             setCurrentPrompt((prev) => (prev + 1) % prompts.length);
           }, 2000);
         }
@@ -60,12 +65,14 @@ const TypingPrompt = () => {
       isTypingRef.current = false;
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
       if (pauseTimerRef.current) {
         clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = null;
       }
     };
-  }, [currentPrompt]);
+  }, [currentPrompt, prompts.length]);
 
   return (
     <motion.div

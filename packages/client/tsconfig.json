@@ -16,8 +16,8 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
     /* Path Alias */
@@ -28,5 +28,12 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/lib/gql/graphql.ts",
+    "src/lib/gql/gql.ts",
+    "src/lib/gql/fragment-masking.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

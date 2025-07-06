@@ -1,43 +1,25 @@
-import React from 'react';
-import { useAuthCheck } from '@/hooks/useAuthCheck';
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  showToast?: boolean;
-  toastMessage?: string;
-  toastDescription?: string;
+  fallback?: React.ReactNode;
 }
 
-export const AuthGuard: React.FC<AuthGuardProps> = ({
-  children,
-  showToast = true,
-  toastMessage = '需要登录才能访问此功能',
-  toastDescription = '请先登录您的账户'
-}) => {
-  const { checkAuthAndExecute } = useAuthCheck();
+const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
+  const { isAuthenticated, isLoading } = useAuth();
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    checkAuthAndExecute(() => {
-      // 如果认证通过，重新触发点击事件
-      const target = e.target as HTMLElement;
-      if (target.click) {
-        target.click();
-      }
-    }, {
-      showToast,
-      toastMessage,
-      toastDescription
-    });
-  };
+  // No need to call checkAuth() here since it's already being called in App.tsx
 
-  return (
-    <div onClick={handleClick}>
-      {children}
-    </div>
-  );
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return fallback || <div>Please log in to continue.</div>;
+  }
+
+  return <>{children}</>;
 };
 
-export default AuthGuard; 
+export default AuthGuard;

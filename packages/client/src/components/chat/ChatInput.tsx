@@ -3,27 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Square, Send } from "lucide-react";
 import TagSelector from "@/components/chat/tag-selector/TagSelector";
 import { Textarea } from "@/components/ui/textarea";
-import useChatStore from "@/store/chat-store";
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (content: string, tagIds?: string[]) => void;
   disabled?: boolean;
-  onAbort?: () => void;
   canAbort?: boolean;
+  onAbort?: () => void;
   placeholder?: string;
 }
 
 const ChatInput = ({
   onSendMessage,
-  disabled,
+  disabled = false,
+  canAbort = false,
   onAbort,
-  canAbort,
-  placeholder = "有什么想问我的吗？比如：今天想吃什么？",
+  placeholder = "输入消息...",
 }: ChatInputProps) => {
-  const [input, setInput] = useState("");
-  const { getCurrentSession, updateSessionTags } = useChatStore();
-  const currentSession = getCurrentSession();
-  const selectedTags = currentSession?.currentTags || [];
+  const [content, setContent] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 自动调整textarea高度
@@ -36,31 +33,39 @@ const ChatInput = ({
       const newHeight = Math.min(textarea.scrollHeight, 96);
       textarea.style.height = `${newHeight}px`;
     }
-  }, [input]);
+  }, [content]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || disabled) return;
+    if (!content.trim() || disabled) return;
 
-    onSendMessage(input);
-    setInput("");
+    onSendMessage(
+      content,
+      selectedTagIds.length > 0 ? selectedTagIds : undefined
+    );
+    setContent("");
+    // 保留已选标签，不需要清空
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!input.trim() || disabled) return;
+      if (!content.trim() || disabled) return;
 
-      onSendMessage(input);
-      setInput("");
+      onSendMessage(
+        content,
+        selectedTagIds.length > 0 ? selectedTagIds : undefined
+      );
+      setContent("");
+      // 保留已选标签，不需要清空
     }
   };
 
-  const handleTagsChange = (tags: any[]) => {
-    updateSessionTags(tags);
+  const handleTagsChange = (tagIds: string[]) => {
+    setSelectedTagIds(tagIds);
   };
 
-  const isEmpty = !input.trim();
+  const isEmpty = !content.trim();
 
   return (
     <div className="space-y-3">
@@ -90,9 +95,9 @@ const ChatInput = ({
           {/* Message Input - Top Section */}
           <Textarea
             ref={textareaRef}
-            value={input}
+            value={content}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setInput(e.target.value)
+              setContent(e.target.value)
             }
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
@@ -105,7 +110,7 @@ const ChatInput = ({
           {/* Bottom Section - Tags and Send Button */}
           <div className="flex justify-between items-center mt-4">
             <TagSelector
-              selectedTags={selectedTags}
+              selectedTagIds={selectedTagIds}
               onTagsChange={handleTagsChange}
               disabled={disabled}
             />

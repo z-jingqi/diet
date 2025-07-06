@@ -1,0 +1,84 @@
+# 复用的消息字段片段
+fragment ChatMessageFields on ChatMessage {
+  id
+  type
+  content
+  role
+  createdAt
+  status
+}
+
+query GetMyChatSessions {
+  myChatSessions {
+    id
+    title
+    tagIds
+    createdAt
+    updatedAt
+    user {
+      id
+      username
+    }
+  }
+}
+
+query GetChatSession($id: ID!) {
+  chatSession(id: $id) {
+    id
+    title
+    messages {
+      ...ChatMessageFields
+    }
+    tagIds
+    createdAt
+    updatedAt
+    user {
+      id
+      username
+    }
+  }
+}
+
+mutation CreateChatSession(
+  $title: String!
+  $messages: String!
+  $tagIds: [ID!]
+) {
+  createChatSession(title: $title, messages: $messages, tagIds: $tagIds) {
+    id
+    title
+    messages {
+      ...ChatMessageFields
+    }
+    tagIds
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateChatSession(
+  $id: ID!
+  $title: String
+  $messages: String
+  $tagIds: [ID!]
+) {
+  updateChatSession(
+    id: $id
+    title: $title
+    messages: $messages
+    tagIds: $tagIds
+  ) {
+    id
+    title
+    messages {
+      ...ChatMessageFields
+    }
+    tagIds
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteChatSession($id: ID!) {
+  deleteChatSession(id: $id)
+}

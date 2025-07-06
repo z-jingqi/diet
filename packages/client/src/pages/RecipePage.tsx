@@ -1,21 +1,27 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
-import useRecipeStore from '@/store/recipe-store';
-import RecipeBasicInfo from '@/components/recipe/RecipeBasicInfo';
-import RecipeIngredients from '@/components/recipe/RecipeIngredients';
-import RecipeSteps from '@/components/recipe/RecipeSteps';
-import RecipeNutrition from '@/components/recipe/RecipeNutrition';
-import RecipeNotes from '@/components/recipe/RecipeNotes';
+import useRecipeStore from "@/store/recipe-store";
+import RecipeBasicInfo from "@/components/recipe/RecipeBasicInfo";
+import RecipeIngredients from "@/components/recipe/RecipeIngredients";
+import RecipeSteps from "@/components/recipe/RecipeSteps";
+import RecipeNutrition from "@/components/recipe/RecipeNutrition";
+import RecipeNotes from "@/components/recipe/RecipeNotes";
 import useAuthStore from "@/store/auth-store";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ChefHat, LogIn } from "lucide-react";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const RecipePage = () => {
-  const { id } = useParams({ from: '/recipe/$id' });
+  const { id } = useParams({ from: "/recipe/$id" });
   const authNavigate = useAuthNavigate();
   const { isAuthenticated } = useAuthStore();
   const { setCurrentRecipeById, currentRecipe } = useRecipeStore();
@@ -43,13 +49,11 @@ const RecipePage = () => {
                 <ChefHat className="w-6 h-6 text-gray-600" />
               </div>
               <CardTitle>需要登录</CardTitle>
-              <CardDescription>
-                请先登录后查看菜谱详情
-              </CardDescription>
+              <CardDescription>请先登录后查看菜谱详情</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={() => authNavigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />
@@ -69,13 +73,11 @@ const RecipePage = () => {
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <CardTitle>菜谱不存在</CardTitle>
-              <CardDescription>
-                未找到指定的菜谱
-              </CardDescription>
+              <CardDescription>未找到指定的菜谱</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={() => authNavigate({ to: "/" })}
               >
                 返回首页
@@ -119,17 +121,21 @@ const RecipePage = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* 食材清单 */}
               <div className="xl:col-span-1">
-                <RecipeIngredients ingredients={currentRecipe.ingredients} />
+                <RecipeIngredients
+                  ingredients={currentRecipe.ingredients || []}
+                />
               </div>
-              
+
               {/* 烹饪步骤 */}
               <div className="xl:col-span-1">
-                <RecipeSteps steps={currentRecipe.steps} />
+                <RecipeSteps steps={currentRecipe.steps || []} />
               </div>
-              
+
               {/* 营养信息 */}
               <div className="xl:col-span-1">
-                <RecipeNutrition nutrition={currentRecipe.nutrition} />
+                {currentRecipe.nutrition && (
+                  <RecipeNutrition nutrition={currentRecipe.nutrition} />
+                )}
               </div>
             </div>
 

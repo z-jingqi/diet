@@ -2,17 +2,23 @@ import FunctionMenu from "@/components/profile/FunctionMenu";
 import TastePreferences from "@/components/profile/TastePreferences";
 import FoodPreferences from "@/components/profile/FoodPreferences";
 import CuisinePreferences from "@/components/profile/CuisinePreferences";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
 import { User, LogIn } from "lucide-react";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 const ProfilePage = () => {
-  const { isAuthenticated, isGuestMode } = useAuthStore();
+  const { isAuthenticated, isGuestMode } = useAuth();
   const authNavigate = useAuthNavigate();
-  
+
   // 桌面端Card高度配置
   const desktopCardHeight = "lg:h-[600px] lg:flex lg:flex-col";
 
@@ -28,15 +34,14 @@ const ProfilePage = () => {
               </div>
               <CardTitle>未登录</CardTitle>
               <CardDescription>
-                {isGuestMode 
-                  ? "您当前处于游客模式，登录后可以使用更多功能" 
-                  : "请登录后查看个人资料和偏好设置"
-                }
+                {isGuestMode
+                  ? "您当前处于游客模式，登录后可以使用更多功能"
+                  : "请登录后查看个人资料和偏好设置"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={() => authNavigate({ to: "/login" })}
               >
                 <LogIn className="w-4 h-4 mr-2" />

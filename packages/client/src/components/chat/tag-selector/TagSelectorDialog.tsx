@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +10,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { MutedText } from "@/components/ui/typography";
-import type { Tag, TagCategory } from "@diet/shared";
 import TagSkeleton from "./TagSkeleton";
 import TagList from "./TagList";
+import { Tag, TagCategory } from "@/lib/gql/graphql";
 
 interface TagSelectorDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   tagsData?: {
-    tags: Tag[];
-    categories: TagCategory[];
+    tags?: Tag[];
+    categories?: TagCategory[];
   };
   categories: TagCategory[];
   selectedTags: Tag[];
@@ -27,9 +28,12 @@ interface TagSelectorDialogProps {
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;
+  disabledTagIds?: string[];
+  warningTagIds?: string[];
+  conflictDescriptions?: Record<string, string>;
 }
 
-const TagSelectorDialog = ({
+const TagSelectorDialog = memo(({
   isOpen,
   onOpenChange,
   disabled,
@@ -40,6 +44,9 @@ const TagSelectorDialog = ({
   isLoading,
   error,
   onRetry,
+  disabledTagIds = [],
+  warningTagIds = [],
+  conflictDescriptions = {},
 }: TagSelectorDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -55,7 +62,7 @@ const TagSelectorDialog = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] sm:h-auto sm:max-h-[80vh] overflow-hidden rounded-lg sm:rounded-xl">
+      <DialogContent className="flex flex-col w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] sm:h-auto sm:max-h-[80vh] overflow-hidden rounded-lg sm:rounded-xl">
         <DialogHeader className="pb-4">
           <DialogTitle>选择标签</DialogTitle>
         </DialogHeader>
@@ -77,6 +84,9 @@ const TagSelectorDialog = ({
               categories={categories}
               selectedTags={selectedTags}
               onTagToggle={onTagToggle}
+              disabledTagIds={disabledTagIds}
+              warningTagIds={warningTagIds}
+              conflictDescriptions={conflictDescriptions}
             />
           )}
         </div>
@@ -90,6 +100,8 @@ const TagSelectorDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
+});
 
-export default TagSelectorDialog; 
+TagSelectorDialog.displayName = "TagSelectorDialog";
+
+export default TagSelectorDialog;

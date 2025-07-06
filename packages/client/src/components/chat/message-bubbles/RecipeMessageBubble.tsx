@@ -1,113 +1,61 @@
+import { useState } from "react";
 import { Markdown } from "@/components/ui/markdown";
-import { Message, RecipeDetail } from "@diet/shared";
-import RecipeList from "./RecipeList";
-import {
-  useRecipeDetails,
-  useRecipeContent,
-  useRecipeDisplay,
-  useRecipeInteractions,
-} from "./hooks";
-import useChatStore from "@/store/chat-store";
-import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
+import { Utensils } from "lucide-react";
+import { ChatMessage, MessageStatus, MessageType } from "@/lib/gql/graphql";
+import { cn } from "@/lib/utils";
 
 interface StreamingRecipeMessageBubbleProps {
-  message: Message;
-  onLike?: (recipeName: string) => void;
-  onDislike?: (recipeName: string) => void;
+  message: ChatMessage;
+  onGenerateRecipe?: (content: string) => void;
 }
 
 const RecipeMessageBubble = ({
   message,
-  onLike,
-  onDislike,
+  onGenerateRecipe,
 }: StreamingRecipeMessageBubbleProps) => {
-  const authNavigate = useAuthNavigate();
-  const { updateMessageRecipeDetails } = useChatStore();
-
-  // 使用分离的 hooks
-  const { recipeDetails, updateRecipeDetail } = useRecipeDetails({ 
-    message, 
-    onUpdateMessage: (messageId, updates) => {
-      if (updates.recipeDetails) {
-        updateMessageRecipeDetails(messageId, updates.recipeDetails);
-      }
-    }
-  });
-  const { beforeText, afterText } = useRecipeContent(message);
-  const { showCards } = useRecipeDisplay(message, recipeDetails.length);
-  const {
-    likedRecipes,
-    dislikedRecipes,
-    generatingRecipes,
-    handleLike,
-    handleDislike,
-    handleGenerateRecipe,
-  } = useRecipeInteractions();
+  const [generating, setGenerating] = useState(false);
 
   // 只处理 type 为 recipe 的消息
-  if (message.type !== "recipe") {
+  if (message.type !== MessageType.Recipe) {
     return null;
   }
 
-  const handleLikeWithCallback = (recipeName: string) => {
-    handleLike(recipeName);
-    onLike?.(recipeName);
+  const handleGenerateRecipe = () => {
+    if (onGenerateRecipe && message.content) {
+      setGenerating(true);
+      onGenerateRecipe(message.content);
+    }
   };
 
-  const handleDislikeWithCallback = (recipeName: string) => {
-    handleDislike(recipeName);
-    onDislike?.(recipeName);
-  };
-
-  const handleGenerateRecipeWithUpdate = async (recipeDetail: RecipeDetail) => {
-    await handleGenerateRecipe(recipeDetail, updateRecipeDetail);
-  };
-
-  const handleStartCooking = (recipeId: string) => {
-    authNavigate({ to: `/recipe/${recipeId}` as any });
-  };
-
-  // 流式过程中显示 Markdown
-  if (!showCards) {
-    return (
-      <div className="flex w-full justify-start">
-        <div className="max-w-[80%]">
-          <div className="bg-white rounded-lg p-4">
-            <Markdown content={message.content} className="max-w-none" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 流式结束后显示卡片
   return (
     <div className="flex w-full justify-start">
-      <div className="w-full max-w-4xl">
-        <div className="space-y-4">
-          {/* 标签前的内容 */}
-          {beforeText && (
-            <div className="bg-white rounded-lg p-4">
-              <Markdown content={beforeText} className="max-w-none" />
-            </div>
-          )}
+      <div className="max-w-[80%]">
+        <div className="bg-white rounded-lg p-4">
+          {/* 菜谱内容 */}
+          <div className="mb-4">
+            <Markdown content={message.content || ""} className="max-w-none" />
+          </div>
 
-          {/* 推荐菜谱列表 */}
-          <RecipeList
-            recipeDetails={recipeDetails}
-            likedRecipes={likedRecipes}
-            dislikedRecipes={dislikedRecipes}
-            generatingRecipes={generatingRecipes}
-            onLike={handleLikeWithCallback}
-            onDislike={handleDislikeWithCallback}
-            onGenerateRecipe={handleGenerateRecipeWithUpdate}
-            onStartCooking={handleStartCooking}
-          />
-
-          {/* 标签后的内容 */}
-          {afterText && (
-            <div className="bg-white rounded-lg p-4">
-              <Markdown content={afterText} className="max-w-none" />
+          {/* 生成菜谱按钮 - 只在消息完成后显示 */}
+          {message.status === MessageStatus.Done && (
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleGenerateRecipe}
+                disabled={generating}
+                className={cn(
+                  "flex items-center gap-1",
+                  generating && "text-green-600"
+                )}
+              >
+                <Utensils className="w-4 h-4" />
+                <Typography variant="span" className="text-sm">
+                  {generating ? "生成中..." : "生成详细菜谱"}
+                </Typography>
+              </Button>
             </div>
           )}
         </div>

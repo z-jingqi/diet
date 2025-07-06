@@ -1,0 +1,95 @@
+# 通用标签字段片段
+fragment TagFields on Tag {
+  id
+  name
+  description
+  categoryId
+  aiPrompt
+  sortOrder
+  isActive
+  createdAt
+  updatedAt
+  restrictions
+}
+
+# 标签分类字段片段
+fragment TagCategoryFields on TagCategory {
+  id
+  name
+  description
+  sortOrder
+  isActive
+  createdAt
+}
+
+# 基础标签字段（仅 id name description）
+fragment TagBasicFields on Tag {
+  id
+  name
+  description
+}
+
+query GetTags($categoryId: ID, $search: String) {
+  tags(categoryId: $categoryId, search: $search) {
+    ...TagFields
+    category {
+      ...TagCategoryFields
+    }
+  }
+}
+
+query GetTagCategories {
+  tagCategories {
+    ...TagCategoryFields
+  }
+}
+
+query GetTag($id: ID!) {
+  tag(id: $id) {
+    ...TagFields
+    category {
+      ...TagCategoryFields
+    }
+  }
+}
+
+query GetTagConflicts {
+  tagConflicts {
+    id
+    conflictType
+    description
+    createdAt
+    tagId1
+    tagId2
+    tag1 {
+      ...TagBasicFields
+    }
+    tag2 {
+      ...TagBasicFields
+    }
+  }
+}
+
+query CheckTagConflicts($tagIds: [ID!]!) {
+  checkTagConflicts(tagIds: $tagIds)
+}
+
+mutation CreateTag(
+  $name: String!
+  $description: String!
+  $categoryId: ID!
+  $aiPrompt: String!
+  $restrictions: [String!]
+  $sortOrder: Int
+) {
+  createTag(
+    name: $name
+    description: $description
+    categoryId: $categoryId
+    aiPrompt: $aiPrompt
+    restrictions: $restrictions
+    sortOrder: $sortOrder
+  ) {
+    ...TagFields
+  }
+}

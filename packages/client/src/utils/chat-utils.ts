@@ -1,5 +1,5 @@
-import type { Message, Tag } from "@diet/shared";
 import { ChatCompletionMessageParam } from "openai/resources";
+import { ChatMessage, MessageRole, Tag } from "@/lib/gql/graphql";
 
 /**
  * 增强用户消息，添加标签信息
@@ -8,9 +8,9 @@ import { ChatCompletionMessageParam } from "openai/resources";
  * @returns 增强后的消息数组
  */
 const enhanceUserMessages = (
-  messages: Message[],
+  messages: ChatMessage[],
   currentTags?: Tag[]
-): Message[] => {
+): ChatMessage[] => {
   if (!currentTags || currentTags.length === 0) {
     return messages;
   }
@@ -18,7 +18,7 @@ const enhanceUserMessages = (
   // 找到最后一条用户消息
   const lastUserMessageIndex = messages
     .map((msg, index) => ({ msg, index }))
-    .filter(({ msg }) => msg.isUser)
+    .filter(({ msg }) => msg.role === MessageRole.User)
     .pop()?.index;
 
   if (lastUserMessageIndex === undefined) {
@@ -31,14 +31,14 @@ const enhanceUserMessages = (
   // 从最后一条用户消息往前查找，直到找到第一个包含饮食限制条件的消息
   for (let i = lastUserMessageIndex - 1; i >= 0; i--) {
     const message = messages[i];
-    if (!message.isUser) {
+    if (message.role !== MessageRole.User) {
       continue; // 跳过AI消息
     }
 
     // 检查这条消息是否包含饮食限制条件
-    if (message.content.includes("用户饮食限制条件：")) {
+    if (message.content?.includes("用户饮食限制条件：")) {
       // 提取这条消息中的饮食限制条件
-      const match = message.content.match(
+      const match = message.content?.match(
         /用户饮食限制条件：\n([\s\S]*?)\n\n用户问题：/
       );
       if (match) {
@@ -74,7 +74,7 @@ const enhanceUserMessages = (
  * @returns AI 格式的消息数组
  */
 export const toAIMessages = (
-  messages: Message[],
+  messages: ChatMessage[],
   currentTags?: Tag[]
 ): ChatCompletionMessageParam[] => {
   // 第一步：增强用户消息（添加标签信息）
@@ -82,10 +82,10 @@ export const toAIMessages = (
 
   // 第二步：转换为 AI 格式
   const result: ChatCompletionMessageParam[] = enhancedMessages.map((msg) => {
-    if (msg.isUser) {
-      return { role: "user", content: msg.content };
+    if (msg.role === MessageRole.User) {
+      return { role: "user", content: msg.content || "" };
     } else {
-      return { role: "assistant", content: msg.content };
+      return { role: "assistant", content: msg.content || "" };
     }
   });
 
