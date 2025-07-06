@@ -159,6 +159,7 @@ export const sendMessage = async ({
           response.ok &&
           response.headers.get("content-type")?.includes("text/event-stream")
         ) {
+          // Stream connection successful
         } else {
           console.error("Stream connection failed:", response.status);
         }
