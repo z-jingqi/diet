@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import useAuthStore from "@/store/auth-store";
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuth();
 
   // No need to call checkAuth() here since it's already being called in App.tsx
 
@@ -22,4 +22,4 @@ const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
   return <>{children}</>;
 };
 
-export default AuthGuard; 
+export default AuthGuard;

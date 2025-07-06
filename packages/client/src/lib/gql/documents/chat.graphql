@@ -12,6 +12,20 @@ query GetMyChatSessions {
   myChatSessions {
     id
     title
+    tagIds
+    createdAt
+    updatedAt
+    user {
+      id
+      username
+    }
+  }
+}
+
+query GetChatSession($id: ID!) {
+  chatSession(id: $id) {
+    id
+    title
     messages {
       ...ChatMessageFields
     }

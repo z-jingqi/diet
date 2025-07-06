@@ -19,7 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 import { useUsernameValidation } from "@/hooks/useUsernameValidation";
 import { Link } from "@tanstack/react-router";
@@ -33,7 +33,7 @@ const RegisterPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { register, enableGuest, isLoading, clearError } = useAuthStore();
+  const { register, enableGuest, isLoading, clearError } = useAuth();
   const {
     validateUsername: validateUsernameAsync,
     resetValidation,

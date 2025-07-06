@@ -12,7 +12,7 @@ import { MutedText } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Lock, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 import { Link } from "@tanstack/react-router";
 import { validateFormData } from "@/utils/validation";
@@ -25,7 +25,7 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { login, enableGuest, isLoading, clearError } = useAuthStore();
+  const { login, enableGuest, isLoading, clearError } = useAuth();
 
   const validateForm = () => {
     const { errors: newErrors, isValid } = validateFormData(formData);

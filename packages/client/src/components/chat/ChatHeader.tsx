@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Text, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
@@ -8,42 +8,39 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
-import useChatMessageStoreV2 from "@/store/chat-message-store-v2";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
-import { useUpdateChatSession, useDeleteChatSession } from "@/lib/gql/hooks";
-import { useChatSessionsV2 } from "@/lib/gql/hooks/chat-v2";
+import {
+  useUpdateChatSession,
+  useDeleteChatSession,
+  useChatSessions,
+} from "@/lib/gql/hooks/chat-hooks";
+import { useNavigate } from "@tanstack/react-router";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
+  currentSessionId: string;
+  isTemporarySession: boolean;
 }
 
-const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
-  // 使用 V2 版本的 store
-  const currentSessionId = useChatSessionStoreV2(
-    (state) => state.currentSessionId
-  );
-  const isTemporarySession = useChatSessionStoreV2(
-    (state) => state.isTemporarySession
-  );
-  const renameSession = useChatSessionStoreV2((state) => state.renameSession);
-  const deleteSession = useChatSessionStoreV2((state) => state.deleteSession);
+const ChatHeader = ({
+  onMenuClick,
+  currentSessionId,
+  isTemporarySession,
+}: ChatHeaderProps) => {
+  const navigate = useNavigate();
+  const confirm = useConfirmDialog();
 
-  // 使用消息 store 来清除消息
-  const clearMessages = useChatMessageStoreV2((state) => state.clearMessages);
-
-  // 获取会话列表以查找当前会话标题
-  const { sessions } = useChatSessionsV2();
+  // 使用新的hooks
+  const { sessions } = useChatSessions();
+  const { mutateAsync: updateChatSession } = useUpdateChatSession();
+  const { mutateAsync: deleteChatSession } = useDeleteChatSession();
 
   // 使用 useMemo 获取当前会话标题
   const sessionTitle = useMemo(() => {
+    if (!currentSessionId) return "新对话";
     const currentSession = sessions.find((s) => s.id === currentSessionId);
     return currentSession?.title || "新对话";
   }, [currentSessionId, sessions]);
-
-  const confirm = useConfirmDialog();
-  const { mutateAsync: updateChatSession } = useUpdateChatSession();
-  const { mutateAsync: deleteChatSession } = useDeleteChatSession();
 
   return (
     <header className="flex items-center justify-between px-4 py-1.5 bg-background min-h-0 h-10">
@@ -79,14 +76,12 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                 }
                 const newTitle = prompt("请输入新的标题:");
                 if (newTitle) {
-                  if (isTemporarySession) {
-                    renameSession(currentSessionId, newTitle);
-                  } else {
-                    void updateChatSession({
-                      id: currentSessionId,
-                      title: newTitle,
-                    });
-                  }
+                  updateChatSession({
+                    id: currentSessionId,
+                    title: newTitle,
+                  }).catch((error) => {
+                    console.error("Failed to rename session:", error);
+                  });
                 }
               }}
             >
@@ -108,14 +103,12 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                   confirmVariant: "destructive",
                 });
                 if (ok) {
-                  if (isTemporarySession) {
-                    clearMessages(currentSessionId);
-                  } else {
-                    void updateChatSession({
-                      id: currentSessionId,
-                      messages: "[]",
-                    });
-                  }
+                  updateChatSession({
+                    id: currentSessionId,
+                    messages: "[]",
+                  }).catch((error) => {
+                    console.error("Failed to clear messages:", error);
+                  });
                 }
               }}
             >
@@ -136,10 +129,12 @@ const ChatHeader = ({ onMenuClick }: ChatHeaderProps) => {
                   confirmVariant: "destructive",
                 });
                 if (ok) {
-                  if (isTemporarySession) {
-                    deleteSession(currentSessionId);
-                  } else {
-                    void deleteChatSession({ id: currentSessionId });
+                  try {
+                    await deleteChatSession({ id: currentSessionId });
+                    // 删除成功后，重定向到根路径
+                    navigate({ to: "/" });
+                  } catch (error) {
+                    console.error("Failed to delete session:", error);
                   }
                 }
               }}

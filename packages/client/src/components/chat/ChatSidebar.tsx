@@ -2,47 +2,52 @@ import { useState, useEffect } from "react";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MessageSquare, User, Plus } from "lucide-react";
+import { Search, MessageSquare, User, Plus, Loader2 } from "lucide-react";
 import SessionHistoryItem from "./SessionHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
 import { useAuthNavigate } from "@/hooks";
 import { createAuthCheck } from "@/utils/auth-utils";
-import useAuthStore from "@/store/auth-store";
 import { categorizeSessions } from "@/utils/time-utils";
 import { ChatSession } from "@/lib/gql/graphql";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  useDeleteChatSession,
+  useUpdateChatSession,
+} from "@/lib/gql/hooks/chat-hooks";
 
 interface ChatSidebarProps {
   currentSessionId: string;
   sessions: ChatSession[];
-  onCreateNewSession?: () => void;
-  onSelectSession?: (sessionId: string) => void;
-  onRenameSession?: (sessionId: string) => void;
-  onDeleteSession?: (sessionId: string) => void;
   onCloseSidebar?: () => void;
+  isLoading?: boolean;
+  onSessionsChange?: () => void;
 }
 
 const ChatSidebar = ({
   currentSessionId,
   sessions,
-  onCreateNewSession,
-  onSelectSession,
-  onRenameSession,
-  onDeleteSession,
   onCloseSidebar,
+  isLoading = false,
+  onSessionsChange,
 }: ChatSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [allowFocus, setAllowFocus] = useState(false);
+
+  const navigate = useNavigate();
   const authNavigate = useAuthNavigate();
-  const { requireAuth } = useAuthStore();
+  const { requireAuth } = useAuth();
   const authCheck = createAuthCheck(
     () => authNavigate({ to: "/login" }),
     requireAuth
   );
 
   const confirm = useConfirmDialog();
+  const { mutateAsync: deleteSession } = useDeleteChatSession();
+  const { mutateAsync: updateSession } = useUpdateChatSession();
 
   // 检测设备类型
   useEffect(() => {
@@ -96,21 +101,33 @@ const ChatSidebar = ({
   );
 
   const handleChatSelect = (sessionId: string) => {
-    onSelectSession?.(sessionId);
-  };
-
-  const handleNewChat = () => {
-    // 创建新会话
-    onCreateNewSession?.();
-    // 总是关闭侧边栏，无论当前会话是否有消息
+    // 导航到选中的会话
+    navigate({ to: `/${sessionId}` });
     onCloseSidebar?.();
   };
 
-  const handleRenameChat = (sessionId: string) => {
-    // TODO: 实现重命名功能，可能需要弹出一个输入框
+  const handleNewChat = async () => {
+    // 创建新会话或导航到根路径以创建临时会话
+    navigate({ to: "/" });
+    onCloseSidebar?.();
+  };
+
+  const handleRenameChat = async (sessionId: string) => {
     const newTitle = prompt("请输入新的标题:");
     if (newTitle) {
-      onRenameSession?.(sessionId);
+      try {
+        await updateSession({
+          id: sessionId,
+          title: newTitle,
+        });
+
+        // 通知父组件会话列表已更改
+        onSessionsChange?.();
+      } catch (error) {
+        console.error("Failed to rename session:", error);
+        // 即使更新失败，也尝试刷新会话列表以确保数据一致性
+        onSessionsChange?.();
+      }
     }
   };
 
@@ -122,8 +139,23 @@ const ChatSidebar = ({
       cancelText: "取消",
       confirmVariant: "destructive",
     });
+
     if (ok) {
-      onDeleteSession?.(sessionId);
+      try {
+        await deleteSession({ id: sessionId });
+
+        // 通知父组件会话列表已更改
+        onSessionsChange?.();
+
+        // 如果删除的是当前会话，导航到根路径
+        if (sessionId === currentSessionId) {
+          navigate({ to: "/" });
+        }
+      } catch (error) {
+        console.error("Failed to delete session:", error);
+        // 即使删除失败，也尝试刷新会话列表以确保数据一致性
+        onSessionsChange?.();
+      }
     }
   };
 
@@ -178,38 +210,63 @@ const ChatSidebar = ({
 
       {/* 聊天记录列表 - 可滚动 */}
       <div className="flex-1 overflow-y-auto">
-        {filteredCategories.map((category) => (
-          <div key={category.key} className="p-4 border-b last:border-b-0">
-            <MutedText className="text-xs font-medium mb-2 block">
-              {category.label}
-            </MutedText>
-            <div className="flex flex-col gap-2">
-              {category.sessions
-                .filter((session) =>
-                  session.title.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((session) => (
-                  <SessionHistoryItem
-                    key={session.id}
-                    session={session}
-                    isActive={session.id === currentSessionId}
-                    onSelectChat={handleChatSelect}
-                    onRenameChat={handleRenameChat}
-                    onDeleteChat={handleDeleteChatItem}
-                  />
-                ))}
-            </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-20">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="ml-2 text-sm">加载会话中...</span>
           </div>
-        ))}
+        ) : (
+          <>
+            {filteredCategories.map((category) => (
+              <div key={category.key} className="p-4 border-b last:border-b-0">
+                <MutedText className="text-xs font-medium mb-2 block">
+                  {category.label}
+                </MutedText>
+                <div className="flex flex-col gap-2">
+                  {category.sessions
+                    .filter((session) =>
+                      session.title
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                    )
+                    .map((session) => (
+                      <SessionHistoryItem
+                        key={session.id}
+                        session={session}
+                        isActive={session.id === currentSessionId}
+                        onSelectChat={handleChatSelect}
+                        onRenameChat={handleRenameChat}
+                        onDeleteChat={handleDeleteChatItem}
+                      />
+                    ))}
+                </div>
+              </div>
+            ))}
 
-        {/* 无搜索结果时显示 */}
-        {searchTerm &&
-          filteredCategories.every((cat) => cat.sessions.length === 0) && (
-            <div className="flex flex-col items-center justify-center h-full text-center p-4">
-              <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
-              <MutedText>未找到相关聊天记录</MutedText>
-            </div>
-          )}
+            {/* 无搜索结果时显示 */}
+            {searchTerm &&
+              filteredCategories.every((cat) => cat.sessions.length === 0) && (
+                <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                  <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
+                  <MutedText>未找到相关聊天记录</MutedText>
+                </div>
+              )}
+
+            {/* 空会话列表 */}
+            {sessions.length === 0 && !searchTerm && (
+              <div className="flex flex-col items-center justify-center h-40 text-center p-4">
+                <MessageSquare className="h-8 w-8 text-muted-foreground mb-2" />
+                <MutedText>没有聊天记录</MutedText>
+                <Typography
+                  variant="p"
+                  className="text-xs text-muted-foreground mt-2"
+                >
+                  开始一个新的聊天吧
+                </Typography>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* 用户昵称 */}

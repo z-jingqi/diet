@@ -1,5 +1,5 @@
 import { useNavigate, NavigateOptions } from "@tanstack/react-router";
-import useAuthStore from "@/store/auth-store";
+import { useAuth } from "@/contexts/AuthContext";
 import { showAuthPrompt } from "@/utils/auth-utils";
 
 // 需要认证保护的路由路径
@@ -12,7 +12,7 @@ const isProtectedRoute = (path: string) => {
 
 export const useAuthNavigate = () => {
   const navigate = useNavigate();
-  const { requireAuth } = useAuthStore();
+  const { requireAuth } = useAuth();
 
   const authNavigate = (options: NavigateOptions) => {
     const targetPath = options.to;
