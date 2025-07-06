@@ -15,6 +15,7 @@ import {
   useChatSessions,
 } from "@/lib/gql/hooks/chat-hooks";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
@@ -39,7 +40,6 @@ const ChatHeader = ({ onMenuClick, currentSessionId }: ChatHeaderProps) => {
 
   return (
     <header className="flex items-center justify-between px-4 py-1.5 bg-background min-h-0 h-10">
-      {/* 左侧菜单按钮 */}
       <Button
         variant="ghost"
         size="icon"

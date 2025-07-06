@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MessageSquare, User, Plus, Loader2 } from "lucide-react";
+import { Search, MessageSquare, User, Plus } from "lucide-react";
 import SessionHistoryItem from "./SessionHistoryItem";
 import ProfileDialog from "@/components/profile/ProfileDialog";
 import { useConfirmDialog } from "@/components/providers/ConfirmDialogProvider";
-import { useAuthNavigate } from "@/hooks";
+import { useAuthNavigate, useMediaQuery } from "@/hooks";
 import { createAuthCheck } from "@/utils/auth-utils";
 import { categorizeSessions } from "@/utils/time-utils";
 import { ChatSession } from "@/lib/gql/graphql";
@@ -16,6 +16,7 @@ import {
   useDeleteChatSession,
   useUpdateChatSession,
 } from "@/lib/gql/hooks/chat-hooks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChatSidebarProps {
   currentSessionId: string;
@@ -33,7 +34,6 @@ const ChatSidebar = ({
   onSessionsChange,
 }: ChatSidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isMobile, setIsMobile] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [allowFocus, setAllowFocus] = useState(false);
 
@@ -49,19 +49,8 @@ const ChatSidebar = ({
   const { mutateAsync: deleteSession } = useDeleteChatSession();
   const { mutateAsync: updateSession } = useUpdateChatSession();
 
-  // 检测设备类型
-  useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.innerWidth < 768); // md断点
-    };
-
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-
-    return () => {
-      window.removeEventListener("resize", checkDevice);
-    };
-  }, []);
+  // 使用 useMediaQuery hook 检测设备类型
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   // 延迟允许聚焦，避免初始自动聚焦
   useEffect(() => {
@@ -174,7 +163,7 @@ const ChatSidebar = ({
   return (
     <div className="flex flex-col h-full">
       {/* 搜索框 */}
-      <div className="p-4 border-b">
+      <div className="px-4 pt-4 pb-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
@@ -197,13 +186,13 @@ const ChatSidebar = ({
       </div>
 
       {/* 新聊天按钮 */}
-      <div className="p-4">
+      <div className="px-4 pb-2">
         <Button
           onClick={handleNewChat}
-          className="w-full justify-start"
-          variant="outline"
+          className="w-full justify-start px-2 py-2 hover:bg-accent/40"
+          variant="ghost"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           新聊天
         </Button>
       </div>
@@ -211,14 +200,15 @@ const ChatSidebar = ({
       {/* 聊天记录列表 - 可滚动 */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-20">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="ml-2 text-sm">加载会话中...</span>
+          <div className="flex flex-col gap-2 p-4">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-10 w-full" />
+            ))}
           </div>
         ) : (
           <>
             {filteredCategories.map((category) => (
-              <div key={category.key} className="p-4 border-b last:border-b-0">
+              <div key={category.key} className="px-4 py-2">
                 <MutedText className="text-xs font-medium mb-2 block">
                   {category.label}
                 </MutedText>

@@ -11,7 +11,7 @@ const preventZoomOnFocus = () => {
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
-    );
+    ) || window.innerWidth < 768; // 添加屏幕宽度检测
 
   if (isMobile) {
     // 监听所有输入框和文本域的聚焦事件

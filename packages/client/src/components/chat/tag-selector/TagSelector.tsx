@@ -9,6 +9,7 @@ import TagSelectorDialog from "./TagSelectorDialog";
 import TagSelectorSheet from "./TagSelectorSheet";
 import { Tag } from "@/lib/gql/graphql";
 import { toast } from "sonner";
+import { useMediaQuery } from "@/hooks";
 
 interface TagSelectorProps {
   selectedTagIds: string[];
@@ -22,21 +23,9 @@ const TagSelector = ({
   disabled,
 }: TagSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // 检测设备类型
-  useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.innerWidth < 768); // md断点
-    };
-
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-
-    return () => {
-      window.removeEventListener("resize", checkDevice);
-    };
-  }, []);
+  // 使用 useMediaQuery hook 检测设备类型
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   // 使用 GraphQL hooks 获取标签数据
   const {

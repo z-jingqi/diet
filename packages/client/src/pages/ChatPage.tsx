@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
@@ -13,8 +13,11 @@ import {
 import { ChatMessage, MessageRole, MessageStatus } from "@/lib/gql/graphql";
 import { buildUserMessage } from "@/utils/message-builder";
 
-const ChatPage = () => {
-  const { sessionId } = useParams({ from: "/$sessionId" });
+interface ChatPageProps {
+  sessionId?: string;
+}
+
+const ChatPage = ({ sessionId }: ChatPageProps) => {
   const navigate = useNavigate();
   const { isAuthenticated, isGuestMode } = useAuth();
 
