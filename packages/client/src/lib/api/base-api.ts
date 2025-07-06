@@ -151,6 +151,7 @@ export const sendMessage = async ({
           onStreamMessage?.(parsed);
         } catch (e) {
           console.error("解析流数据失败:", e, "Raw data:", data);
+          onStreamError?.(e as Error);
         }
       },
       onopen: async (response) => {

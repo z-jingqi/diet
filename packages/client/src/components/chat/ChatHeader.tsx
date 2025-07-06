@@ -19,14 +19,9 @@ import { useNavigate } from "@tanstack/react-router";
 interface ChatHeaderProps {
   onMenuClick: () => void;
   currentSessionId: string;
-  isTemporarySession: boolean;
 }
 
-const ChatHeader = ({
-  onMenuClick,
-  currentSessionId,
-  isTemporarySession,
-}: ChatHeaderProps) => {
+const ChatHeader = ({ onMenuClick, currentSessionId }: ChatHeaderProps) => {
   const navigate = useNavigate();
   const confirm = useConfirmDialog();
 

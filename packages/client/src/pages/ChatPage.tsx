@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
@@ -10,20 +10,11 @@ import {
   useChatMessaging,
   useCreateChatSession,
 } from "@/lib/gql/hooks/chat-hooks";
-import {
-  ChatMessage,
-  MessageType,
-  MessageRole,
-  MessageStatus,
-} from "@/lib/gql/graphql";
+import { ChatMessage, MessageRole, MessageStatus } from "@/lib/gql/graphql";
 import { buildUserMessage } from "@/utils/message-builder";
 
-// 假设我们在路由中定义了sessionId参数
-interface ChatPageProps {
-  sessionId?: string;
-}
-
-const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
+const ChatPage = () => {
+  const { sessionId } = useParams({ from: "/$sessionId" });
   const navigate = useNavigate();
   const { isAuthenticated, isGuestMode } = useAuth();
 
@@ -77,7 +68,7 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
     setMessages(optimisticMessages);
 
     // 如果是临时会话且用户已登录，先创建正式会话
-    let sessionId = currentSessionId;
+    let targetSessionId = currentSessionId;
     let newSessionId: string | null = null;
 
     if (isTemporarySession && isAuthenticated && !isGuestMode) {
@@ -92,7 +83,7 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
         if (result.createChatSession) {
           // 保存新的 sessionId，但不立即更新状态
           newSessionId = result.createChatSession.id || "";
-          sessionId = newSessionId;
+          targetSessionId = newSessionId;
         }
       } catch (error) {
         console.error("Failed to create session:", error);
@@ -105,7 +96,7 @@ const ChatPage = ({ sessionId }: ChatPageProps = {}) => {
 
       // 使用 hook 的 sendMessage 方法，它会自动处理意图判断和消息发送
       const result = await sendMessage({
-        sessionId,
+        sessionId: targetSessionId,
         content,
         existingMessages: previousMessages,
         onStreamStart: (aiMsg) => {

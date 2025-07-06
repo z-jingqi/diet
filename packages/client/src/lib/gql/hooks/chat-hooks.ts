@@ -195,13 +195,7 @@ export const useChatMessaging = () => {
   // Handle sending a chat message with streaming response
   const sendChatWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      const {
-        sessionId,
-        messages,
-        aiMessages,
-        onChunkReceived,
-        isGuestMode = false,
-      } = options;
+      const { aiMessages, onChunkReceived, isGuestMode = false } = options;
       const controller = new AbortController();
       setAbortController(controller);
       setIsLoading(true);
@@ -242,13 +236,7 @@ export const useChatMessaging = () => {
   // Handle sending a recipe message with streaming response
   const sendRecipeWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      const {
-        sessionId,
-        messages,
-        aiMessages,
-        onChunkReceived,
-        isGuestMode = false,
-      } = options;
+      const { aiMessages, onChunkReceived, isGuestMode = false } = options;
       const controller = new AbortController();
       setAbortController(controller);
       setIsLoading(true);
@@ -289,13 +277,7 @@ export const useChatMessaging = () => {
   // Handle sending a health advice message with streaming response
   const sendHealthAdviceWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      const {
-        sessionId,
-        messages,
-        aiMessages,
-        onChunkReceived,
-        isGuestMode = false,
-      } = options;
+      const { aiMessages, onChunkReceived, isGuestMode = false } = options;
       const controller = new AbortController();
       setAbortController(controller);
       setIsLoading(true);

@@ -1,10 +1,9 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import ChatHeader from "./ChatHeader";
 import ChatSidebar from "./ChatSidebar";
 import { useChatSessions } from "@/lib/gql/hooks/chat-hooks";
-import { ChatSession } from "@/lib/gql/graphql";
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -42,7 +41,6 @@ const ChatLayout = ({
       <ChatHeader
         onMenuClick={handleMenuClick}
         currentSessionId={currentSessionId}
-        isTemporarySession={isTemporarySession}
       />
 
       {/* Main Content */}
