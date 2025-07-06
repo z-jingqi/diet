@@ -1,10 +1,10 @@
 import { RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { router } from "./router";
-import useAuthStore from "@/store/auth-store";
+import { useAuth, AuthProvider } from "@/contexts/AuthContext";
 
-const App = () => {
-  const { checkAuth, isAuthenticated, isGuestMode, requireAuth } = useAuthStore();
+const AppContent = () => {
+  const { checkAuth, isAuthenticated, isGuestMode, requireAuth } = useAuth();
 
   useEffect(() => {
     // 应用启动时检查认证状态
@@ -12,14 +12,22 @@ const App = () => {
   }, [checkAuth]);
 
   return (
-    <RouterProvider 
-      router={router} 
+    <RouterProvider
+      router={router}
       context={{
         isAuthenticated,
         isGuestMode,
         requireAuth,
       }}
     />
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 

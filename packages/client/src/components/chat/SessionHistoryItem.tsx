@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { formatSessionTime } from "@/utils/time-utils";
 import { ChatSession } from "@/lib/gql/graphql";
 
 interface SessionHistoryItemProps {
@@ -40,12 +39,6 @@ const SessionHistoryItem = ({
           <div className="flex-1 min-w-0 text-left">
             <Typography variant="span" className="block truncate text-sm">
               {session.title}
-            </Typography>
-            <Typography
-              variant="span"
-              className="block truncate text-xs text-muted-foreground"
-            >
-              {formatSessionTime(session.updatedAt)}
             </Typography>
           </div>
         </div>

@@ -1,15 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Square, Send, StopCircle } from "lucide-react";
+import { Square, Send } from "lucide-react";
 import TagSelector from "@/components/chat/tag-selector/TagSelector";
 import { Textarea } from "@/components/ui/textarea";
-import useChatSessionStoreV2 from "@/store/chat-session-store-v2";
-import { useTags } from "@/lib/gql/hooks";
-import { Tag } from "@/lib/gql/graphql";
-import { useChatSessionsV2 } from "@/lib/gql/hooks/chat-v2";
 
 interface ChatInputProps {
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, tagIds?: string[]) => void;
   disabled?: boolean;
   canAbort?: boolean;
   onAbort?: () => void;
@@ -24,19 +20,8 @@ const ChatInput = ({
   placeholder = "输入消息...",
 }: ChatInputProps) => {
   const [content, setContent] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { currentSessionId, updateSessionTags } = useChatSessionStoreV2();
-  const { data: tagsData } = useTags();
-  const { sessions } = useChatSessionsV2();
-  
-  // 获取当前会话的标签
-  const currentSession = sessions.find(s => s.id === currentSessionId);
-  const currentTagIds = currentSession?.tagIds || [];
-  
-  // 从所有标签中筛选出当前会话已选择的标签
-  const selectedTags = (tagsData?.tags || [])
-    .filter(tag => tag?.id && currentTagIds.includes(tag.id))
-    .filter((tag): tag is Tag => tag !== null);
 
   // 自动调整textarea高度
   useEffect(() => {
@@ -54,8 +39,12 @@ const ChatInput = ({
     e.preventDefault();
     if (!content.trim() || disabled) return;
 
-    onSendMessage(content);
+    onSendMessage(
+      content,
+      selectedTagIds.length > 0 ? selectedTagIds : undefined
+    );
     setContent("");
+    // 保留已选标签，不需要清空
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -63,15 +52,17 @@ const ChatInput = ({
       e.preventDefault();
       if (!content.trim() || disabled) return;
 
-      onSendMessage(content);
+      onSendMessage(
+        content,
+        selectedTagIds.length > 0 ? selectedTagIds : undefined
+      );
       setContent("");
+      // 保留已选标签，不需要清空
     }
   };
 
-  const handleTagsChange = (tags: Tag[]) => {
-    if (currentSessionId) {
-      updateSessionTags(currentSessionId, tags);
-    }
+  const handleTagsChange = (tagIds: string[]) => {
+    setSelectedTagIds(tagIds);
   };
 
   const isEmpty = !content.trim();
@@ -119,7 +110,7 @@ const ChatInput = ({
           {/* Bottom Section - Tags and Send Button */}
           <div className="flex justify-between items-center mt-4">
             <TagSelector
-              selectedTagIds={selectedTags.map(tag => tag.id || "").filter(Boolean)}
+              selectedTagIds={selectedTagIds}
               onTagsChange={handleTagsChange}
               disabled={disabled}
             />

@@ -140,26 +140,26 @@ export const sendMessage = async ({
       credentials: isGuestRequest ? "omit" : "include",
       signal,
       onmessage(event: EventSourceMessage) {
-        console.log("Stream event received:", event);
         const data = event.data;
         if (data === "[DONE]") {
-          console.log("Stream completed with [DONE] marker");
           onStreamMessage?.({ done: true });
           return;
         }
 
         try {
           const parsed = JSON.parse(data);
-          console.log("Parsed stream data:", parsed);
           onStreamMessage?.(parsed);
         } catch (e) {
           console.error("解析流数据失败:", e, "Raw data:", data);
+          onStreamError?.(e as Error);
         }
       },
       onopen: async (response) => {
-        console.log("Stream connection opened:", response.status, response.ok);
-        if (response.ok && response.headers.get('content-type')?.includes('text/event-stream')) {
-          console.log("Stream established successfully");
+        if (
+          response.ok &&
+          response.headers.get("content-type")?.includes("text/event-stream")
+        ) {
+          // Stream connection successful
         } else {
           console.error("Stream connection failed:", response.status);
         }

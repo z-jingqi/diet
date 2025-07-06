@@ -1,22 +1,24 @@
-import { nanoid } from "nanoid";
 import { chatSessionSdkV2 } from "@/lib/gql/sdk/chat-session-v2";
-import {
-  ChatMessage,
-  ChatSession,
-  MessageRole,
-  MessageStatus,
-  MessageType,
-  Tag,
-} from "@/lib/gql/graphql";
-import {
-  createEmptyChatSessionV2,
-  generateChatSessionTitleV2,
-} from "@/utils/chat-utils-v2";
+import { ChatMessage, ChatSession, Tag } from "@/lib/gql/graphql";
+import { createEmptyChatSessionV2 } from "@/utils/chat-utils-v2";
 
 /**
  * Service for managing chat sessions
  */
 class ChatSessionServiceV2 {
+  /**
+   * Get a chat session by ID
+   */
+  async getChatSessionById(id: string): Promise<ChatSession | null> {
+    try {
+      const result = await chatSessionSdkV2.get({ id });
+      return result.chatSession as ChatSession;
+    } catch (error) {
+      console.error(`Error fetching chat session with ID ${id}:`, error);
+      return null;
+    }
+  }
+
   /**
    * Create a new chat session
    */
@@ -25,43 +27,19 @@ class ChatSessionServiceV2 {
     initialMessages: ChatMessage[] = [],
     tagIds: string[] = []
   ): Promise<ChatSession> {
-    try {
-      // Generate title from first message if available
-      const autoTitle =
-        initialMessages.length > 0
-          ? generateChatSessionTitleV2(initialMessages)
-          : title;
+    const result = await chatSessionSdkV2.create({
+      title: title,
+      messages: JSON.stringify(initialMessages),
+      tagIds,
+    });
 
-      const result = await chatSessionSdkV2.create({
-        title: autoTitle,
-        messages: JSON.stringify(initialMessages),
-        tagIds,
-      });
+    const createdSession = result.createChatSession;
 
-      const createdSession = result.createChatSession;
-
-      if (!createdSession) {
-        throw new Error("Failed to create chat session");
-      }
-
-      return {
-        id: createdSession.id,
-        title: createdSession.title || autoTitle,
-        messages: initialMessages,
-        tagIds: createdSession.tagIds || [],
-        createdAt: createdSession.createdAt,
-        updatedAt: createdSession.updatedAt,
-      } as ChatSession;
-    } catch (error) {
-      console.error("Error creating chat session:", error);
-      // Create local fallback for error cases
-      return {
-        ...createEmptyChatSessionV2(),
-        title,
-        messages: initialMessages,
-        tagIds,
-      };
+    if (!createdSession) {
+      throw new Error("Failed to create chat session");
     }
+
+    return result.createChatSession as ChatSession;
   }
 
   /**
@@ -74,39 +52,31 @@ class ChatSessionServiceV2 {
       messages?: ChatMessage[];
       tagIds?: string[];
     }
-  ): Promise<void> {
-    try {
-      const updateVars: any = { id };
+  ): Promise<ChatSession> {
+    const updateVars: any = { id };
 
-      if (updates.title !== undefined) {
-        updateVars.title = updates.title;
-      }
-
-      if (updates.messages !== undefined) {
-        updateVars.messages = JSON.stringify(updates.messages);
-      }
-
-      if (updates.tagIds !== undefined) {
-        updateVars.tagIds = updates.tagIds;
-      }
-
-      await chatSessionSdkV2.update(updateVars);
-    } catch (error) {
-      console.error(`Error updating chat session ${id}:`, error);
-      throw error;
+    if (updates.title !== undefined) {
+      updateVars.title = updates.title;
     }
+
+    if (updates.messages !== undefined) {
+      updateVars.messages = JSON.stringify(updates.messages);
+    }
+
+    if (updates.tagIds !== undefined) {
+      updateVars.tagIds = updates.tagIds;
+    }
+
+    const result = await chatSessionSdkV2.update(updateVars);
+    return result.updateChatSession as ChatSession;
   }
 
   /**
    * Delete a chat session
    */
-  async deleteSession(id: string): Promise<void> {
-    try {
-      await chatSessionSdkV2.delete(id);
-    } catch (error) {
-      console.error(`Error deleting chat session ${id}:`, error);
-      throw error;
-    }
+  async deleteSession(id: string): Promise<boolean> {
+    const result = await chatSessionSdkV2.delete(id);
+    return result.deleteChatSession ?? false;
   }
 
   /**

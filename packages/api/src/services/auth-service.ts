@@ -218,11 +218,11 @@ export class AuthService {
     const sessionToken = this.generateSessionToken();
     const refreshToken = this.generateRefreshToken();
     const sessionExpiresAt = new Date(
-      Date.now() + 24 * 60 * 60 * 1000
-    ).toISOString(); // 24小时
-    const refreshExpiresAt = new Date(
       Date.now() + 7 * 24 * 60 * 60 * 1000
     ).toISOString(); // 7天
+    const refreshExpiresAt = new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000
+    ).toISOString(); // 30天
 
     const [session] = await this.db
       .insert(user_sessions)
@@ -345,8 +345,8 @@ export class AuthService {
     // 生成新的session token
     const newSessionToken = this.generateSessionToken();
     const newSessionExpiresAt = new Date(
-      Date.now() + 24 * 60 * 60 * 1000
-    ).toISOString(); // 24小时
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    ).toISOString(); // 7天
 
     // 更新会话
     await this.db

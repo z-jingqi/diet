@@ -473,7 +473,7 @@ export type ChatMessageFieldsFragment = { __typename?: 'ChatMessage', id?: strin
 export type GetMyChatSessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, messages?: Array<{ __typename?: 'ChatMessage', id?: string | null, type?: MessageType | null, content?: string | null, role?: MessageRole | null, createdAt?: any | null, status?: MessageStatus | null }> | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
+export type GetMyChatSessionsQuery = { __typename?: 'Query', myChatSessions?: Array<{ __typename?: 'ChatSession', id?: string | null, title?: string | null, tagIds?: Array<string> | null, createdAt?: any | null, updatedAt?: any | null, user?: { __typename?: 'User', id?: string | null, username?: string | null } | null }> | null };
 
 export type GetChatSessionQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -832,9 +832,6 @@ export const GetMyChatSessionsDocument = `
   myChatSessions {
     id
     title
-    messages {
-      ...ChatMessageFields
-    }
     tagIds
     createdAt
     updatedAt
@@ -844,7 +841,7 @@ export const GetMyChatSessionsDocument = `
     }
   }
 }
-    ${ChatMessageFieldsFragmentDoc}`;
+    `;
 
 export const useGetMyChatSessionsQuery = <
       TData = GetMyChatSessionsQuery,

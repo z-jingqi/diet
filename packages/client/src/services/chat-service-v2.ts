@@ -1,12 +1,11 @@
-import { 
-  sendChatMessage, 
-  sendRecipeChatMessage, 
+import {
+  sendChatMessage,
+  sendRecipeChatMessage,
   sendHealthAdviceChatMessage,
-  getIntent
+  getIntent,
 } from "@/lib/api/chat-api";
 import { ChatCompletionMessageParam } from "openai/resources";
-import { MessageStatus, MessageType } from "@/lib/gql/graphql";
-import { toAIMessagesV2 } from "@/utils/chat-utils-v2";
+import { MessageType } from "@/lib/gql/graphql";
 
 /**
  * Service for handling chat messaging operations
@@ -88,4 +87,4 @@ class ChatServiceV2 {
 }
 
 // Export singleton instance
-export default new ChatServiceV2(); 
+export default new ChatServiceV2();

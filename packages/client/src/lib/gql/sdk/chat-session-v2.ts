@@ -3,17 +3,37 @@ import {
   CreateChatSessionDocument,
   UpdateChatSessionDocument,
   DeleteChatSessionDocument,
+  GetChatSessionDocument,
   type CreateChatSessionMutationVariables,
   type UpdateChatSessionMutationVariables,
   type CreateChatSessionMutation,
   type UpdateChatSessionMutation,
   type DeleteChatSessionMutation,
+  type GetChatSessionQuery,
+  type GetChatSessionQueryVariables,
 } from "../graphql";
 
 /**
  * SDK for chat session operations with error handling
  */
 export const chatSessionSdkV2 = {
+  /**
+   * Get a chat session by ID
+   */
+  get: async (
+    vars: GetChatSessionQueryVariables
+  ): Promise<GetChatSessionQuery> => {
+    try {
+      return await graphqlClient.request(GetChatSessionDocument, vars);
+    } catch (error) {
+      console.error(`Error fetching chat session with ID ${vars.id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new chat session
+   */
   create: async (
     vars: CreateChatSessionMutationVariables
   ): Promise<CreateChatSessionMutation> => {
@@ -25,6 +45,9 @@ export const chatSessionSdkV2 = {
     }
   },
 
+  /**
+   * Update an existing chat session
+   */
   update: async (
     vars: UpdateChatSessionMutationVariables
   ): Promise<UpdateChatSessionMutation> => {
@@ -36,6 +59,9 @@ export const chatSessionSdkV2 = {
     }
   },
 
+  /**
+   * Delete a chat session
+   */
   delete: async (id: string): Promise<DeleteChatSessionMutation> => {
     try {
       return await graphqlClient.request(DeleteChatSessionDocument, { id });

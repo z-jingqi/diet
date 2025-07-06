@@ -270,6 +270,7 @@ function issueLoginResponse(ctx: any, result: any) {
         "HttpOnly",
         secure,
         "SameSite=Lax",
+        "Max-Age=604800", // 7 天
       ]
         .filter(Boolean)
         .join("; ")
@@ -284,6 +285,7 @@ function issueLoginResponse(ctx: any, result: any) {
         "HttpOnly",
         secure,
         "SameSite=Lax",
+        "Max-Age=2592000", // 30 天
       ]
         .filter(Boolean)
         .join("; ")
@@ -545,6 +547,7 @@ builder.mutationFields((t) => ({
             "HttpOnly",
             secure2,
             "SameSite=Lax",
+            "Max-Age=604800", // 7 天
           ]
             .filter(Boolean)
             .join("; ")

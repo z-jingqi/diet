@@ -7,7 +7,10 @@ interface ChatMessagesProps {
   gettingIntent?: boolean;
 }
 
-const ChatMessages = ({ messages, gettingIntent = false }: ChatMessagesProps) => {
+const ChatMessages = ({
+  messages,
+  gettingIntent = false,
+}: ChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -53,16 +56,24 @@ const ChatMessages = ({ messages, gettingIntent = false }: ChatMessagesProps) =>
     // 检查是否是新的消息ID（新消息开始）
     const isNewMessageId =
       lastMessage && lastMessage.id !== lastMessageIdRef.current;
-      
-    // 检查最后一条消息的内容是否更新（流式响应）
-    const hasContentUpdate = lastMessage && 
-      lastMessage.content && 
-      lastMessage.content.length > lastContentLengthRef.current;
-    
-    // 检查是否有消息正在流式传输
-    const hasStreamingMessage = messages.some(msg => msg.status === MessageStatus.Streaming);
 
-    if (hasNewMessage || isNewMessageId || hasContentUpdate || hasStreamingMessage) {
+    // 检查最后一条消息的内容是否更新（流式响应）
+    const hasContentUpdate =
+      lastMessage &&
+      lastMessage.content &&
+      lastMessage.content.length > lastContentLengthRef.current;
+
+    // 检查是否有消息正在流式传输
+    const hasStreamingMessage = messages.some(
+      (msg) => msg.status === MessageStatus.Streaming
+    );
+
+    if (
+      hasNewMessage ||
+      isNewMessageId ||
+      hasContentUpdate ||
+      hasStreamingMessage
+    ) {
       // 新消息开始时，重置用户滚动状态并启用自动滚动
       if (isNewMessageId) {
         isUserScrollingRef.current = false;
@@ -75,7 +86,7 @@ const ChatMessages = ({ messages, gettingIntent = false }: ChatMessagesProps) =>
         lastMessageIdRef.current = lastMessage.id || "";
         lastContentLengthRef.current = lastMessage.content?.length || 0;
       }
-      
+
       // 流式响应时，总是滚动到底部
       if (hasStreamingMessage) {
         isUserScrollingRef.current = false;

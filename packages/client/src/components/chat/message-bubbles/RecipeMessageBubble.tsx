@@ -5,7 +5,6 @@ import { Typography } from "@/components/ui/typography";
 import { Utensils } from "lucide-react";
 import { ChatMessage, MessageStatus, MessageType } from "@/lib/gql/graphql";
 import { cn } from "@/lib/utils";
-import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 
 interface StreamingRecipeMessageBubbleProps {
   message: ChatMessage;
@@ -17,7 +16,6 @@ const RecipeMessageBubble = ({
   onGenerateRecipe,
 }: StreamingRecipeMessageBubbleProps) => {
   const [generating, setGenerating] = useState(false);
-  const authNavigate = useAuthNavigate();
 
   // 只处理 type 为 recipe 的消息
   if (message.type !== MessageType.Recipe) {

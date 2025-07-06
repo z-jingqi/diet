@@ -24,7 +24,7 @@ export const getIntent = async (
       signal,
       isGuestMode,
     });
-    const intent = result.intent?.trim()?.toLowerCase();
+    const intent = result.intent?.trim()?.toUpperCase();
 
     if (
       ![
