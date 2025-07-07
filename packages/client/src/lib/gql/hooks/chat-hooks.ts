@@ -20,7 +20,6 @@ import {
   getIntent,
 } from "@/lib/api/chat-api";
 import type { ChatCompletionMessageParam } from "openai/resources";
-import { nanoid } from "nanoid";
 import {
   createUserMessageV2,
   createAIMessageV2,

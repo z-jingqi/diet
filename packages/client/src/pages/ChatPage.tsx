@@ -151,10 +151,7 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
 
   return (
     <div className="h-[100dvh] w-full overflow-hidden">
-      <ChatLayout
-        currentSessionId={currentSessionId}
-        isTemporarySession={isTemporarySession}
-      >
+      <ChatLayout currentSessionId={currentSessionId}>
         <div className="flex flex-col h-full w-full">
           {/* Main content area */}
           <div className="flex-1 flex items-center justify-center overflow-hidden w-full">

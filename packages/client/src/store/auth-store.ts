@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { graphqlClient, createAuthenticatedClient } from "@/lib/gql/client";
+import { createAuthenticatedClient } from "@/lib/gql/client";
 import {
   useGetMeQuery,
   useLoginMutation,
