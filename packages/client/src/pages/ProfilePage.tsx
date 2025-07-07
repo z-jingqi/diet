@@ -1,7 +1,4 @@
-import FunctionMenu from "@/components/profile/FunctionMenu";
-import TastePreferences from "@/components/profile/TastePreferences";
-import FoodPreferences from "@/components/profile/FoodPreferences";
-import CuisinePreferences from "@/components/profile/CuisinePreferences";
+import ProfileContent from "@/components/profile/ProfileContent";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +15,6 @@ import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 const ProfilePage = () => {
   const { isAuthenticated, isGuestMode } = useAuth();
   const authNavigate = useAuthNavigate();
-
-  // 桌面端Card高度配置
-  const desktopCardHeight = "lg:h-[600px] lg:flex lg:flex-col";
 
   // 未登录状态
   if (!isAuthenticated) {
@@ -60,21 +54,8 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 p-4 space-y-6">
-      {/* 响应式网格布局 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-6">
-        {/* 功能菜单 */}
-        <FunctionMenu className={desktopCardHeight} />
-
-        {/* 口味偏好 */}
-        <TastePreferences className={desktopCardHeight} />
-
-        {/* 菜系偏好 */}
-        <CuisinePreferences className={desktopCardHeight} />
-
-        {/* 食物偏好 */}
-        <FoodPreferences className={desktopCardHeight} />
-      </div>
+    <div className="flex flex-col flex-1 min-h-0">
+      <ProfileContent className="flex-1" />
     </div>
   );
 };
