@@ -10,10 +10,7 @@ interface TastePreferencesProps {
 }
 
 const TastePreferences = ({ className }: TastePreferencesProps) => {
-  const { 
-    tastePreferences, 
-    updateTastePreference
-  } = usePreferencesStore();
+  const { tastePreferences, updateTastePreference } = usePreferencesStore();
 
   const tasteIcons = {
     spiciness: Flame,
@@ -23,7 +20,10 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
     umami: Star,
   };
 
-  const handleTasteChange = (key: keyof Omit<TastePreference, 'cuisine'>, value: number[]) => {
+  const handleTasteChange = (
+    key: keyof Omit<TastePreference, "cuisine">,
+    value: number[]
+  ) => {
     updateTastePreference(key, value[0]);
   };
 
@@ -42,8 +42,9 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
         {/* 口味维度设置 */}
         {Object.entries(tasteLabels).map(([key, label]) => {
           const Icon = tasteIcons[key as keyof typeof tasteIcons];
-          const currentValue = tastePreferences[key as keyof Omit<TastePreference, 'cuisine'>];
-          
+          const currentValue =
+            tastePreferences[key as keyof Omit<TastePreference, "cuisine">];
+
           return (
             <div key={key} className="space-y-3">
               <div className="flex items-center justify-between">
@@ -53,29 +54,40 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
                     {label.name}
                   </Typography>
                 </div>
-                <Typography variant="span" className="text-xs bg-muted px-2 py-1 rounded-md">
+                <Typography
+                  variant="span"
+                  className="text-xs bg-muted px-2 py-1 rounded-md"
+                >
                   {label.levels[currentValue]}
                 </Typography>
               </div>
-              
+
               <Slider
                 value={[currentValue]}
-                onValueChange={(value) => handleTasteChange(key as keyof Omit<TastePreference, 'cuisine'>, value)}
+                onValueChange={(value) =>
+                  handleTasteChange(
+                    key as keyof Omit<TastePreference, "cuisine">,
+                    value
+                  )
+                }
                 max={4}
                 min={0}
                 step={1}
                 className="w-full"
               />
-              
+
               <div className="relative w-full">
                 {label.levels.map((level, index) => (
                   <div
                     key={index}
                     className="absolute transform -translate-x-1/2"
                     style={{
-                      left: index === 0 ? 'calc(0% + var(--spacing) * 3)' : 
-                           index === label.levels.length - 1 ? 'calc(100% - var(--spacing) * 3)' : 
-                           `${(index / (label.levels.length - 1)) * 100}%`,
+                      left:
+                        index === 0
+                          ? "calc(0% + var(--spacing) * 3)"
+                          : index === label.levels.length - 1
+                            ? "calc(100% - var(--spacing) * 3)"
+                            : `${(index / (label.levels.length - 1)) * 100}%`,
                     }}
                   >
                     <MutedText className="text-xs text-center whitespace-nowrap">
@@ -92,4 +104,4 @@ const TastePreferences = ({ className }: TastePreferencesProps) => {
   );
 };
 
-export default TastePreferences; 
+export default TastePreferences;

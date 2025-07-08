@@ -62,7 +62,7 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
   };
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
       {/* Header */}
       <div className="flex flex-col items-center justify-center gap-4 py-6 lg:flex-row lg:justify-start lg:items-center lg:px-6 border-b">
         <Avatar className="h-20 w-20">
@@ -111,7 +111,7 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
       ) : (
         <div className="flex flex-1 overflow-hidden">
           {/* Left category list */}
-          <div className="w-64 border-r p-2 overflow-y-auto space-y-1">
+          <div className="w-64 p-2 overflow-y-auto space-y-1 flex flex-col border-r">
             {settingsGroups.map((group) => (
               <Button
                 key={group.title}

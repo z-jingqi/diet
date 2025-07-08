@@ -1,17 +1,14 @@
 import * as React from "react";
 import {
   Palette,
-  Target,
-  Apple,
   AlertTriangle,
   Timer,
   Utensils,
   ChefHat,
   Pizza,
-  Shield,
-  ShieldCheck,
   LogOut,
   Trash2,
+  Heart,
 } from "lucide-react";
 
 export type SettingVariant = "default" | "danger";
@@ -19,15 +16,13 @@ export type SettingVariant = "default" | "danger";
 // Keys enum for settings items
 export enum SettingKey {
   Theme = "theme",
-  HealthGoals = "healthGoals",
-  NutritionPreferences = "nutritionPreferences",
   DietaryRestrictions = "dietaryRestrictions",
   CookingConstraints = "cookingConstraints",
   TastePreferences = "tastePreferences",
   CuisinePreferences = "cuisinePreferences",
   FoodPreferences = "foodPreferences",
-  PrivacyData = "privacyData",
-  AccountSecurity = "accountSecurity",
+  FavoriteRecipes = "favoriteRecipes",
+  FavoriteHealthAdvice = "favoriteHealthAdvice",
   Logout = "logout",
   DeleteAccount = "deleteAccount",
 }
@@ -50,7 +45,7 @@ export const settingsGroups: SettingGroup[] = [
     items: [
       {
         key: SettingKey.Theme,
-        label: "主题设置",
+        label: "主题风格",
         icon: <Palette className="h-5 w-5" />,
       },
     ],
@@ -58,16 +53,6 @@ export const settingsGroups: SettingGroup[] = [
   {
     title: "健康与营养",
     items: [
-      {
-        key: SettingKey.HealthGoals,
-        label: "健康目标",
-        icon: <Target className="h-5 w-5" />,
-      },
-      {
-        key: SettingKey.NutritionPreferences,
-        label: "营养偏好",
-        icon: <Apple className="h-5 w-5" />,
-      },
       {
         key: SettingKey.DietaryRestrictions,
         label: "饮食限制 / 过敏原",
@@ -101,17 +86,12 @@ export const settingsGroups: SettingGroup[] = [
     ],
   },
   {
-    title: "隐私与安全",
+    title: "我的收藏",
     items: [
       {
-        key: SettingKey.PrivacyData,
-        label: "隐私与数据",
-        icon: <Shield className="h-5 w-5" />,
-      },
-      {
-        key: SettingKey.AccountSecurity,
-        label: "账户安全",
-        icon: <ShieldCheck className="h-5 w-5" />,
+        key: SettingKey.FavoriteRecipes,
+        label: "我的收藏",
+        icon: <Heart className="h-5 w-5" />,
       },
     ],
   },

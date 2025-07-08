@@ -21,7 +21,7 @@ const ProfilePage = () => {
   // 未登录状态
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col flex-1 min-h-0 p-4">
+      <div className="flex flex-col h-dvh min-h-0 p-4">
         <div className="flex-1 flex items-center justify-center">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
@@ -56,7 +56,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col h-dvh min-h-0">
       {/* Header */}
       <div className="p-4 border-b flex items-center gap-2">
         <Button
