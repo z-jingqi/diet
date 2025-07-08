@@ -9,12 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, ChevronLeft } from "lucide-react";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { useNavigate } from "@tanstack/react-router";
 
 const ProfilePage = () => {
   const { isAuthenticated, isGuestMode } = useAuth();
   const authNavigate = useAuthNavigate();
+  const navigate = useNavigate();
 
   // 未登录状态
   if (!isAuthenticated) {
@@ -55,6 +57,18 @@ const ProfilePage = () => {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      {/* Header */}
+      <div className="p-4 border-b flex items-center gap-2">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-1 text-base font-medium"
+          onClick={() => navigate({ to: ".." })}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          个人中心
+        </Button>
+      </div>
+
       <ProfileContent className="flex-1" />
     </div>
   );

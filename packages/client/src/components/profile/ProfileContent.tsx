@@ -5,41 +5,61 @@ import { Button } from "@/components/ui/button";
 import { MutedText, Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { Palette, Utensils, ChefHat, Pizza } from "lucide-react";
+import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { settingsGroups, SettingItem, SettingKey } from "./settings-config";
+import useMediaQuery from "@/hooks/useMediaQuery";
+import SettingsDrawer from "./SettingsDrawer";
+import SettingsPanel from "./SettingsPanel";
 
 interface ProfileContentProps {
   className?: string;
 }
 
 const ProfileContent = ({ className }: ProfileContentProps) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const authNavigate = useAuthNavigate();
 
   // Display name logic
   const displayName = user?.nickname || user?.username || "访客";
 
-  // Placeholder menu items – will be wired up later
-  const menuItems: {
-    label: string;
-    icon: React.ReactNode;
-    onClick?: () => void;
-  }[] = [
-    {
-      label: "主题设置",
-      icon: <Palette className="h-5 w-5" />,
-    },
-    {
-      label: "口味偏好",
-      icon: <Utensils className="h-5 w-5" />,
-    },
-    {
-      label: "菜系偏好",
-      icon: <ChefHat className="h-5 w-5" />,
-    },
-    {
-      label: "食物偏好",
-      icon: <Pizza className="h-5 w-5" />,
-    },
-  ];
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  const [activeGroup, setActiveGroup] = React.useState<
+    (typeof settingsGroups)[number] | null
+  >(null);
+
+  // Default select first group on desktop
+  React.useEffect(() => {
+    if (isMobile) {
+      // On mobile, don't preselect
+      setActiveGroup(null);
+    } else if (!activeGroup) {
+      // Desktop default selection
+      setActiveGroup(settingsGroups[0]);
+    }
+  }, [isMobile]);
+
+  // Click handler for settings item keys
+  const handleSettingClick = async (key: SettingKey) => {
+    switch (key) {
+      case SettingKey.Logout:
+        try {
+          await logout();
+          authNavigate({ to: "/login" });
+        } catch (e) {
+          console.error("Logout failed", e);
+        }
+        break;
+      case SettingKey.DeleteAccount:
+        if (confirm("确定要删除所有账号数据吗？此操作无法撤销？")) {
+          // TODO: 调用删除账号接口
+          console.log("Delete account - TODO");
+        }
+        break;
+      default:
+        console.log(`${key} clicked - TODO`);
+    }
+  };
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
@@ -57,35 +77,63 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left menu */}
-        <div className="border-r lg:w-64 p-2 overflow-y-auto">
-          <div className="space-y-1">
-            {menuItems.map((item) => (
-              <Button
-                key={item.label}
-                variant="ghost"
-                className="w-full justify-start h-12 px-3"
-                onClick={item.onClick}
-              >
-                <span className="mr-3 text-gray-600">{item.icon}</span>
+      {isMobile ? (
+        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4">
+          {settingsGroups.map((group) => (
+            <Card
+              key={group.title}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => setActiveGroup(group)}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <span className="text-primary h-6 w-6">
+                  {group.items[0]?.icon}
+                </span>
                 <Typography variant="span" className="font-medium">
-                  {item.label}
+                  {group.title}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Drawer for second level */}
+          <SettingsDrawer
+            open={activeGroup !== null}
+            group={activeGroup}
+            onOpenChange={(open) => {
+              if (!open) {
+                setActiveGroup(null);
+              }
+            }}
+            onItemClick={handleSettingClick}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left category list */}
+          <div className="w-64 border-r p-2 overflow-y-auto space-y-1">
+            {settingsGroups.map((group) => (
+              <Button
+                key={group.title}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-12 px-2",
+                  activeGroup?.title === group.title && "bg-muted"
+                )}
+                onClick={() => setActiveGroup(group)}
+              >
+                <span className="mr-3">{group.items[0]?.icon}</span>
+                <Typography variant="span" className="font-medium">
+                  {group.title}
                 </Typography>
               </Button>
             ))}
           </div>
-        </div>
 
-        {/* Right content placeholder */}
-        <div className="flex-1 p-6 overflow-y-auto hidden lg:block">
-          <Card className="h-full w-full flex items-center justify-center">
-            <CardContent className="text-center">
-              <MutedText>选择左侧设置项进行编辑</MutedText>
-            </CardContent>
-          </Card>
+          {/* Right panel */}
+          <SettingsPanel group={activeGroup} onItemClick={handleSettingClick} />
         </div>
-      </div>
+      )}
     </div>
   );
 };

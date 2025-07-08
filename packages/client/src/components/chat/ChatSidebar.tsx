@@ -39,7 +39,7 @@ const ChatSidebar = ({
 
   const navigate = useNavigate();
   const authNavigate = useAuthNavigate();
-  const { requireAuth } = useAuth();
+  const { requireAuth, user } = useAuth();
   const authCheck = createAuthCheck(
     () => authNavigate({ to: "/login" }),
     requireAuth
@@ -270,7 +270,7 @@ const ChatSidebar = ({
             <User className="mr-2 h-4 w-4 flex-shrink-0" />
             <div className="flex-1 min-w-0 text-left">
               <Typography variant="span" className="block truncate">
-                用户昵称
+                {user?.nickname || user?.username || "访客"}
               </Typography>
             </div>
           </div>
