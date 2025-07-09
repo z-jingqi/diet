@@ -15,58 +15,32 @@ export interface KitchenToolsData {
 export const kitchenToolsData: KitchenToolsData = {
   categories: [
     {
-      name: "基础厨具",
+      name: "中餐",
       tools: [
         { id: "wok", name: "炒锅" },
-        { id: "pan", name: "平底锅" },
-        { id: "pot", name: "汤锅" },
-        { id: "steamer", name: "蒸锅" },
-        { id: "rice_cooker", name: "电饭煲" },
         { id: "clay_pot", name: "砂锅" },
-        { id: "casserole", name: "炖锅" },
+        { id: "bamboo_steamer", name: "竹蒸笼" },
+        { id: "steam_basket", name: "蒸架" },
+      ],
+    },
+    {
+      name: "西餐",
+      tools: [
+        { id: "pan", name: "平底锅" },
         { id: "frying_pan", name: "煎锅" },
+        { id: "casserole", name: "炖锅" },
+      ],
+    },
+    {
+      name: "基础厨具",
+      tools: [
+        { id: "pot", name: "汤锅" },
         { id: "soup_pot", name: "煮锅" },
+        { id: "steamer", name: "蒸锅" },
       ],
     },
     {
-      name: "刀具",
-      tools: [
-        { id: "chef_knife", name: "菜刀" },
-        { id: "paring_knife", name: "水果刀" },
-        { id: "scissors", name: "厨房剪刀" },
-        { id: "bread_knife", name: "面包刀" },
-        { id: "cleaver", name: "砍刀" },
-      ],
-    },
-    {
-      name: "工具",
-      tools: [
-        { id: "spatula", name: "铲子" },
-        { id: "ladle", name: "勺子" },
-        { id: "tongs", name: "夹子" },
-        { id: "whisk", name: "打蛋器" },
-        { id: "grater", name: "刨丝器" },
-        { id: "colander", name: "漏勺" },
-        { id: "strainer", name: "筛子" },
-        { id: "peeler", name: "削皮器" },
-        { id: "garlic_press", name: "蒜泥器" },
-        { id: "mandoline", name: "切片器" },
-      ],
-    },
-    {
-      name: "电器",
-      tools: [
-        { id: "blender", name: "搅拌机" },
-        { id: "food_processor", name: "料理机" },
-        { id: "microwave", name: "微波炉" },
-        { id: "oven", name: "烤箱" },
-        { id: "air_fryer", name: "空气炸锅" },
-        { id: "rice_cooker_pressure", name: "电压力锅" },
-        { id: "induction_cooker", name: "电磁炉" },
-      ],
-    },
-    {
-      name: "烘焙工具",
+      name: "烘焙",
       tools: [
         { id: "rolling_pin", name: "擀面杖" },
         { id: "baking_sheet", name: "烤盘" },
@@ -76,18 +50,20 @@ export const kitchenToolsData: KitchenToolsData = {
         { id: "cookie_cutter", name: "饼干模具" },
         { id: "piping_bag", name: "裱花袋" },
         { id: "piping_tips", name: "裱花嘴" },
+        { id: "pizza_stone", name: "披萨石" },
       ],
     },
     {
-      name: "中式专用",
+      name: "厨房电器",
       tools: [
-        { id: "bamboo_steamer", name: "竹蒸笼" },
+        { id: "microwave", name: "微波炉" },
+        { id: "oven", name: "烤箱" },
+        { id: "air_fryer", name: "空气炸锅" },
+        { id: "induction_cooker", name: "电磁炉" },
+        { id: "rice_cooker", name: "电饭煲" },
         { id: "pressure_cooker", name: "高压锅" },
+        { id: "rice_cooker_pressure", name: "电压力锅" },
         { id: "slow_cooker", name: "慢炖锅" },
-        { id: "mortar_pestle", name: "捣蒜器" },
-        { id: "wok_spatula", name: "炒菜铲" },
-        { id: "rice_paddle", name: "饭铲" },
-        { id: "steam_basket", name: "蒸架" },
       ],
     },
   ],

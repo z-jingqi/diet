@@ -1,5 +1,5 @@
 import { Typography } from "@/components/ui/typography";
-import { SettingGroup, SettingKey } from "./settings-config";
+import { SettingGroup, SettingKey, SettingGroupTitle } from "./settings-config";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -13,17 +13,20 @@ import FavoritesMenu from "./settings/favorites/FavoritesMenu";
 import FavoriteRecipes from "./settings/favorites/FavoriteRecipes";
 import FavoriteHealthAdvice from "./settings/favorites/FavoriteHealthAdvice";
 import AccountActions from "./settings/account/AccountActions";
+import { cn } from "../../lib/utils";
 
 interface SettingsPanelProps {
   group: SettingGroup | null;
   onItemClick: (key: SettingKey) => void;
   inDrawer?: boolean;
+  isMobile?: boolean;
 }
 
 const SettingsPanel = ({
   group,
   onItemClick,
   inDrawer = false,
+  isMobile = false,
 }: SettingsPanelProps) => {
   // Local state for favorites sub-view
   const [favoritesView, setFavoritesView] = React.useState<
@@ -47,7 +50,12 @@ const SettingsPanel = ({
 
   // Helper to wrap content with padding & scroll area
   const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <div className="flex-1 min-h-0 p-6 space-y-6 overflow-y-auto">
+    <div
+      className={cn(
+        "flex-1 min-h-0 space-y-6 overflow-y-auto p-6",
+        !isMobile ? "max-w-[80rem] mx-auto" : ""
+      )}
+    >
       {children}
     </div>
   );
@@ -55,20 +63,20 @@ const SettingsPanel = ({
   const sectionClass = "shadow-none border-none";
 
   switch (group.title) {
-    case "通用":
+    case SettingGroupTitle.General:
       return (
         <Wrapper>
           <ThemeSettings className={sectionClass} />
         </Wrapper>
       );
-    case "健康与营养":
+    case SettingGroupTitle.HealthAndNutrition:
       return (
         <Wrapper>
           <DietaryRestrictionsSettings className={sectionClass} />
           <CookingConstraintsSettings className={sectionClass} />
         </Wrapper>
       );
-    case "偏好设置":
+    case SettingGroupTitle.Preferences:
       return (
         <Wrapper>
           <TastePreferences className={sectionClass} />
@@ -76,7 +84,7 @@ const SettingsPanel = ({
           <FoodPreferences className={sectionClass} />
         </Wrapper>
       );
-    case "我的收藏":
+    case SettingGroupTitle.Favorites:
       return (
         <Wrapper>
           {favoritesView !== "menu" && (
@@ -104,7 +112,7 @@ const SettingsPanel = ({
           )}
         </Wrapper>
       );
-    case "账户操作":
+    case SettingGroupTitle.Account:
       return (
         <Wrapper>
           <AccountActions

@@ -131,7 +131,11 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
           </div>
 
           {/* Right panel */}
-          <SettingsPanel group={activeGroup} onItemClick={handleSettingClick} />
+          <SettingsPanel
+            group={activeGroup}
+            isMobile={isMobile}
+            onItemClick={handleSettingClick}
+          />
         </div>
       )}
     </div>
