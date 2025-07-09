@@ -1,12 +1,16 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Palette } from "lucide-react";
-import { Typography, MutedText } from "@/components/ui/typography";
+import { MutedText } from "@/components/ui/typography";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useTheme, ThemeOption } from "@/hooks/useTheme";
 
 interface ThemeSettingsProps {
   className?: string;
 }
 
 const ThemeSettings = ({ className }: ThemeSettingsProps) => {
+  const { theme, setTheme } = useTheme();
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -17,9 +21,24 @@ const ThemeSettings = ({ className }: ThemeSettingsProps) => {
         <MutedText>选择应用的主题配色</MutedText>
       </CardHeader>
       <CardContent>
-        <Typography variant="span" className="text-sm text-muted-foreground">
-          TODO: 主题切换器占位
-        </Typography>
+        <RadioGroup
+          value={theme}
+          onValueChange={(val: string) => setTheme(val as ThemeOption)}
+          className="flex flex-col gap-3"
+        >
+          <label className="flex items-center gap-2 cursor-pointer">
+            <RadioGroupItem value="light" />
+            浅色
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <RadioGroupItem value="dark" />
+            深色
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <RadioGroupItem value="system" />
+            跟随系统
+          </label>
+        </RadioGroup>
       </CardContent>
     </Card>
   );

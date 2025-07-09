@@ -52,7 +52,7 @@ const SettingsPanel = ({
     </div>
   );
 
-  const sectionClass = "shadow-none border-none p-0";
+  const sectionClass = "shadow-none border-none";
 
   switch (group.title) {
     case "通用":
