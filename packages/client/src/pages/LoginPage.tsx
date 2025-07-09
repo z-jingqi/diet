@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
 import { useEffect } from "react";
-import { isWeChatMiniProgram } from "@/utils/is-wechat";
+import { isWeChatMiniProgram } from "@/utils/is-wechat-mini";
 import { Link } from "@tanstack/react-router";
 import { validateFormData } from "@/utils/validation";
 

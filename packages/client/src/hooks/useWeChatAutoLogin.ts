@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isWeChatMiniProgram } from "@/utils/is-wechat";
+import { isWeChatMiniProgram } from "@/utils/is-wechat-mini";
 import { useAuth } from "@/contexts/AuthContext";
 import { createAuthenticatedClient } from "@/lib/gql/client";
 import {
