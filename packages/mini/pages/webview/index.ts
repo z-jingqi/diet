@@ -1,6 +1,5 @@
 // @ts-nocheck
 /* global Page, wx */
-/// <reference types="miniprogram-api-typings" />
 
 interface IWebviewPageData {
   url: string;
