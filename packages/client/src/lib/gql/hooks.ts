@@ -3,7 +3,6 @@
 // ============================================================================
 
 // 重新导出所有 hooks
-export * from "./hooks/auth";
 export * from "./hooks/tags";
 export * from "./hooks/chat-hooks";
 export * from "./hooks/common";

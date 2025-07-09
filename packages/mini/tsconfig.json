@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "es2015"],
-    "types": ["miniprogram-api-typings"],
+    "types": [],
     "baseUrl": "."
   },
   "exclude": ["node_modules"]
