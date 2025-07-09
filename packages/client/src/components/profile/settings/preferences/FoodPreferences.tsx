@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,8 @@ interface FoodPreferencesProps {
 }
 
 const FoodPreferences = ({ className }: FoodPreferencesProps) => {
-  const { dislikedFoods, addDislikedFood, removeDislikedFood } = usePreferencesStore();
+  const { dislikedFoods, addDislikedFood, removeDislikedFood } =
+    usePreferencesStore();
   const [inputValue, setInputValue] = useState("");
 
   const handleAddFood = () => {
@@ -55,7 +55,7 @@ const FoodPreferences = ({ className }: FoodPreferencesProps) => {
             onKeyPress={handleKeyPress}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={handleAddFood}
             disabled={!inputValue.trim()}
             size="sm"
@@ -91,13 +91,11 @@ const FoodPreferences = ({ className }: FoodPreferencesProps) => {
             </div>
           </div>
         ) : (
-          <MutedText className="text-sm">
-            暂未设置不推荐的食物
-          </MutedText>
+          <MutedText className="text-sm">暂未设置不推荐的食物</MutedText>
         )}
       </CardContent>
     </Card>
   );
 };
 
-export default FoodPreferences; 
+export default FoodPreferences;

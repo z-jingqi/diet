@@ -20,7 +20,6 @@ import {
   getIntent,
 } from "@/lib/api/chat-api";
 import type { ChatCompletionMessageParam } from "openai/resources";
-import { nanoid } from "nanoid";
 import {
   createUserMessageV2,
   createAIMessageV2,
@@ -192,9 +191,18 @@ export const useChatMessaging = () => {
     []
   );
 
-  // Handle sending a chat message with streaming response
-  const sendChatWithStream = useCallback(
-    async (options: StreamSendOptions): Promise<string> => {
+  // Generic handler for sending messages with streaming response
+  const sendWithStream = useCallback(
+    async (
+      sendFn: (
+        aiMessages: ChatCompletionMessageParam[],
+        onMessage: (data: { done: boolean; response?: string }) => void,
+        onError: (error: Error) => void,
+        signal: AbortSignal,
+        isGuestMode: boolean
+      ) => Promise<void>,
+      options: StreamSendOptions
+    ): Promise<string> => {
       const { aiMessages, onChunkReceived, isGuestMode = false } = options;
       const controller = new AbortController();
       setAbortController(controller);
@@ -204,7 +212,7 @@ export const useChatMessaging = () => {
       let content = "";
 
       try {
-        await sendChatMessage(
+        await sendFn(
           aiMessages,
           (data) => {
             if (data.done) {
@@ -217,7 +225,7 @@ export const useChatMessaging = () => {
               onChunkReceived?.(data.response);
             }
           },
-          (error) => {
+          (error: any) => {
             setError(error.message);
             throw error;
           },
@@ -230,89 +238,31 @@ export const useChatMessaging = () => {
         setIsLoading(false);
       }
     },
-    []
+    [setAbortController, setIsLoading, setError]
+  );
+
+  // Handle sending a chat message with streaming response
+  const sendChatWithStream = useCallback(
+    async (options: StreamSendOptions): Promise<string> => {
+      return sendWithStream(sendChatMessage, options);
+    },
+    [sendWithStream]
   );
 
   // Handle sending a recipe message with streaming response
   const sendRecipeWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      const { aiMessages, onChunkReceived, isGuestMode = false } = options;
-      const controller = new AbortController();
-      setAbortController(controller);
-      setIsLoading(true);
-      setError(null);
-
-      let content = "";
-
-      try {
-        await sendRecipeChatMessage(
-          aiMessages,
-          (data) => {
-            if (data.done) {
-              setAbortController(null);
-              return;
-            }
-
-            if (data.response) {
-              content += data.response;
-              onChunkReceived?.(data.response);
-            }
-          },
-          (error) => {
-            setError(error.message);
-            throw error;
-          },
-          controller.signal,
-          isGuestMode
-        );
-
-        return content;
-      } finally {
-        setIsLoading(false);
-      }
+      return sendWithStream(sendRecipeChatMessage, options);
     },
-    []
+    [sendWithStream]
   );
 
   // Handle sending a health advice message with streaming response
   const sendHealthAdviceWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      const { aiMessages, onChunkReceived, isGuestMode = false } = options;
-      const controller = new AbortController();
-      setAbortController(controller);
-      setIsLoading(true);
-      setError(null);
-
-      let content = "";
-
-      try {
-        await sendHealthAdviceChatMessage(
-          aiMessages,
-          (data) => {
-            if (data.done) {
-              setAbortController(null);
-              return;
-            }
-
-            if (data.response) {
-              content += data.response;
-              onChunkReceived?.(data.response);
-            }
-          },
-          (error) => {
-            setError(error.message);
-            throw error;
-          },
-          controller.signal,
-          isGuestMode
-        );
-
-        return content;
-      } finally {
-        setIsLoading(false);
-      }
+      return sendWithStream(sendHealthAdviceChatMessage, options);
     },
-    []
+    [sendWithStream]
   );
 
   // Main handler for sending user messages

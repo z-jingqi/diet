@@ -1,15 +1,30 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import ConfirmDialog, { ConfirmDialogProps } from "@/components/ui/confirm-dialog";
+import ConfirmDialog, {
+  ConfirmDialogProps,
+} from "@/components/ui/confirm-dialog";
 
-export type ConfirmOptions = Omit<ConfirmDialogProps, "open" | "onOpenChange" | "onConfirm">;
+export type ConfirmOptions = Omit<
+  ConfirmDialogProps,
+  "open" | "onOpenChange" | "onConfirm"
+>;
 
 // context类型：传递confirm方法
-export type ConfirmDialogContextType = (options: ConfirmOptions) => Promise<boolean>;
+export type ConfirmDialogContextType = (
+  options: ConfirmOptions
+) => Promise<boolean>;
 
-const ConfirmDialogContext = createContext<ConfirmDialogContextType | undefined>(undefined);
+const ConfirmDialogContext = createContext<
+  ConfirmDialogContextType | undefined
+>(undefined);
 
-export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
-  const [dialog, setDialog] = useState<ConfirmOptions & { resolve?: (v: boolean) => void; open: boolean }>({
+export const ConfirmDialogProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [dialog, setDialog] = useState<
+    ConfirmOptions & { resolve?: (v: boolean) => void; open: boolean }
+  >({
     open: false,
   });
 
@@ -50,6 +65,9 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
 
 export const useConfirmDialog = () => {
   const ctx = useContext(ConfirmDialogContext);
-  if (!ctx) throw new Error("useConfirmDialog must be used within ConfirmDialogProvider");
+  if (!ctx)
+    throw new Error(
+      "useConfirmDialog must be used within ConfirmDialogProvider"
+    );
   return ctx;
-}; 
+};

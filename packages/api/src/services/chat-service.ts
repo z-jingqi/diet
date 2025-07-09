@@ -1,7 +1,6 @@
 // ChatService provides methods to manage chat sessions and messages
 import { DB } from "../db";
 import { chat_sessions } from "../db/schema/chat";
-import { users } from "../db/schema/auth";
 import { eq, and, isNull } from "drizzle-orm";
 import type {
   CreateChatSessionRequest,

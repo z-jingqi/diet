@@ -9,14 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ChatLayoutProps {
   children: React.ReactNode;
   currentSessionId: string;
-  isTemporarySession: boolean;
 }
 
-const ChatLayout = ({
-  children,
-  currentSessionId,
-  isTemporarySession,
-}: ChatLayoutProps) => {
+const ChatLayout = ({ children, currentSessionId }: ChatLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // 使用hooks获取会话列表

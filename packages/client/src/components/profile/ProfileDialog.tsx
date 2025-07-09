@@ -1,10 +1,13 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import FunctionMenu from "@/components/profile/FunctionMenu";
-import TastePreferences from "@/components/profile/TastePreferences";
-import FoodPreferences from "@/components/profile/FoodPreferences";
-import CuisinePreferences from "@/components/profile/CuisinePreferences";
+import ProfileContent from "@/components/profile/ProfileContent";
 
 interface ProfileDialogProps {
   open: boolean;
@@ -14,8 +17,8 @@ interface ProfileDialogProps {
 const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="bottom" 
+      <SheetContent
+        side="bottom"
         className="h-[85vh] max-h-[85vh] rounded-t-xl border-t-2 p-0"
       >
         <SheetHeader className="px-4 py-4 border-b flex flex-row items-center justify-between">
@@ -26,23 +29,13 @@ const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
             </Button>
           </SheetClose>
         </SheetHeader>
-        
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* 功能菜单 */}
-          <FunctionMenu className="h-auto" />
 
-          {/* 口味偏好 */}
-          <TastePreferences className="h-auto" />
-
-          {/* 菜系偏好 */}
-          <CuisinePreferences className="h-auto" />
-
-          {/* 食物偏好 */}
-          <FoodPreferences className="h-auto" />
+        <div className="flex-1 overflow-y-auto">
+          <ProfileContent />
         </div>
       </SheetContent>
     </Sheet>
   );
 };
 
-export default ProfileDialog; 
+export default ProfileDialog;

@@ -15,7 +15,6 @@ import {
   useChatSessions,
 } from "@/lib/gql/hooks/chat-hooks";
 import { useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatHeaderProps {
   onMenuClick: () => void;
