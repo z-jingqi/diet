@@ -573,12 +573,8 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, { code }, ctx) => {
       const result = await ctx.services.auth.wechatLogin(code);
-      return {
-        ...result,
-        user: result.user
-          ? (toGraphQLUser(result.user as any) as GraphQLUser)
-          : null,
-      };
+      // 复用 issueLoginResponse 以写入 Cookie，保证前端可正常保持会话
+      return issueLoginResponse(ctx, result);
     },
   }),
 }));

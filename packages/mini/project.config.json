@@ -1,0 +1,12 @@
+{
+  "miniprogramRoot": ".",
+  "projectname": "diet-webview",
+  "description": "WeChat mini program wrapper for Diet web client",
+  "appid": "",
+  "setting": {
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "2.32.3"
+} 

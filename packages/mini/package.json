@@ -1,0 +1,12 @@
+{
+  "name": "@diet/mp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Open the project in WeChat Developer Tools to run\"",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.7"
+  }
+}

@@ -11,11 +11,20 @@ import type {
   AuthContext,
   RefreshTokenResponse,
 } from "../types";
+import { oauth_accounts } from "../db/schema";
 
 type SessionWithUser = {
   users: typeof users.$inferSelect;
   user_sessions: typeof user_sessions.$inferSelect;
 };
+
+interface WechatSessionResp {
+  openid?: string;
+  unionid?: string;
+  session_key?: string;
+  errcode?: number;
+  errmsg?: string;
+}
 
 export class AuthService {
   constructor(private db: DB) {}
@@ -400,10 +409,108 @@ export class AuthService {
     return this.mapUserToResponse(user);
   }
 
-  // 微信登录（待实现）
-  async wechatLogin(_code: string): Promise<LoginResponse> {
-    // TODO: 实现微信登录逻辑
-    throw new Error("WeChat login not implemented yet");
+  // 微信小程序登录
+  async wechatLogin(code: string): Promise<LoginResponse> {
+    // 1. 调用微信接口换取 openid & session_key
+    const appid = process.env.WECHAT_MP_APPID;
+    const secret = process.env.WECHAT_MP_SECRET;
+
+    if (!appid || !secret) {
+      throw new Error("WECHAT_MP_APPID / WECHAT_MP_SECRET env missing");
+    }
+
+    const url =
+      "https://api.weixin.qq.com/sns/jscode2session?appid=" +
+      `${appid}&secret=${secret}&js_code=${code}&grant_type=authorization_code`;
+
+    let sessionResp: WechatSessionResp;
+    try {
+      const res = await fetch(url);
+      sessionResp = (await res.json()) as WechatSessionResp;
+    } catch (err) {
+      console.error("Failed to request WeChat jscode2session", err);
+      throw new Error("微信登录失败，请稍后再试");
+    }
+
+    if (!sessionResp.openid) {
+      throw new Error(sessionResp.errmsg || "微信登录失败");
+    }
+
+    // 2. 查找或创建用户
+    const provider = "wechat_mp";
+    const { openid } = sessionResp;
+
+    // 使用事务可确保一致性
+    let user: typeof users.$inferSelect | undefined;
+
+    // 查询 oauth_accounts
+    const existingOauth = await this.getFirstRow(
+      this.db
+        .select()
+        .from(oauth_accounts)
+        .where(
+          and(
+            eq(oauth_accounts.provider, provider),
+            eq(oauth_accounts.provider_user_id, openid)
+          )
+        )
+    );
+
+    if (existingOauth) {
+      // existing user
+      user = await this.getFirstRow(
+        this.db.select().from(users).where(eq(users.id, existingOauth.user_id))
+      );
+      if (!user) {
+        throw new Error("关联用户不存在");
+      }
+    } else {
+      // create new user & oauth account
+      const userId = generateId();
+      const username = `wx_${openid}`;
+
+      await this.db.insert(users).values({
+        id: userId,
+        username,
+        is_verified: true,
+      });
+
+      await this.db.insert(oauth_accounts).values({
+        id: generateId(),
+        user_id: userId,
+        provider,
+        provider_user_id: openid,
+        provider_user_data: JSON.stringify(sessionResp),
+      });
+
+      user = await this.getFirstRow(
+        this.db.select().from(users).where(eq(users.id, userId))
+      );
+    }
+
+    if (!user) {
+      throw new Error("用户创建失败");
+    }
+
+    const finalUser = user as NonNullable<typeof user>;
+
+    // 3. 创建会话
+    const session = await this.createSession(finalUser.id);
+
+    // 4. 生成 CSRF token
+    const csrfToken = this.generateCsrfToken();
+
+    // 5. 更新最后登录时间
+    await this.db
+      .update(users)
+      .set({ last_login_at: new Date().toISOString() })
+      .where(eq(users.id, finalUser.id));
+
+    return {
+      user: this.mapUserToResponse(finalUser),
+      sessionToken: session.sessionToken,
+      csrfToken,
+    };
   }
 
   // 检查用户名是否存在

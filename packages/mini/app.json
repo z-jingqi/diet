@@ -1,0 +1,9 @@
+{
+  "pages": [
+    "pages/webview/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "Diet App"
+  },
+  "style": "v2"
+} 

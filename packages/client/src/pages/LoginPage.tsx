@@ -14,6 +14,8 @@ import { Loader2, User, Lock, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
+import { useEffect } from "react";
+import { isWeChatMiniProgram } from "@/utils/is-wechat";
 import { Link } from "@tanstack/react-router";
 import { validateFormData } from "@/utils/validation";
 
@@ -25,7 +27,14 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { login, enableGuest, isLoading, clearError } = useAuth();
+  const { login, enableGuest, isLoading, clearError, isAuthenticated } = useAuth();
+
+  // 若在小程序且已登录，则直接跳转首页
+  useEffect(() => {
+    if (isWeChatMiniProgram() && isAuthenticated) {
+      authNavigate({ to: "/" });
+    }
+  }, [isAuthenticated, authNavigate]);
 
   const validateForm = () => {
     const { errors: newErrors, isValid } = validateFormData(formData);
