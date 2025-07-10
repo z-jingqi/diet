@@ -8,12 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface StreamingRecipeMessageBubbleProps {
   message: ChatMessage;
-  onGenerateRecipe?: (content: string) => void;
 }
 
 const RecipeMessageBubble = ({
   message,
-  onGenerateRecipe,
 }: StreamingRecipeMessageBubbleProps) => {
   const [generating, setGenerating] = useState(false);
 
@@ -23,9 +21,9 @@ const RecipeMessageBubble = ({
   }
 
   const handleGenerateRecipe = () => {
-    if (onGenerateRecipe && message.content) {
+    if (message.content) {
       setGenerating(true);
-      onGenerateRecipe(message.content);
+      // TODO: 生成菜谱
     }
   };
 

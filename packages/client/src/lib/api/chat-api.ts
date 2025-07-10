@@ -1,14 +1,14 @@
 import { sendMessage } from "./base-api";
-import {
-  HealthAdvice,
-  CHAT_PROMPT,
-  INTENT_PROMPT,
-  RECIPE_CHAT_PROMPT,
-  HEALTH_ADVICE_PROMPT,
-  HEALTH_ADVICE_CHAT_PROMPT,
-} from "@diet/shared";
+import { HealthAdvice } from "@diet/shared";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { MessageType } from "@/lib/gql/graphql";
+import {
+  CHAT_PROMPT,
+  HEALTH_ADVICE_CHAT_PROMPT,
+  HEALTH_ADVICE_PROMPT,
+  INTENT_PROMPT,
+  RECIPE_CHAT_PROMPT,
+} from "@/prompts";
 
 // 获取意图 - 通过发送带有INTENT_PROMPT的消息
 export const getIntent = async (
