@@ -4,6 +4,7 @@ import React, {
   useReducer,
   useCallback,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetMeQuery,
   useLoginMutation,
@@ -113,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const queryClient = useQueryClient();
 
   const login = useCallback(
     async (username: string, password: string): Promise<void> => {
@@ -128,6 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!result.login) {
           throw new Error("登录失败");
         }
+
+        // 清空之前的缓存，避免游客/旧用户数据污染
+        queryClient.clear();
 
         dispatch({
           type: AuthActionType.SET_AUTH,
@@ -166,6 +171,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error("注册失败");
         }
 
+        queryClient.clear();
+
         dispatch({
           type: AuthActionType.SET_AUTH,
           payload: {
@@ -197,6 +204,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const variables: LogoutMutationVariables = {};
 
       await useLogoutMutation.fetcher(client, variables)();
+      // 登出后清空所有缓存
+      queryClient.clear();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

@@ -1,109 +1,122 @@
+import { nanoid } from "nanoid";
+import {
+  ChatMessage,
+  ChatSession,
+  MessageRole,
+  MessageType,
+  MessageStatus,
+} from "@/lib/gql/graphql";
 import { ChatCompletionMessageParam } from "openai/resources";
-import { ChatMessage, MessageRole, Tag } from "@/lib/gql/graphql";
 
 /**
- * 增强用户消息，添加标签信息
- * @param messages 消息数组
- * @param currentTags 当前标签
- * @returns 增强后的消息数组
+ * Generate a title for a chat session based on the first user message
  */
-const enhanceUserMessages = (
-  messages: ChatMessage[],
-  currentTags?: Tag[]
-): ChatMessage[] => {
-  if (!currentTags || currentTags.length === 0) {
-    return messages;
+export const generateChatSessionTitleV2 = (messages: ChatMessage[]): string => {
+  const firstUserMessage = messages.find((m) => m.role === MessageRole.User);
+  if (!firstUserMessage || !firstUserMessage.content) {
+    return "New Chat";
   }
 
-  // 找到最后一条用户消息
-  const lastUserMessageIndex = messages
-    .map((msg, index) => ({ msg, index }))
-    .filter(({ msg }) => msg.role === MessageRole.User)
-    .pop()?.index;
+  const maxLength = 20;
+  const content = firstUserMessage.content.trim();
+  return content.length <= maxLength
+    ? content
+    : content.substring(0, maxLength) + "...";
+};
 
-  if (lastUserMessageIndex === undefined) {
-    return messages;
-  }
-
-  // 检查之前的用户消息，看是否已经包含了相同的饮食限制条件
-  const currentTagInfo = currentTags.map((tag) => tag.aiPrompt).join("\n");
-
-  // 从最后一条用户消息往前查找，直到找到第一个包含饮食限制条件的消息
-  for (let i = lastUserMessageIndex - 1; i >= 0; i--) {
-    const message = messages[i];
-    if (message.role !== MessageRole.User) {
-      continue; // 跳过AI消息
-    }
-
-    // 检查这条消息是否包含饮食限制条件
-    if (message.content?.includes("用户饮食限制条件：")) {
-      // 提取这条消息中的饮食限制条件
-      const match = message.content?.match(
-        /用户饮食限制条件：\n([\s\S]*?)\n\n用户问题：/
-      );
-      if (match) {
-        const previousTagInfo = match[1];
-        // 如果饮食限制条件相同，则不重复添加
-        if (previousTagInfo === currentTagInfo) {
-          return messages; // 直接返回原消息，不进行增强
-        }
-      }
-      // 如果找到了包含饮食限制条件的消息，就停止查找
-      break;
-    }
-  }
-
-  // 创建新的消息数组，只修改最后一条用户消息
-  const enhancedMessages = [...messages];
-  const lastUserMessage = enhancedMessages[lastUserMessageIndex];
-
-  const enhancedContent = `用户饮食限制条件：\n${currentTagInfo}\n\n用户问题：${lastUserMessage.content}`;
-
-  enhancedMessages[lastUserMessageIndex] = {
-    ...lastUserMessage,
-    content: enhancedContent,
+/**
+ * Create a new user message
+ */
+export const createUserMessageV2 = (content: string): ChatMessage => {
+  return {
+    id: nanoid(),
+    role: MessageRole.User,
+    content,
+    type: MessageType.Chat,
+    status: MessageStatus.Done,
+    createdAt: new Date().toISOString(),
   };
-
-  return enhancedMessages;
 };
 
 /**
- * 将消息转换为 AI 格式
- * @param messages 消息数组
- * @param currentTags 当前标签
- * @returns AI 格式的消息数组
+ * Create a new AI message
  */
-export const toAIMessages = (
-  messages: ChatMessage[],
-  currentTags?: Tag[]
+export const createAIMessageV2 = (
+  type: MessageType = MessageType.Chat
+): ChatMessage => {
+  return {
+    id: nanoid(),
+    role: MessageRole.Assistant,
+    content: "",
+    type,
+    status: MessageStatus.Pending,
+    createdAt: new Date().toISOString(),
+  };
+};
+
+/**
+ * Convert chat messages to OpenAI format
+ */
+export const toAIMessagesV2 = (
+  messages: ChatMessage[]
 ): ChatCompletionMessageParam[] => {
-  // 第一步：增强用户消息（添加标签信息）
-  const enhancedMessages = enhanceUserMessages(messages, currentTags);
-
-  // 第二步：转换为 AI 格式
-  const result: ChatCompletionMessageParam[] = enhancedMessages.map((msg) => {
-    if (msg.role === MessageRole.User) {
-      return { role: "user", content: msg.content || "" };
-    } else {
-      return { role: "assistant", content: msg.content || "" };
-    }
-  });
-
-  return result;
+  return messages.map((msg) => ({
+    role: msg.role as MessageRole,
+    content: msg.content || "",
+  }));
 };
 
 /**
- * 比较两个标签数组是否相同
- * @param tags1 第一个标签数组
- * @param tags2 第二个标签数组
- * @returns 是否相同
+ * Create a new empty chat session
  */
-export const areTagsEqual = (tags1: Tag[], tags2: Tag[]): boolean => {
-  if (!tags1 || !tags2) {
+export const createEmptyChatSessionV2 = (
+  id: string = nanoid()
+): ChatSession => {
+  const now = new Date().toISOString();
+  return {
+    id,
+    title: "New Chat",
+    messages: [],
+    tagIds: [],
+    createdAt: now,
+    updatedAt: now,
+  } as ChatSession;
+};
+
+/**
+ * Check if a message is in streaming state
+ */
+export const isMessageStreamingV2 = (message: ChatMessage): boolean => {
+  return message.status === MessageStatus.Streaming;
+};
+
+/**
+ * Check if user can send a message
+ */
+export const canSendMessageV2 = (
+  messages: ChatMessage[],
+  gettingIntent: boolean
+): boolean => {
+  if (gettingIntent) {
     return false;
   }
-  if (tags1.length !== tags2.length) {
+
+  if (messages.length === 0) {
+    return true;
+  }
+
+  const lastMessage = messages[messages.length - 1];
+
+  if (lastMessage.role === MessageRole.User) {
     return false;
   }
-  return tags1.every((tag1) => tags2.some((tag2) => tag2.id === tag1.id));
+
+  if (
+    lastMessage.status === MessageStatus.Pending ||
+    lastMessage.status === MessageStatus.Streaming
+  ) {
+    return false;
+  }
+
+  return true;
 };

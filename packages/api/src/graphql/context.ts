@@ -2,6 +2,7 @@ import type { DB } from "../db";
 import { user_sessions, users } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import type { AuthContext, GraphQLContext } from "../types";
+import type { Bindings } from "../types/bindings";
 
 // Services are created per-request to avoid connection/state sharing
 export type { GraphQLContext };
@@ -80,7 +81,8 @@ async function validateSessionToken(
 // ---------------------------------------------------------------------------
 export async function createGraphQLContext(
   db: DB,
-  headers: Headers
+  headers: Headers,
+  env: Bindings
 ): Promise<GraphQLContext> {
   const sessionToken = extractSessionToken(headers);
 
@@ -89,7 +91,7 @@ export async function createGraphQLContext(
   const { TagService } = await import("../services/tag-service");
 
   const services = {
-    auth: new AuthService(db),
+    auth: new AuthService(db, env),
     chat: new ChatService(db),
     tag: new TagService(db),
   } as const;

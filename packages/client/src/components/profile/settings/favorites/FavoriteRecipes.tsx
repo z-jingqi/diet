@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
-import { Typography, MutedText } from "@/components/ui/typography";
+import { MutedText } from "@/components/ui/typography";
 
 interface FavoriteRecipesProps {
   className?: string;

@@ -25,7 +25,7 @@ import {
   createAIMessageV2,
   toAIMessagesV2,
   createEmptyChatSessionV2,
-} from "@/utils/chat-utils-v2";
+} from "@/utils/chat-utils";
 
 /**
  * Query key constants for chat related queries

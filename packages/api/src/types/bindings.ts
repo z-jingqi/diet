@@ -1,4 +1,10 @@
-import type { KVNamespace, R2Bucket, Fetcher, Ai, D1Database } from "@cloudflare/workers-types";
+import type {
+  KVNamespace,
+  R2Bucket,
+  Fetcher,
+  Ai,
+  D1Database,
+} from "@cloudflare/workers-types";
 import type { AIProvider } from "../services/ai/types";
 
 // 定义环境变量类型
@@ -9,8 +15,8 @@ export type Bindings = {
   // AI 服务相关
   AI_SERVICE?: AIProvider; // 使用的 AI 服务提供商
   AI: Ai; // Cloudflare Workers AI binding
-  
-  QWEN_MODEL?: string;  // 千问模型
+
+  QWEN_MODEL?: string; // 千问模型
   QWEN_API_KEY?: string; // 阿里云 DashScope API Key
   CLOUDFLARE_MODEL?: string; // Cloudflare AI model
 
@@ -24,6 +30,10 @@ export type Bindings = {
   // 对象存储相关
   BUCKET?: R2Bucket; // Cloudflare R2 存储
 
+  // --- WeChat Mini Program credentials ---
+  WECHAT_MP_APPID?: string;
+  WECHAT_MP_SECRET?: string;
+
   // 其他服务
   ASSETS: Fetcher; // 静态资源绑定
-}; 
+};
