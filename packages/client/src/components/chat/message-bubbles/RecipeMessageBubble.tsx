@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Markdown } from "@/components/ui/markdown";
-import { Button } from "@/components/ui/button";
-import { Typography } from "@/components/ui/typography";
-import { Utensils } from "lucide-react";
+import { useMemo } from "react";
+import { extractBasicRecipeInfos } from "@/utils/recipe-extractor";
+import RecipeRecommendationsEntry from "./RecipeRecommendationsEntry";
 import { ChatMessage, MessageStatus, MessageType } from "@/lib/gql/graphql";
-import { cn } from "@/lib/utils";
 
 interface StreamingRecipeMessageBubbleProps {
   message: ChatMessage;
@@ -13,19 +11,15 @@ interface StreamingRecipeMessageBubbleProps {
 const RecipeMessageBubble = ({
   message,
 }: StreamingRecipeMessageBubbleProps) => {
-  const [generating, setGenerating] = useState(false);
-
   // 只处理 type 为 recipe 的消息
   if (message.type !== MessageType.Recipe) {
     return null;
   }
 
-  const handleGenerateRecipe = () => {
-    if (message.content) {
-      setGenerating(true);
-      // TODO: 生成菜谱
-    }
-  };
+  // 提取菜谱基础信息
+  const recipeInfos = useMemo(() => {
+    return extractBasicRecipeInfos(message.content || "");
+  }, [message.content]);
 
   return (
     <div className="flex w-full justify-start">
@@ -36,24 +30,10 @@ const RecipeMessageBubble = ({
             <Markdown content={message.content || ""} className="max-w-none" />
           </div>
 
-          {/* 生成菜谱按钮 - 只在消息完成后显示 */}
-          {message.status === MessageStatus.Done && (
+          {/* 生成菜谱 Popover - 只在消息完成后显示 */}
+          {message.status === MessageStatus.Done && recipeInfos.length > 0 && (
             <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleGenerateRecipe}
-                disabled={generating}
-                className={cn(
-                  "flex items-center gap-1",
-                  generating && "text-green-600"
-                )}
-              >
-                <Utensils className="w-4 h-4" />
-                <Typography variant="span" className="text-sm">
-                  {generating ? "生成中..." : "生成详细菜谱"}
-                </Typography>
-              </Button>
+              <RecipeRecommendationsEntry recipes={recipeInfos} />
             </div>
           )}
         </div>
