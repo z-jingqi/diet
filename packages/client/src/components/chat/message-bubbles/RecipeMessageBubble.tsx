@@ -11,15 +11,15 @@ interface StreamingRecipeMessageBubbleProps {
 const RecipeMessageBubble = ({
   message,
 }: StreamingRecipeMessageBubbleProps) => {
-  // 只处理 type 为 recipe 的消息
-  if (message.type !== MessageType.Recipe) {
-    return null;
-  }
-
   // 提取菜谱基础信息
   const recipeInfos = useMemo(() => {
     return extractBasicRecipeInfos(message.content || "");
   }, [message.content]);
+
+  // 只处理 type 为 recipe 的消息
+  if (message.type !== MessageType.Recipe) {
+    return null;
+  }
 
   return (
     <div className="flex w-full justify-start">
