@@ -12,6 +12,7 @@ import type {
   RefreshTokenResponse,
 } from "../types";
 import { oauth_accounts } from "../db/schema";
+import type { Bindings } from "../types/bindings";
 
 type SessionWithUser = {
   users: typeof users.$inferSelect;
@@ -27,7 +28,10 @@ interface WechatSessionResp {
 }
 
 export class AuthService {
-  constructor(private db: DB) {}
+  constructor(
+    private db: DB,
+    private env: Bindings
+  ) {}
 
   // 密码加密（使用PBKDF2和随机盐值）
   private async hashPassword(password: string): Promise<string> {
@@ -412,8 +416,7 @@ export class AuthService {
   // 微信小程序登录
   async wechatLogin(code: string): Promise<LoginResponse> {
     // 1. 调用微信接口换取 openid & session_key
-    const appid = process.env.WECHAT_MP_APPID;
-    const secret = process.env.WECHAT_MP_SECRET;
+    const { WECHAT_MP_APPID: appid, WECHAT_MP_SECRET: secret } = this.env;
 
     if (!appid || !secret) {
       throw new Error("WECHAT_MP_APPID / WECHAT_MP_SECRET env missing");

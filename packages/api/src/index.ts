@@ -89,7 +89,7 @@ app.all("/graphql", async (c) => {
   const db = createDB(c.env.DB);
 
   // 创建 GraphQL 上下文（包含认证信息）
-  const context = await createGraphQLContext(db, c.req.raw.headers);
+  const context = await createGraphQLContext(db, c.req.raw.headers, c.env);
 
   // Pass the GraphQLContext as the **third** parameter so Yoga uses it directly
   const response = (await yoga.fetch(
