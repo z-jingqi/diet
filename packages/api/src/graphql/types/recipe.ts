@@ -1,0 +1,202 @@
+import { builder, DateTimeScalar } from "../builder";
+import { recipes } from "../../db/schema";
+import { InferSelectModel } from "drizzle-orm";
+import { requireAuth } from "../middleware/auth";
+
+// Drizzle model type
+type RecipeModel = InferSelectModel<typeof recipes>;
+
+// ----------------------
+// Recipe type
+// ----------------------
+export const RecipeRef = builder.objectRef<RecipeModel>("Recipe").implement({
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    name: t.exposeString("name"),
+    description: t.exposeString("description", { nullable: true }),
+    coverImageUrl: t.exposeString("cover_image_url", { nullable: true }),
+    cuisineType: t.field({
+      type: CuisineTypeEnum,
+      nullable: true,
+      resolve: (p) => p.cuisine_type as any,
+    }),
+    mealType: t.field({
+      type: MealTypeEnum,
+      nullable: true,
+      resolve: (p) => p.meal_type as any,
+    }),
+    servings: t.exposeInt("servings"),
+    difficulty: t.field({
+      type: DifficultyEnum,
+      nullable: true,
+      resolve: (p) => p.difficulty as any,
+    }),
+    prepTimeApproxMin: t.exposeInt("prep_time_approx_min", { nullable: true }),
+    cookTimeApproxMin: t.exposeInt("cook_time_approx_min", { nullable: true }),
+    totalTimeApproxMin: t.exposeInt("total_time_approx_min", { nullable: true }),
+    costApprox: t.exposeInt("cost_approx", { nullable: true }),
+    currency: t.exposeString("currency", { nullable: true }),
+    tips: t.exposeString("tips", { nullable: true }),
+    leftoverHandling: t.exposeString("leftover_handling", { nullable: true }),
+    version: t.exposeInt("version"),
+    checksum: t.exposeString("checksum"),
+    createdAt: t.expose("created_at", { type: DateTimeScalar, nullable: true }),
+    updatedAt: t.expose("updated_at", { type: DateTimeScalar, nullable: true }),
+
+    // JSON parsed fields
+    dietaryTags: t.field({
+      type: ["String"],
+      nullable: true,
+      resolve: (parent) => {
+        if (!parent.dietary_tags) return null;
+        try {
+          return JSON.parse(parent.dietary_tags);
+        } catch {
+          return null;
+        }
+      },
+    }),
+    allergens: t.field({
+      type: ["String"],
+      nullable: true,
+      resolve: (parent) => {
+        if (!parent.allergens) return null;
+        try {
+          return JSON.parse(parent.allergens);
+        } catch {
+          return null;
+        }
+      },
+    }),
+    ingredientsJson: t.exposeString("ingredients"),
+    stepsJson: t.exposeString("steps"),
+    nutrientsJson: t.exposeString("nutrients", { nullable: true }),
+    equipmentsJson: t.exposeString("equipments", { nullable: true }),
+  }),
+});
+
+// ----------------------
+// Input type
+// ----------------------
+const RecipeInput = builder.inputType("RecipeInput", {
+  fields: (t) => ({
+    name: t.string({ required: true }),
+    description: t.string(),
+    coverImageUrl: t.string(),
+    cuisineType: t.field({ type: CuisineTypeEnum }),
+    mealType: t.field({ type: MealTypeEnum }),
+    servings: t.int({ required: true }),
+    difficulty: t.field({ type: DifficultyEnum }),
+    prepTimeApproxMin: t.int(),
+    cookTimeApproxMin: t.int(),
+    totalTimeApproxMin: t.int(),
+    costApprox: t.int(),
+    currency: t.string(),
+    dietaryTags: t.stringList(),
+    allergens: t.stringList(),
+    tips: t.string(),
+    leftoverHandling: t.string(),
+    ingredientsJson: t.string({ required: true }),
+    stepsJson: t.string({ required: true }),
+    nutrientsJson: t.string(),
+    equipmentsJson: t.string(),
+  }),
+});
+
+// ----------------------
+// Queries
+// ----------------------
+builder.queryFields((t) => ({
+  myRecipes: t.field({
+    type: [RecipeRef],
+    resolve: (_r, _a, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.listMyRecipes(auth.user.id);
+    },
+  }),
+
+  recipe: t.field({
+    type: RecipeRef,
+    args: { id: t.arg.id({ required: true }) },
+    resolve: (_r, { id }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.getRecipe(id, auth.user.id);
+    },
+  }),
+}));
+
+// ----------------------
+// Mutations
+// ----------------------
+builder.mutationFields((t) => ({
+  createRecipe: t.field({
+    type: RecipeRef,
+    args: { input: t.arg({ type: RecipeInput, required: true }) },
+    resolve: (_r, { input }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.createRecipe(auth.user.id, input as any);
+    },
+  }),
+
+  updateRecipe: t.field({
+    type: RecipeRef,
+    args: {
+      id: t.arg.id({ required: true }),
+      input: t.arg({ type: RecipeInput, required: true }),
+    },
+    resolve: (_r, { id, input }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.updateRecipe(id, auth.user.id, input as any);
+    },
+  }),
+
+  deleteRecipe: t.field({
+    type: "Boolean",
+    args: { id: t.arg.id({ required: true }) },
+    resolve: (_r, { id }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.deleteRecipe(id, auth.user.id);
+    },
+  }),
+}));
+
+// ----------------------
+// Enums
+// ----------------------
+
+export const DifficultyEnum = builder.enumType("Difficulty", {
+  values: {
+    EASY: {},
+    MEDIUM: {},
+    HARD: {},
+  },
+});
+
+export const MealTypeEnum = builder.enumType("MealType", {
+  description: "用餐场景 / 餐次类型",
+  values: {
+    BREAKFAST: { description: "早餐" },
+    LUNCH: { description: "午餐" },
+    DINNER: { description: "晚餐" },
+    SNACK: { description: "加餐 / 零食" },
+    DESSERT: { description: "甜点" },
+    DRINK: { description: "饮品" },
+    OTHER: { description: "其他场景" },
+  },
+});
+
+export const CuisineTypeEnum = builder.enumType("CuisineType", {
+  description: "菜系类型，用于区分不同风味的食谱",
+  values: {
+    CHINESE: { description: "中餐 / 中国菜" },
+    JAPANESE: { description: "日餐 / 日本菜" },
+    KOREAN: { description: "韩餐 / 韩国菜" },
+    ITALIAN: { description: "意大利菜" },
+    FRENCH: { description: "法餐" },
+    MEXICAN: { description: "墨西哥菜" },
+    INDIAN: { description: "印度菜" },
+    THAI: { description: "泰国菜" },
+    WESTERN: { description: "西餐（泛指欧美等西方菜系）" },
+    OTHER: { description: "其他或未分类" },
+  },
+}); 

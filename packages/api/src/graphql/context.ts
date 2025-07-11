@@ -89,11 +89,13 @@ export async function createGraphQLContext(
   const { AuthService } = await import("../services/auth-service");
   const { ChatService } = await import("../services/chat-service");
   const { TagService } = await import("../services/tag-service");
+  const { RecipeService } = await import("../services/recipe-service");
 
   const services = {
     auth: new AuthService(db, env),
     chat: new ChatService(db),
     tag: new TagService(db),
+    recipe: new RecipeService(db),
   } as const;
 
   if (!sessionToken) {

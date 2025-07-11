@@ -41,18 +41,21 @@ export const extractBasicRecipeInfos = (
     return results;
   }
 
+  // 将 HTML 换行标签统一替换为换行符，方便后续正则匹配
+  const normalizedContent = content.replace(/<br\s*\/?\s*>/gi, "\n");
+
   // 使用多行正则一次性提取一个菜品块
   const recipeBlockRegex = /\*\*\s*(?:\d+\.)?\s*([^*]+?)\s*\*\*\s*\n\s*适用人数：([^\n]+?)\n\s*大概花费：([^\n]+?)\n\s*难度：([^\n]+?)\n/gu;
 
   let match: RegExpExecArray | null;
-  while ((match = recipeBlockRegex.exec(content)) !== null) {
+  while ((match = recipeBlockRegex.exec(normalizedContent)) !== null) {
     const [, name, servings, cost, difficulty] = match;
     results.push({
       id: nanoid(),
-      name: name.trim(),
-      servings: servings.trim(),
-      cost: cost.trim(),
-      difficulty: difficulty.trim(),
+      name: name.replace(/<br\s*\/?\s*>/gi, "").trim(),
+      servings: servings.replace(/<br\s*\/?\s*>/gi, "").trim(),
+      cost: cost.replace(/<br\s*\/?\s*>/gi, "").trim(),
+      difficulty: difficulty.replace(/<br\s*\/?\s*>/gi, "").trim(),
     });
   }
 

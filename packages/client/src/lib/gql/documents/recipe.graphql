@@ -1,0 +1,69 @@
+# Recipe full fields fragment
+fragment RecipeFields on Recipe {
+  id
+  name
+  description
+  coverImageUrl
+  cuisineType
+  mealType
+  servings
+  difficulty
+  prepTimeApproxMin
+  cookTimeApproxMin
+  totalTimeApproxMin
+  costApprox
+  currency
+  dietaryTags
+  allergens
+  tips
+  leftoverHandling
+  ingredientsJson
+  stepsJson
+  nutrientsJson
+  equipmentsJson
+  version
+  checksum
+  createdAt
+  updatedAt
+}
+
+# 基础信息（适合列表展示）
+fragment RecipeBasicFields on Recipe {
+  id
+  name
+  servings
+  cuisineType
+  mealType
+  createdAt
+  updatedAt
+}
+
+# Queries
+query MyRecipes {
+  myRecipes {
+    ...RecipeBasicFields
+  }
+}
+
+query GetRecipe($id: ID!) {
+  recipe(id: $id) {
+    ...RecipeFields
+  }
+}
+
+# Mutations
+mutation CreateRecipe($input: RecipeInput!) {
+  createRecipe(input: $input) {
+    ...RecipeFields
+  }
+}
+
+mutation UpdateRecipe($id: ID!, $input: RecipeInput!) {
+  updateRecipe(id: $id, input: $input) {
+    ...RecipeFields
+  }
+}
+
+mutation DeleteRecipe($id: ID!) {
+  deleteRecipe(id: $id)
+} 

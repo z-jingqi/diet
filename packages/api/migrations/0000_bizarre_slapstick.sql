@@ -89,3 +89,35 @@ CREATE TABLE `chat_sessions` (
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP,
 	`deleted_at` text
 );
+--> statement-breakpoint
+CREATE TABLE `recipes` (
+	`id` text PRIMARY KEY NOT NULL,
+	`user_id` text NOT NULL,
+	`name` text NOT NULL,
+	`description` text,
+	`cover_image_url` text,
+	`cuisine_type` text,
+	`meal_type` text,
+	`servings` integer NOT NULL,
+	`difficulty` text NOT NULL,
+	`prep_time_approx_min` integer,
+	`cook_time_approx_min` integer,
+	`total_time_approx_min` integer,
+	`cost_approx` integer,
+	`currency` text,
+	`dietary_tags` text,
+	`allergens` text,
+	`tips` text,
+	`leftover_handling` text,
+	`version` integer DEFAULT 1,
+	`checksum` text,
+	`source_message_id` text,
+	`ingredients` text,
+	`steps` text,
+	`nutrients` text,
+	`equipments` text,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP,
+	`deleted_at` text,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);

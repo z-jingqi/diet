@@ -55,12 +55,60 @@ export type ChatSession = {
   user?: Maybe<User>;
 };
 
+/** 菜系类型，用于区分不同风味的食谱 */
+export enum CuisineType {
+  /** 中餐 / 中国菜 */
+  Chinese = 'CHINESE',
+  /** 法餐 */
+  French = 'FRENCH',
+  /** 印度菜 */
+  Indian = 'INDIAN',
+  /** 意大利菜 */
+  Italian = 'ITALIAN',
+  /** 日餐 / 日本菜 */
+  Japanese = 'JAPANESE',
+  /** 韩餐 / 韩国菜 */
+  Korean = 'KOREAN',
+  /** 墨西哥菜 */
+  Mexican = 'MEXICAN',
+  /** 其他或未分类 */
+  Other = 'OTHER',
+  /** 泰国菜 */
+  Thai = 'THAI',
+  /** 西餐（泛指欧美等西方菜系） */
+  Western = 'WESTERN'
+}
+
+export enum Difficulty {
+  Easy = 'EASY',
+  Hard = 'HARD',
+  Medium = 'MEDIUM'
+}
+
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   csrfToken?: Maybe<Scalars['String']['output']>;
   sessionToken?: Maybe<Scalars['String']['output']>;
   user?: Maybe<User>;
 };
+
+/** 用餐场景 / 餐次类型 */
+export enum MealType {
+  /** 早餐 */
+  Breakfast = 'BREAKFAST',
+  /** 甜点 */
+  Dessert = 'DESSERT',
+  /** 晚餐 */
+  Dinner = 'DINNER',
+  /** 饮品 */
+  Drink = 'DRINK',
+  /** 午餐 */
+  Lunch = 'LUNCH',
+  /** 其他场景 */
+  Other = 'OTHER',
+  /** 加餐 / 零食 */
+  Snack = 'SNACK'
+}
 
 export enum MessageRole {
   Assistant = 'assistant',
@@ -86,12 +134,14 @@ export type Mutation = {
   __typename?: 'Mutation';
   createChatSession?: Maybe<ChatSession>;
   createOAuthAccount?: Maybe<OAuthAccount>;
+  createRecipe?: Maybe<Recipe>;
   createTag?: Maybe<Tag>;
   createTagCategory?: Maybe<TagCategory>;
   createTagConflict?: Maybe<TagConflict>;
   createUser?: Maybe<User>;
   createUserSession?: Maybe<UserSession>;
   deleteChatSession?: Maybe<Scalars['Boolean']['output']>;
+  deleteRecipe?: Maybe<Scalars['Boolean']['output']>;
   deleteTag?: Maybe<Scalars['Boolean']['output']>;
   deleteTagCategory?: Maybe<Scalars['Boolean']['output']>;
   deleteTagConflict?: Maybe<Scalars['Boolean']['output']>;
@@ -101,6 +151,7 @@ export type Mutation = {
   refreshSession?: Maybe<RefreshResponse>;
   register?: Maybe<LoginResponse>;
   updateChatSession?: Maybe<ChatSession>;
+  updateRecipe?: Maybe<Recipe>;
   updateTag?: Maybe<Tag>;
   updateTagCategory?: Maybe<TagCategory>;
   updateUser?: Maybe<User>;
@@ -123,6 +174,11 @@ export type MutationCreateOAuthAccountArgs = {
   providerUserId: Scalars['String']['input'];
   refreshToken?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['String']['input'];
+};
+
+
+export type MutationCreateRecipeArgs = {
+  input: RecipeInput;
 };
 
 
@@ -177,6 +233,11 @@ export type MutationDeleteChatSessionArgs = {
 };
 
 
+export type MutationDeleteRecipeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteTagArgs = {
   id: Scalars['ID']['input'];
 };
@@ -219,6 +280,12 @@ export type MutationUpdateChatSessionArgs = {
   messages?: InputMaybe<Scalars['String']['input']>;
   tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUpdateRecipeArgs = {
+  id: Scalars['ID']['input'];
+  input: RecipeInput;
 };
 
 
@@ -276,7 +343,9 @@ export type Query = {
   hello?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   myChatSessions?: Maybe<Array<ChatSession>>;
+  myRecipes?: Maybe<Array<Recipe>>;
   oauthAccounts?: Maybe<Array<OAuthAccount>>;
+  recipe?: Maybe<Recipe>;
   tag?: Maybe<Tag>;
   tagCategories?: Maybe<Array<TagCategory>>;
   tagCategory?: Maybe<TagCategory>;
@@ -306,6 +375,11 @@ export type QueryCheckTagConflictsArgs = {
 
 export type QueryOauthAccountsArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryRecipeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -342,6 +416,58 @@ export type QueryUserByUsernameArgs = {
 
 export type QueryUserSessionsArgs = {
   userId: Scalars['String']['input'];
+};
+
+export type Recipe = {
+  __typename?: 'Recipe';
+  allergens?: Maybe<Array<Scalars['String']['output']>>;
+  checksum?: Maybe<Scalars['String']['output']>;
+  cookTimeApproxMin?: Maybe<Scalars['Int']['output']>;
+  costApprox?: Maybe<Scalars['Int']['output']>;
+  coverImageUrl?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  cuisineType?: Maybe<CuisineType>;
+  currency?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  dietaryTags?: Maybe<Array<Scalars['String']['output']>>;
+  difficulty?: Maybe<Difficulty>;
+  equipmentsJson?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  ingredientsJson?: Maybe<Scalars['String']['output']>;
+  leftoverHandling?: Maybe<Scalars['String']['output']>;
+  mealType?: Maybe<MealType>;
+  name?: Maybe<Scalars['String']['output']>;
+  nutrientsJson?: Maybe<Scalars['String']['output']>;
+  prepTimeApproxMin?: Maybe<Scalars['Int']['output']>;
+  servings?: Maybe<Scalars['Int']['output']>;
+  stepsJson?: Maybe<Scalars['String']['output']>;
+  tips?: Maybe<Scalars['String']['output']>;
+  totalTimeApproxMin?: Maybe<Scalars['Int']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['Int']['output']>;
+};
+
+export type RecipeInput = {
+  allergens?: InputMaybe<Array<Scalars['String']['input']>>;
+  cookTimeApproxMin?: InputMaybe<Scalars['Int']['input']>;
+  costApprox?: InputMaybe<Scalars['Int']['input']>;
+  coverImageUrl?: InputMaybe<Scalars['String']['input']>;
+  cuisineType?: InputMaybe<CuisineType>;
+  currency?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  dietaryTags?: InputMaybe<Array<Scalars['String']['input']>>;
+  difficulty?: InputMaybe<Difficulty>;
+  equipmentsJson?: InputMaybe<Scalars['String']['input']>;
+  ingredientsJson: Scalars['String']['input'];
+  leftoverHandling?: InputMaybe<Scalars['String']['input']>;
+  mealType?: InputMaybe<MealType>;
+  name: Scalars['String']['input'];
+  nutrientsJson?: InputMaybe<Scalars['String']['input']>;
+  prepTimeApproxMin?: InputMaybe<Scalars['Int']['input']>;
+  servings: Scalars['Int']['input'];
+  stepsJson: Scalars['String']['input'];
+  tips?: InputMaybe<Scalars['String']['input']>;
+  totalTimeApproxMin?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type RefreshResponse = {
@@ -508,6 +634,44 @@ export type DeleteChatSessionMutationVariables = Exact<{
 
 export type DeleteChatSessionMutation = { __typename?: 'Mutation', deleteChatSession?: boolean | null };
 
+export type RecipeFieldsFragment = { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null };
+
+export type RecipeBasicFieldsFragment = { __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, createdAt?: any | null, updatedAt?: any | null };
+
+export type MyRecipesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyRecipesQuery = { __typename?: 'Query', myRecipes?: Array<{ __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, createdAt?: any | null, updatedAt?: any | null }> | null };
+
+export type GetRecipeQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetRecipeQuery = { __typename?: 'Query', recipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
+
+export type CreateRecipeMutationVariables = Exact<{
+  input: RecipeInput;
+}>;
+
+
+export type CreateRecipeMutation = { __typename?: 'Mutation', createRecipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
+
+export type UpdateRecipeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: RecipeInput;
+}>;
+
+
+export type UpdateRecipeMutation = { __typename?: 'Mutation', updateRecipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
+
+export type DeleteRecipeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteRecipeMutation = { __typename?: 'Mutation', deleteRecipe?: boolean | null };
+
 export type TagFieldsFragment = { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null };
 
 export type TagCategoryFieldsFragment = { __typename?: 'TagCategory', id?: string | null, name?: string | null, description?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null };
@@ -581,6 +745,46 @@ export const ChatMessageFieldsFragmentDoc = `
   role
   createdAt
   status
+}
+    `;
+export const RecipeFieldsFragmentDoc = `
+    fragment RecipeFields on Recipe {
+  id
+  name
+  description
+  coverImageUrl
+  cuisineType
+  mealType
+  servings
+  difficulty
+  prepTimeApproxMin
+  cookTimeApproxMin
+  totalTimeApproxMin
+  costApprox
+  currency
+  dietaryTags
+  allergens
+  tips
+  leftoverHandling
+  ingredientsJson
+  stepsJson
+  nutrientsJson
+  equipmentsJson
+  version
+  checksum
+  createdAt
+  updatedAt
+}
+    `;
+export const RecipeBasicFieldsFragmentDoc = `
+    fragment RecipeBasicFields on Recipe {
+  id
+  name
+  servings
+  cuisineType
+  mealType
+  createdAt
+  updatedAt
 }
     `;
 export const TagFieldsFragmentDoc = `
@@ -1003,6 +1207,150 @@ export const useDeleteChatSessionMutation = <
 
 
 useDeleteChatSessionMutation.fetcher = (client: GraphQLClient, variables: DeleteChatSessionMutationVariables, headers?: RequestInit['headers']) => fetcher<DeleteChatSessionMutation, DeleteChatSessionMutationVariables>(client, DeleteChatSessionDocument, variables, headers);
+
+export const MyRecipesDocument = `
+    query MyRecipes {
+  myRecipes {
+    ...RecipeBasicFields
+  }
+}
+    ${RecipeBasicFieldsFragmentDoc}`;
+
+export const useMyRecipesQuery = <
+      TData = MyRecipesQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables?: MyRecipesQueryVariables,
+      options?: Omit<UseQueryOptions<MyRecipesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<MyRecipesQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<MyRecipesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyRecipes'] : ['MyRecipes', variables],
+    queryFn: fetcher<MyRecipesQuery, MyRecipesQueryVariables>(client, MyRecipesDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useMyRecipesQuery.getKey = (variables?: MyRecipesQueryVariables) => variables === undefined ? ['MyRecipes'] : ['MyRecipes', variables];
+
+
+useMyRecipesQuery.fetcher = (client: GraphQLClient, variables?: MyRecipesQueryVariables, headers?: RequestInit['headers']) => fetcher<MyRecipesQuery, MyRecipesQueryVariables>(client, MyRecipesDocument, variables, headers);
+
+export const GetRecipeDocument = `
+    query GetRecipe($id: ID!) {
+  recipe(id: $id) {
+    ...RecipeFields
+  }
+}
+    ${RecipeFieldsFragmentDoc}`;
+
+export const useGetRecipeQuery = <
+      TData = GetRecipeQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables: GetRecipeQueryVariables,
+      options?: Omit<UseQueryOptions<GetRecipeQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetRecipeQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<GetRecipeQuery, TError, TData>(
+      {
+    queryKey: ['GetRecipe', variables],
+    queryFn: fetcher<GetRecipeQuery, GetRecipeQueryVariables>(client, GetRecipeDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useGetRecipeQuery.getKey = (variables: GetRecipeQueryVariables) => ['GetRecipe', variables];
+
+
+useGetRecipeQuery.fetcher = (client: GraphQLClient, variables: GetRecipeQueryVariables, headers?: RequestInit['headers']) => fetcher<GetRecipeQuery, GetRecipeQueryVariables>(client, GetRecipeDocument, variables, headers);
+
+export const CreateRecipeDocument = `
+    mutation CreateRecipe($input: RecipeInput!) {
+  createRecipe(input: $input) {
+    ...RecipeFields
+  }
+}
+    ${RecipeFieldsFragmentDoc}`;
+
+export const useCreateRecipeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<CreateRecipeMutation, TError, CreateRecipeMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<CreateRecipeMutation, TError, CreateRecipeMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateRecipe'],
+    mutationFn: (variables?: CreateRecipeMutationVariables) => fetcher<CreateRecipeMutation, CreateRecipeMutationVariables>(client, CreateRecipeDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useCreateRecipeMutation.fetcher = (client: GraphQLClient, variables: CreateRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<CreateRecipeMutation, CreateRecipeMutationVariables>(client, CreateRecipeDocument, variables, headers);
+
+export const UpdateRecipeDocument = `
+    mutation UpdateRecipe($id: ID!, $input: RecipeInput!) {
+  updateRecipe(id: $id, input: $input) {
+    ...RecipeFields
+  }
+}
+    ${RecipeFieldsFragmentDoc}`;
+
+export const useUpdateRecipeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<UpdateRecipeMutation, TError, UpdateRecipeMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<UpdateRecipeMutation, TError, UpdateRecipeMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateRecipe'],
+    mutationFn: (variables?: UpdateRecipeMutationVariables) => fetcher<UpdateRecipeMutation, UpdateRecipeMutationVariables>(client, UpdateRecipeDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useUpdateRecipeMutation.fetcher = (client: GraphQLClient, variables: UpdateRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<UpdateRecipeMutation, UpdateRecipeMutationVariables>(client, UpdateRecipeDocument, variables, headers);
+
+export const DeleteRecipeDocument = `
+    mutation DeleteRecipe($id: ID!) {
+  deleteRecipe(id: $id)
+}
+    `;
+
+export const useDeleteRecipeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<DeleteRecipeMutation, TError, DeleteRecipeMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<DeleteRecipeMutation, TError, DeleteRecipeMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteRecipe'],
+    mutationFn: (variables?: DeleteRecipeMutationVariables) => fetcher<DeleteRecipeMutation, DeleteRecipeMutationVariables>(client, DeleteRecipeDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useDeleteRecipeMutation.fetcher = (client: GraphQLClient, variables: DeleteRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<DeleteRecipeMutation, DeleteRecipeMutationVariables>(client, DeleteRecipeDocument, variables, headers);
 
 export const GetTagsDocument = `
     query GetTags($categoryId: ID, $search: String) {
