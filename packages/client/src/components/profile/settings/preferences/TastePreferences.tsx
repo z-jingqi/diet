@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Flame, Droplet, Heart, Zap, Star } from "lucide-react";
-import usePreferencesStore from "@/store/preferences-store";
+import { useState } from "react";
 import { tasteLabels, type TastePreference } from "@/data/taste-preferences";
 
 interface TastePreferencesProps {
@@ -10,7 +10,21 @@ interface TastePreferencesProps {
 }
 
 const TastePreferences = ({ className }: TastePreferencesProps) => {
-  const { tastePreferences, updateTastePreference } = usePreferencesStore();
+  const [tastePreferences, setTastePreferences] = useState<TastePreference>({
+    cuisine: [],
+    spiciness: 0,
+    saltiness: 0,
+    sweetness: 0,
+    sourness: 0,
+    umami: 0,
+  });
+
+  const updateTastePreference = (
+    key: keyof Omit<TastePreference, "cuisine">,
+    value: number
+  ) => {
+    setTastePreferences((prev) => ({ ...prev, [key]: value }));
+  };
 
   const tasteIcons = {
     spiciness: Flame,

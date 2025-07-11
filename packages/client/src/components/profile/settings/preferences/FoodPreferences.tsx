@@ -5,16 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { X, Plus, Utensils } from "lucide-react";
-import usePreferencesStore from "@/store/preferences-store";
 
 interface FoodPreferencesProps {
   className?: string;
 }
 
 const FoodPreferences = ({ className }: FoodPreferencesProps) => {
-  const { dislikedFoods, addDislikedFood, removeDislikedFood } =
-    usePreferencesStore();
+  const [dislikedFoods, setDislikedFoods] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
+
+  const addDislikedFood = (food: string) =>
+    setDislikedFoods((prev) => [...prev, food]);
+
+  const removeDislikedFood = (food: string) =>
+    setDislikedFoods((prev) => prev.filter((f) => f !== food));
 
   const handleAddFood = () => {
     const foodName = inputValue.trim();
