@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { ThumbsUp, ThumbsDown, Utensils } from "lucide-react";
-import { BasicRecipeInfo } from "@/utils/recipe-extractor";
+import { BasicRecipeInfo } from "@/types/recipe";
 
 interface RecipeRecommendationItemProps {
   recipe: BasicRecipeInfo;
@@ -27,9 +27,9 @@ const RecipeRecommendationItem = ({
           {recipe.name}
         </Typography>
         <div className="text-xs text-muted-foreground mt-0.5 space-x-1 truncate">
-          <span>{recipe.servings}</span>
+          <span>{recipe.avgCost}</span>
           <span>|</span>
-          <span>{recipe.cost}</span>
+          <span>{recipe.duration}</span>
           <span>|</span>
           <span>{recipe.difficulty}</span>
         </div>

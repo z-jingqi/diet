@@ -9,15 +9,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import RecipeRecommendationItem from "./RecipeRecommendationItem";
-import { BasicRecipeInfo } from "@/utils/recipe-extractor";
+import { BasicRecipeInfo } from "@/types/recipe";
 import { Utensils } from "lucide-react";
 
 interface RecipeRecommendationsDialogProps {
   recipes: BasicRecipeInfo[];
+  onLike?: (recipe: BasicRecipeInfo) => void;
+  onDislike?: (recipe: BasicRecipeInfo) => void;
+  onGenerate?: (recipe: BasicRecipeInfo) => void;
 }
 
 const RecipeRecommendationsDialog = ({
   recipes,
+  onLike,
+  onDislike,
+  onGenerate,
 }: RecipeRecommendationsDialogProps) => {
   const [open, setOpen] = useState(false);
 
@@ -48,14 +54,14 @@ const RecipeRecommendationsDialog = ({
             <RecipeRecommendationItem
               key={recipe.id}
               recipe={recipe}
-              onLike={() => {
-                // TODO: 处理喜欢逻辑
+              onLike={(r) => {
+                onLike?.(r);
               }}
-              onDislike={() => {
-                // TODO: 处理不喜欢逻辑
+              onDislike={(r) => {
+                onDislike?.(r);
               }}
-              onGenerate={() => {
-                // TODO: 生成该菜谱详细信息
+              onGenerate={(r) => {
+                onGenerate?.(r);
                 setOpen(false);
               }}
             />
