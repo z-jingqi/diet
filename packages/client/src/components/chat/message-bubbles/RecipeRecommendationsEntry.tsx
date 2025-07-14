@@ -5,16 +5,16 @@ import RecipeRecommendationsDialog from "./RecipeRecommendationsDialog";
 
 interface RecipeRecommendationsEntryProps {
   recipes: BasicRecipeInfo[];
-  onLike?: (recipe: BasicRecipeInfo) => void;
-  onDislike?: (recipe: BasicRecipeInfo) => void;
+  /** 点击生成菜谱 */
   onGenerate?: (recipe: BasicRecipeInfo) => void;
+  /** 是否禁用操作 */
+  disabled?: boolean;
 }
 
 const RecipeRecommendationsEntry = ({
   recipes,
-  onLike,
-  onDislike,
   onGenerate,
+  disabled = false,
 }: RecipeRecommendationsEntryProps) => {
   const isMobile = useMediaQuery("(max-width: 767px)");
 
@@ -25,16 +25,14 @@ const RecipeRecommendationsEntry = ({
   return isMobile ? (
     <RecipeRecommendationsDialog
       recipes={recipes}
-      onLike={onLike}
-      onDislike={onDislike}
       onGenerate={onGenerate}
+      disabled={disabled}
     />
   ) : (
     <RecipeRecommendationsPopover
       recipes={recipes}
-      onLike={onLike}
-      onDislike={onDislike}
       onGenerate={onGenerate}
+      disabled={disabled}
     />
   );
 };

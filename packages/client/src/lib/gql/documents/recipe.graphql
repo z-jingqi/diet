@@ -45,9 +45,36 @@ query MyRecipes {
   }
 }
 
+# 获取菜谱详情
 query GetRecipe($id: ID!) {
   recipe(id: $id) {
     ...RecipeFields
+  }
+}
+
+# 查询当前用户标记的菜谱喜好
+query GetRecipePreferences {
+  myRecipePreferences {
+    id
+    recipeId
+    recipeName
+    preference
+  }
+}
+
+# 现有的查询
+query GetMyRecipes {
+  myRecipes {
+    id
+    name
+    description
+    difficulty
+    prepTimeApproxMin
+    cookTimeApproxMin
+    totalTimeApproxMin
+    costApprox
+    currency
+    createdAt
   }
 }
 
@@ -66,4 +93,21 @@ mutation UpdateRecipe($id: ID!, $input: RecipeInput!) {
 
 mutation DeleteRecipe($id: ID!) {
   deleteRecipe(id: $id)
+}
+
+# 设置菜谱喜好(喜欢/不喜欢)
+mutation SetRecipePreference($input: RecipePreferenceInput!) {
+  setRecipePreference(input: $input) {
+    id
+    recipeId
+    recipeName
+    preference
+  }
+}
+
+# 生成菜谱详情
+mutation GenerateRecipe($input: RecipeGenerateInput!) {
+  generateRecipe(input: $input) {
+    ...RecipeFields
+  }
 } 

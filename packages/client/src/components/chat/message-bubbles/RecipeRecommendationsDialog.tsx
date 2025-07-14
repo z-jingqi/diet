@@ -14,16 +14,15 @@ import { Utensils } from "lucide-react";
 
 interface RecipeRecommendationsDialogProps {
   recipes: BasicRecipeInfo[];
-  onLike?: (recipe: BasicRecipeInfo) => void;
-  onDislike?: (recipe: BasicRecipeInfo) => void;
   onGenerate?: (recipe: BasicRecipeInfo) => void;
+  /** 是否禁用操作 */
+  disabled?: boolean;
 }
 
 const RecipeRecommendationsDialog = ({
   recipes,
-  onLike,
-  onDislike,
   onGenerate,
+  disabled = false,
 }: RecipeRecommendationsDialogProps) => {
   const [open, setOpen] = useState(false);
 
@@ -38,6 +37,7 @@ const RecipeRecommendationsDialog = ({
           variant="ghost"
           size="sm"
           className="flex items-center gap-1"
+          disabled={disabled}
         >
           <Utensils className="w-4 h-4" />
           <Typography variant="span" className="text-sm">
@@ -54,16 +54,11 @@ const RecipeRecommendationsDialog = ({
             <RecipeRecommendationItem
               key={recipe.id}
               recipe={recipe}
-              onLike={(r) => {
-                onLike?.(r);
-              }}
-              onDislike={(r) => {
-                onDislike?.(r);
-              }}
               onGenerate={(r) => {
                 onGenerate?.(r);
                 setOpen(false);
               }}
+              disabled={disabled}
             />
           ))}
         </div>

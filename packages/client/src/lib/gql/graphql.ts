@@ -146,10 +146,12 @@ export type Mutation = {
   deleteTagCategory?: Maybe<Scalars['Boolean']['output']>;
   deleteTagConflict?: Maybe<Scalars['Boolean']['output']>;
   deleteUserSession?: Maybe<Scalars['Boolean']['output']>;
+  generateRecipe?: Maybe<Recipe>;
   login?: Maybe<LoginResponse>;
   logout?: Maybe<Scalars['Boolean']['output']>;
   refreshSession?: Maybe<RefreshResponse>;
   register?: Maybe<LoginResponse>;
+  setRecipePreference?: Maybe<RecipePreference>;
   updateChatSession?: Maybe<ChatSession>;
   updateRecipe?: Maybe<Recipe>;
   updateTag?: Maybe<Tag>;
@@ -258,6 +260,11 @@ export type MutationDeleteUserSessionArgs = {
 };
 
 
+export type MutationGenerateRecipeArgs = {
+  input: RecipeGenerateInput;
+};
+
+
 export type MutationLoginArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
@@ -272,6 +279,11 @@ export type MutationRefreshSessionArgs = {
 export type MutationRegisterArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
+};
+
+
+export type MutationSetRecipePreferenceArgs = {
+  input: RecipePreferenceInput;
 };
 
 
@@ -335,6 +347,13 @@ export type OAuthAccount = {
   user?: Maybe<User>;
 };
 
+export enum PreferenceType {
+  /** 用户不喜欢 */
+  Dislike = 'DISLIKE',
+  /** 用户喜欢 */
+  Like = 'LIKE'
+}
+
 export type Query = {
   __typename?: 'Query';
   chatSession?: Maybe<ChatSession>;
@@ -343,6 +362,7 @@ export type Query = {
   hello?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   myChatSessions?: Maybe<Array<ChatSession>>;
+  myRecipePreferences?: Maybe<Array<RecipePreference>>;
   myRecipes?: Maybe<Array<Recipe>>;
   oauthAccounts?: Maybe<Array<OAuthAccount>>;
   recipe?: Maybe<Recipe>;
@@ -447,6 +467,17 @@ export type Recipe = {
   version?: Maybe<Scalars['Int']['output']>;
 };
 
+export type RecipeGenerateInput = {
+  allergens?: InputMaybe<Array<Scalars['String']['input']>>;
+  cuisineType?: InputMaybe<CuisineType>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  dietaryTags?: InputMaybe<Array<Scalars['String']['input']>>;
+  mealType?: InputMaybe<MealType>;
+  recipeBasicInfo: Scalars['String']['input'];
+  recipeName: Scalars['String']['input'];
+  servings?: Scalars['Int']['input'];
+};
+
 export type RecipeInput = {
   allergens?: InputMaybe<Array<Scalars['String']['input']>>;
   cookTimeApproxMin?: InputMaybe<Scalars['Int']['input']>;
@@ -468,6 +499,23 @@ export type RecipeInput = {
   stepsJson: Scalars['String']['input'];
   tips?: InputMaybe<Scalars['String']['input']>;
   totalTimeApproxMin?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type RecipePreference = {
+  __typename?: 'RecipePreference';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  preference?: Maybe<PreferenceType>;
+  recipeBasicInfo?: Maybe<Scalars['String']['output']>;
+  recipeId?: Maybe<Scalars['String']['output']>;
+  recipeName?: Maybe<Scalars['String']['output']>;
+};
+
+export type RecipePreferenceInput = {
+  preference: PreferenceType;
+  recipeBasicInfo?: InputMaybe<Scalars['String']['input']>;
+  recipeId?: InputMaybe<Scalars['String']['input']>;
+  recipeName: Scalars['String']['input'];
 };
 
 export type RefreshResponse = {
@@ -650,6 +698,16 @@ export type GetRecipeQueryVariables = Exact<{
 
 export type GetRecipeQuery = { __typename?: 'Query', recipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
 
+export type GetRecipePreferencesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecipePreferencesQuery = { __typename?: 'Query', myRecipePreferences?: Array<{ __typename?: 'RecipePreference', id?: string | null, recipeId?: string | null, recipeName?: string | null, preference?: PreferenceType | null }> | null };
+
+export type GetMyRecipesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyRecipesQuery = { __typename?: 'Query', myRecipes?: Array<{ __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, createdAt?: any | null }> | null };
+
 export type CreateRecipeMutationVariables = Exact<{
   input: RecipeInput;
 }>;
@@ -671,6 +729,20 @@ export type DeleteRecipeMutationVariables = Exact<{
 
 
 export type DeleteRecipeMutation = { __typename?: 'Mutation', deleteRecipe?: boolean | null };
+
+export type SetRecipePreferenceMutationVariables = Exact<{
+  input: RecipePreferenceInput;
+}>;
+
+
+export type SetRecipePreferenceMutation = { __typename?: 'Mutation', setRecipePreference?: { __typename?: 'RecipePreference', id?: string | null, recipeId?: string | null, recipeName?: string | null, preference?: PreferenceType | null } | null };
+
+export type GenerateRecipeMutationVariables = Exact<{
+  input: RecipeGenerateInput;
+}>;
+
+
+export type GenerateRecipeMutation = { __typename?: 'Mutation', generateRecipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
 
 export type TagFieldsFragment = { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null };
 
@@ -1270,6 +1342,80 @@ useGetRecipeQuery.getKey = (variables: GetRecipeQueryVariables) => ['GetRecipe',
 
 useGetRecipeQuery.fetcher = (client: GraphQLClient, variables: GetRecipeQueryVariables, headers?: RequestInit['headers']) => fetcher<GetRecipeQuery, GetRecipeQueryVariables>(client, GetRecipeDocument, variables, headers);
 
+export const GetRecipePreferencesDocument = `
+    query GetRecipePreferences {
+  myRecipePreferences {
+    id
+    recipeId
+    recipeName
+    preference
+  }
+}
+    `;
+
+export const useGetRecipePreferencesQuery = <
+      TData = GetRecipePreferencesQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables?: GetRecipePreferencesQueryVariables,
+      options?: Omit<UseQueryOptions<GetRecipePreferencesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetRecipePreferencesQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<GetRecipePreferencesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetRecipePreferences'] : ['GetRecipePreferences', variables],
+    queryFn: fetcher<GetRecipePreferencesQuery, GetRecipePreferencesQueryVariables>(client, GetRecipePreferencesDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useGetRecipePreferencesQuery.getKey = (variables?: GetRecipePreferencesQueryVariables) => variables === undefined ? ['GetRecipePreferences'] : ['GetRecipePreferences', variables];
+
+
+useGetRecipePreferencesQuery.fetcher = (client: GraphQLClient, variables?: GetRecipePreferencesQueryVariables, headers?: RequestInit['headers']) => fetcher<GetRecipePreferencesQuery, GetRecipePreferencesQueryVariables>(client, GetRecipePreferencesDocument, variables, headers);
+
+export const GetMyRecipesDocument = `
+    query GetMyRecipes {
+  myRecipes {
+    id
+    name
+    description
+    difficulty
+    prepTimeApproxMin
+    cookTimeApproxMin
+    totalTimeApproxMin
+    costApprox
+    currency
+    createdAt
+  }
+}
+    `;
+
+export const useGetMyRecipesQuery = <
+      TData = GetMyRecipesQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables?: GetMyRecipesQueryVariables,
+      options?: Omit<UseQueryOptions<GetMyRecipesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GetMyRecipesQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<GetMyRecipesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyRecipes'] : ['GetMyRecipes', variables],
+    queryFn: fetcher<GetMyRecipesQuery, GetMyRecipesQueryVariables>(client, GetMyRecipesDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useGetMyRecipesQuery.getKey = (variables?: GetMyRecipesQueryVariables) => variables === undefined ? ['GetMyRecipes'] : ['GetMyRecipes', variables];
+
+
+useGetMyRecipesQuery.fetcher = (client: GraphQLClient, variables?: GetMyRecipesQueryVariables, headers?: RequestInit['headers']) => fetcher<GetMyRecipesQuery, GetMyRecipesQueryVariables>(client, GetMyRecipesDocument, variables, headers);
+
 export const CreateRecipeDocument = `
     mutation CreateRecipe($input: RecipeInput!) {
   createRecipe(input: $input) {
@@ -1351,6 +1497,65 @@ export const useDeleteRecipeMutation = <
 
 
 useDeleteRecipeMutation.fetcher = (client: GraphQLClient, variables: DeleteRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<DeleteRecipeMutation, DeleteRecipeMutationVariables>(client, DeleteRecipeDocument, variables, headers);
+
+export const SetRecipePreferenceDocument = `
+    mutation SetRecipePreference($input: RecipePreferenceInput!) {
+  setRecipePreference(input: $input) {
+    id
+    recipeId
+    recipeName
+    preference
+  }
+}
+    `;
+
+export const useSetRecipePreferenceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<SetRecipePreferenceMutation, TError, SetRecipePreferenceMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<SetRecipePreferenceMutation, TError, SetRecipePreferenceMutationVariables, TContext>(
+      {
+    mutationKey: ['SetRecipePreference'],
+    mutationFn: (variables?: SetRecipePreferenceMutationVariables) => fetcher<SetRecipePreferenceMutation, SetRecipePreferenceMutationVariables>(client, SetRecipePreferenceDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useSetRecipePreferenceMutation.fetcher = (client: GraphQLClient, variables: SetRecipePreferenceMutationVariables, headers?: RequestInit['headers']) => fetcher<SetRecipePreferenceMutation, SetRecipePreferenceMutationVariables>(client, SetRecipePreferenceDocument, variables, headers);
+
+export const GenerateRecipeDocument = `
+    mutation GenerateRecipe($input: RecipeGenerateInput!) {
+  generateRecipe(input: $input) {
+    ...RecipeFields
+  }
+}
+    ${RecipeFieldsFragmentDoc}`;
+
+export const useGenerateRecipeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<GenerateRecipeMutation, TError, GenerateRecipeMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<GenerateRecipeMutation, TError, GenerateRecipeMutationVariables, TContext>(
+      {
+    mutationKey: ['GenerateRecipe'],
+    mutationFn: (variables?: GenerateRecipeMutationVariables) => fetcher<GenerateRecipeMutation, GenerateRecipeMutationVariables>(client, GenerateRecipeDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useGenerateRecipeMutation.fetcher = (client: GraphQLClient, variables: GenerateRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<GenerateRecipeMutation, GenerateRecipeMutationVariables>(client, GenerateRecipeDocument, variables, headers);
 
 export const GetTagsDocument = `
     query GetTags($categoryId: ID, $search: String) {

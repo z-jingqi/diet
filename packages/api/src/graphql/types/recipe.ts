@@ -1,10 +1,11 @@
 import { builder, DateTimeScalar } from "../builder";
-import { recipes } from "../../db/schema";
+import { recipes, recipePreferences } from "../../db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth";
 
 // Drizzle model type
 type RecipeModel = InferSelectModel<typeof recipes>;
+type RecipePreferenceModel = InferSelectModel<typeof recipePreferences>;
 
 // ----------------------
 // Recipe type
@@ -76,6 +77,30 @@ export const RecipeRef = builder.objectRef<RecipeModel>("Recipe").implement({
 });
 
 // ----------------------
+// Recipe Preference type
+// ----------------------
+export const PreferenceEnum = builder.enumType("PreferenceType", {
+  values: {
+    LIKE: { description: "用户喜欢" },
+    DISLIKE: { description: "用户不喜欢" },
+  },
+});
+
+export const RecipePreferenceRef = builder.objectRef<RecipePreferenceModel>("RecipePreference").implement({
+  fields: (t) => ({
+    id: t.exposeID("id"),
+    recipeId: t.exposeString("recipe_id", { nullable: true }),
+    recipeName: t.exposeString("recipe_name"),
+    preference: t.field({
+      type: PreferenceEnum,
+      resolve: (parent) => parent.preference as any,
+    }),
+    recipeBasicInfo: t.exposeString("recipe_basic_info", { nullable: true }),
+    createdAt: t.expose("created_at", { type: DateTimeScalar, nullable: true }),
+  }),
+});
+
+// ----------------------
 // Input type
 // ----------------------
 const RecipeInput = builder.inputType("RecipeInput", {
@@ -103,6 +128,29 @@ const RecipeInput = builder.inputType("RecipeInput", {
   }),
 });
 
+const RecipePreferenceInput = builder.inputType("RecipePreferenceInput", {
+  fields: (t) => ({
+    recipeId: t.string({ required: false }),
+    recipeName: t.string({ required: true }),
+    recipeBasicInfo: t.string({ required: false }),
+    preference: t.field({ type: PreferenceEnum, required: true }),
+  }),
+});
+
+// 新增：菜谱生成输入类型
+const RecipeGenerateInput = builder.inputType("RecipeGenerateInput", {
+  fields: (t) => ({
+    recipeName: t.string({ required: true }),
+    recipeBasicInfo: t.string({ required: true }),
+    servings: t.int({ required: true, defaultValue: 2 }),
+    description: t.string(),
+    cuisineType: t.field({ type: CuisineTypeEnum }),
+    mealType: t.field({ type: MealTypeEnum }),
+    dietaryTags: t.stringList(),
+    allergens: t.stringList(),
+  }),
+});
+
 // ----------------------
 // Queries
 // ----------------------
@@ -121,6 +169,15 @@ builder.queryFields((t) => ({
     resolve: (_r, { id }, ctx) => {
       const auth = requireAuth(ctx);
       return ctx.services.recipe.getRecipe(id, auth.user.id);
+    },
+  }),
+
+  // 添加查询用户菜谱喜好
+  myRecipePreferences: t.field({
+    type: [RecipePreferenceRef],
+    resolve: (_r, _a, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.getRecipePreferences(auth.user.id);
     },
   }),
 }));
@@ -156,6 +213,42 @@ builder.mutationFields((t) => ({
     resolve: (_r, { id }, ctx) => {
       const auth = requireAuth(ctx);
       return ctx.services.recipe.deleteRecipe(id, auth.user.id);
+    },
+  }),
+
+  // 添加设置菜谱喜好的变更操作
+  setRecipePreference: t.field({
+    type: RecipePreferenceRef,
+    args: {
+      input: t.arg({ type: RecipePreferenceInput, required: true }),
+    },
+    resolve: (_r, { input }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.setRecipePreference(auth.user.id, {
+        ...input,
+        recipeId: input.recipeId ?? undefined,
+        recipeBasicInfo: input.recipeBasicInfo ?? undefined,
+      });
+    },
+  }),
+
+  // 添加生成菜谱变更操作
+  generateRecipe: t.field({
+    type: RecipeRef,
+    args: {
+      input: t.arg({ type: RecipeGenerateInput, required: true }),
+    },
+    resolve: async (_r, { input }, ctx) => {
+      const auth = requireAuth(ctx);
+      // 使用AI助手生成菜谱，然后保存到数据库
+      return ctx.services.recipe.generateRecipe(auth.user.id, {
+        ...input,
+        description: input.description ?? undefined,
+        cuisineType: input.cuisineType ?? undefined,
+        mealType: input.mealType ?? undefined,
+        dietaryTags: input.dietaryTags ?? undefined,
+        allergens: input.allergens ?? undefined,
+      });
     },
   }),
 }));
