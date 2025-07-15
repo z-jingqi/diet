@@ -2,37 +2,51 @@ import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { ThumbsDown, Utensils } from "lucide-react";
 import { BasicRecipeInfo } from "@/types/recipe";
-import { useRecipePreferenceStatus, useSetRecipePreference } from "@/lib/gql/hooks/recipe-hooks";
+import {
+  useRecipePreferenceStatus,
+  useSetRecipePreference,
+  useGenerateRecipe,
+} from "@/lib/gql/hooks/recipe-hooks";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { PreferenceType } from "@/lib/gql/graphql";
+import { useMyRecipesQuery } from "@/lib/gql/graphql";
+import { graphqlClient } from "@/lib/gql/client";
+import { useNavigate } from "@tanstack/react-router";
 
 interface RecipeRecommendationItemProps {
   recipe: BasicRecipeInfo;
-  /** 点击生成菜谱 */
-  onGenerate?: (recipe: BasicRecipeInfo) => void;
-  /** 是否禁用所有操作 */
-  disabled?: boolean;
 }
 
 const RecipeRecommendationItem = ({
   recipe,
-  onGenerate,
-  disabled = false,
 }: RecipeRecommendationItemProps) => {
   // 获取菜谱喜好状态
   const { isDisliked, loading } = useRecipePreferenceStatus(recipe.name);
-  
+
   // 设置菜谱喜好的mutation
   const { mutate: setPreference, isPending } = useSetRecipePreference();
 
+  const navigate = useNavigate();
+
+  // 我的菜谱列表，用于判断是否已生成
+  const { data: myRecipesData } = useMyRecipesQuery(graphqlClient, {});
+
+  const existingRecipe = myRecipesData?.myRecipes?.find(
+    (r) => r?.name === recipe.name
+  );
+
+  // 生成菜谱 hook
+  const { mutate: generateRecipe, isPending: isGenerating } =
+    useGenerateRecipe();
+
   // 处理不喜欢
   const handleDislike = () => {
-    if (loading || isPending || disabled) return;
-    
+    if (loading || isPending) return;
+
     // 如果已经不喜欢，则不做任何操作
     if (isDisliked) return;
-    
+
     setPreference(
       { recipe, preference: PreferenceType.Dislike },
       {
@@ -41,9 +55,30 @@ const RecipeRecommendationItem = ({
         },
         onError: () => {
           toast.error("操作失败，请稍后再试");
-        }
+        },
       }
     );
+  };
+
+  const handleGenerate = () => {
+    if (isGenerating) return;
+
+    toast.message(`正在生成「${recipe.name}」的详细菜谱...`, {
+      duration: 3000,
+    });
+
+    generateRecipe(recipe, {
+      onError: (error) => {
+        console.error("生成菜谱失败:", error);
+        toast.error(`生成「${recipe.name}」失败，请稍后再试`);
+      },
+    });
+  };
+
+  const handleView = () => {
+    if (existingRecipe?.id) {
+      navigate({ to: "/recipe/$id", params: { id: existingRecipe.id } });
+    }
   };
 
   return (
@@ -69,27 +104,46 @@ const RecipeRecommendationItem = ({
           size="icon"
           className={cn(
             "h-9 w-9 md:h-7 md:w-7",
-            isDisliked ? "bg-red-100 text-red-600" : "text-red-600 hover:text-red-700"
+            isDisliked
+              ? "bg-red-100 text-red-600"
+              : "text-red-600 hover:text-red-700"
           )}
           title="不喜欢"
           onClick={handleDislike}
-          disabled={loading || isPending || disabled}
+          disabled={loading || isPending}
         >
           <ThumbsDown className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-1 px-3 h-9 md:h-7 text-primary hover:text-primary/80"
-          onClick={() => onGenerate?.(recipe)}
-          disabled={isDisliked || disabled} // 如果用户不喜欢，或整体禁用时，禁用生成按钮
-        >
-          <Utensils className="h-4 w-4" />
-          <span className="text-sm">生成菜谱</span>
-        </Button>
+        {existingRecipe ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1 px-3 h-9 md:h-7 text-primary hover:text-primary/80"
+            onClick={handleView}
+          >
+            <Utensils className="h-4 w-4" />
+            <span className="text-sm">查看菜谱</span>
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "flex items-center gap-1 px-3 h-9 md:h-7 text-primary hover:text-primary/80",
+              isGenerating && "opacity-50 cursor-not-allowed"
+            )}
+            onClick={handleGenerate}
+            disabled={isDisliked || isGenerating}
+          >
+            <Utensils className="h-4 w-4" />
+            <span className="text-sm">
+              {isGenerating ? "生成中" : "生成菜谱"}
+            </span>
+          </Button>
+        )}
       </div>
     </div>
   );
 };
 
-export default RecipeRecommendationItem; 
+export default RecipeRecommendationItem;

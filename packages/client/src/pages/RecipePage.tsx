@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar, Utensils, Clock, DollarSign } from "lucide-react";
 import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 const RecipePage = () => {
   // 从URL获取菜谱ID
@@ -24,6 +25,8 @@ const RecipePage = () => {
     ? `${Math.floor(recipe.totalTimeApproxMin / 60) > 0 ? `${Math.floor(recipe.totalTimeApproxMin / 60)}小时` : ''}${recipe.totalTimeApproxMin % 60 > 0 ? ` ${recipe.totalTimeApproxMin % 60}分钟` : ''}`
     : '未知';
     
+  const navigate = useNavigate();
+
   if (error) {
     return (
       <div className="p-8 flex flex-col items-center justify-center h-full">
@@ -47,21 +50,31 @@ const RecipePage = () => {
       </Button>
       
       {/* 菜谱标题 */}
-      <div className="mb-8">
-        {isLoading ? (
-          <Skeleton className="h-10 w-3/4 mb-2" />
-        ) : (
-          <Typography variant="h2" className="text-2xl md:text-3xl font-bold">
-            {recipe?.name || '加载中...'}
-          </Typography>
-        )}
-        
-        {isLoading ? (
-          <Skeleton className="h-6 w-1/2" />
-        ) : (
-          <Typography variant="p" className="text-muted-foreground">
-            {recipe?.description || ''}
-          </Typography>
+      <div className="mb-8 flex items-start justify-between flex-col md:flex-row md:items-center md:gap-4">
+        <div className="flex-1">
+          {isLoading ? (
+            <Skeleton className="h-10 w-3/4 mb-2" />
+          ) : (
+            <Typography variant="h2" className="text-2xl md:text-3xl font-bold">
+              {recipe?.name || '加载中...'}
+            </Typography>
+          )}
+          {isLoading ? (
+            <Skeleton className="h-6 w-1/2" />
+          ) : (
+            <Typography variant="p" className="text-muted-foreground">
+              {recipe?.description || ''}
+            </Typography>
+          )}
+        </div>
+        {!isLoading && recipe?.id && (
+          <Button
+            variant="secondary"
+            // @ts-ignore 路径在 route 生成后会自动识别
+            onClick={() => navigate({ to: '/recipe/$id/edit', params: { id: recipe.id! } })}
+          >
+            编辑
+          </Button>
         )}
       </div>
       

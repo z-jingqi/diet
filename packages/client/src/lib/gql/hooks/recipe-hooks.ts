@@ -8,12 +8,18 @@ import {
   SetRecipePreferenceDocument,
   SetRecipePreferenceMutation,
   SetRecipePreferenceMutationVariables,
-  GenerateRecipeDocument,
-  GenerateRecipeMutation,
-  GenerateRecipeMutationVariables,
   GetRecipeDocument,
-  GetRecipeQuery
+  GetRecipeQuery,
+  UpdateRecipeDocument,
+  UpdateRecipeMutation,
+  UpdateRecipeMutationVariables,
+  RecipeInput,
+  CreateRecipeDocument,
+  CreateRecipeMutation,
+  CreateRecipeMutationVariables
 } from "../graphql";
+
+import { generateRecipeDetail } from "@/lib/api/recipe-api";
 import { useNavigate } from "@tanstack/react-router";
 
 /**
@@ -95,31 +101,26 @@ export const useRecipePreferenceStatus = (recipeName: string) => {
 export const useGenerateRecipe = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  
+
   return useMutation({
-    mutationFn: async (recipe: BasicRecipeInfo) => {
-      const response = await graphqlClient.request<
-        GenerateRecipeMutation,
-        GenerateRecipeMutationVariables
-      >(GenerateRecipeDocument, {
-        input: {
-          recipeName: recipe.name,
-          recipeBasicInfo: JSON.stringify(recipe),
-          servings: 2
-        }
-      });
-      
-      return response.generateRecipe;
+    mutationFn: async (basicInfo: BasicRecipeInfo) => {
+      // 1. 调用 AI 生成完整菜谱详情并映射为 RecipeInput
+      const recipeInput: RecipeInput = await generateRecipeDetail(basicInfo);
+
+      // 2. 调用 GraphQL createRecipe 创建记录
+      const { createRecipe } = await graphqlClient.request<
+        CreateRecipeMutation,
+        CreateRecipeMutationVariables
+      >(CreateRecipeDocument, { input: recipeInput });
+
+      return createRecipe;
     },
     onSuccess: (recipe) => {
-      // 成功后刷新菜谱列表
       queryClient.invalidateQueries({ queryKey: ["myRecipes"] });
-      
-      // 导航到菜谱详情页
       if (recipe?.id) {
-        navigate({ to: `/recipe/$id`, params: { id: recipe.id } });
+        navigate({ to: "/recipe/$id", params: { id: recipe.id } });
       }
-    }
+    },
   });
 };
 
@@ -137,5 +138,27 @@ export const useRecipeDetail = (id: string) => {
       return recipe;
     },
     enabled: !!id
+  });
+};
+
+/**
+ * 更新菜谱详情
+ */
+export const useUpdateRecipe = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: string; input: RecipeInput }) => {
+      const { updateRecipe } = await graphqlClient.request<
+        UpdateRecipeMutation,
+        UpdateRecipeMutationVariables
+      >(UpdateRecipeDocument, { id, input });
+      return updateRecipe;
+    },
+    onSuccess: () => {
+      // 更新成功后刷新缓存数据
+      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+      queryClient.invalidateQueries({ queryKey: ["myRecipes"] });
+    },
   });
 }; 
