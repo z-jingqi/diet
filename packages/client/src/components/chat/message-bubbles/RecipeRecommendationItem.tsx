@@ -42,10 +42,9 @@ const RecipeRecommendationItem = ({
 
   // 处理不喜欢
   const handleDislike = () => {
-    if (loading || isPending) return;
-
-    // 如果已经不喜欢，则不做任何操作
-    if (isDisliked) return;
+    if (loading || isPending || isDisliked) {
+      return;
+    }
 
     setPreference(
       { recipe, preference: PreferenceType.Dislike },
@@ -61,11 +60,9 @@ const RecipeRecommendationItem = ({
   };
 
   const handleGenerate = () => {
-    if (isGenerating) return;
-
-    toast.message(`正在生成「${recipe.name}」的详细菜谱...`, {
-      duration: 3000,
-    });
+    if (isGenerating) {
+      return;
+    }
 
     generateRecipe(recipe, {
       onError: (error) => {

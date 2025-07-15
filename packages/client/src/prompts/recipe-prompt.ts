@@ -11,10 +11,10 @@ export const RECIPE_PROMPT = `
 {
   "name": "宫保鸡丁",              // 菜谱名称
   "description": "### 简介\n经典川菜…", // Markdown 描述
-  "cuisineType": "川菜",            // 菜系
-  "mealType": "午餐",               // 餐次 / 场景
+  "cuisineType": "CHINESE",          // 菜系，可选值: CHINESE|JAPANESE|KOREAN|ITALIAN|FRENCH|MEXICAN|INDIAN|THAI|WESTERN|OTHER
+  "mealType": "LUNCH",               // 餐次，可选值: BREAKFAST|LUNCH|DINNER|SNACK|DESSERT|DRINK|OTHER
   "servings": 2,                    // 适用人数
-  "difficulty": "easy",            // 难度: easy|medium|hard
+  "difficulty": "EASY",             // 难度: EASY|MEDIUM|HARD
   "prepTimeApproxMin": 10,          // 备料时间（分钟）
   "cookTimeApproxMin": 15,          // 烹饪时间（分钟）
   "totalTimeApproxMin": 25,         // 总耗时（分钟）
@@ -70,21 +70,21 @@ export const RECIPE_CHAT_PROMPT = `
 
 【输出格式要求】
 1. 请先给出简短回答（可省略），随后直接输出菜品列表。
-2. 菜品列表中，每个菜品严格使用以下 6 行模版（不要省略行，也不要在这 6 行内部插入空行），并使用 HTML <br/> 标签确保换行：
-**{{序号}}. {{菜品名称}}**<br/>
-人均花费：{{最低-最高}}元<br/>
-预计耗时：{{时长}}<br/>
-难度：{{简单｜中等｜困难}}<br/>
-主食材：{{主要食材列表｜逗号分隔}}<br/>
-特点：{{一句话特点}}<br/>
+2. 菜品列表中，每个菜品严格使用以下 6 行模版（不要省略行，也不要在这 6 行内部插入空行），并在每行末尾添加两个空格后换行（即 Markdown 原生换行）：
+**{{序号}}. {{菜品名称}}**  
+人均花费：{{最低-最高}}元  
+预计耗时：{{时长}}  
+难度：{{简单｜中等｜困难}}  
+主食材：{{主要食材列表｜逗号分隔}}  
+特点：{{一句话特点}}  
 
 示例：
-**1. 宫保鸡丁**<br/>
-人均花费：20-25元<br/>
-预计耗时：30分钟<br/>
-难度：简单<br/>
-主食材：鸡肉, 花生, 干辣椒<br/>
-特点：酸甜微辣，口感鲜嫩<br/>
+**1. 宫保鸡丁**  
+人均花费：20-25元  
+预计耗时：30分钟  
+难度：简单  
+主食材：鸡肉, 花生, 干辣椒  
+特点：酸甜微辣，口感鲜嫩  
 
 3. 在菜品列表之后，你可以再提供一些烹饪技巧、注意事项或其他相关建议，**但不要在该部分再次出现菜品信息**。
 

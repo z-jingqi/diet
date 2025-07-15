@@ -3,6 +3,11 @@ import { getCookie } from "hono/cookie";
 
 // CSRF 保护中间件
 export const csrfProtection = async (c: Context, next: Next) => {
+  // 跳过 CORS 预检请求（OPTIONS 无需验证 CSRF）
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
   // 获取 session token
   const sessionToken = getCookie(c, "session_token");
   if (!sessionToken) {
@@ -23,6 +28,11 @@ export const csrfProtection = async (c: Context, next: Next) => {
 
 // 可选的 CSRF 保护（仅在有 token 时验证）
 export const optionalCsrfProtection = async (c: Context, next: Next) => {
+  // 跳过 CORS 预检请求（OPTIONS 无需验证 CSRF）
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
   // 获取 session token
   const sessionToken = getCookie(c, "session_token");
   if (!sessionToken) {

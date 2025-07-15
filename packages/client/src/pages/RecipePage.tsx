@@ -141,8 +141,13 @@ const RecipePage = () => {
                 <li key={index} className="flex justify-between py-1 border-b border-dashed border-muted-foreground/20 last:border-0">
                   <span className="font-medium">{ing.name}</span>
                   <div className="text-muted-foreground text-sm">
-                    <span>{ing.amount}</span>
-                    {ing.notes && <span className="ml-2 text-xs">({ing.notes})</span>}
+                    <span>
+                      {ing.quantity ?? ing.amount}
+                      {ing.unit ?? ""}
+                    </span>
+                    {(ing.note || ing.notes) && (
+                      <span className="ml-2 text-xs">({ing.note || ing.notes})</span>
+                    )}
                   </div>
                 </li>
               ))}
@@ -177,15 +182,15 @@ const RecipePage = () => {
             {steps.map((step: any, index: number) => (
               <li key={index} className="flex gap-4">
                 <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                  {step.step}
+                  {(step.order ?? index) + 1}
                 </div>
                 <div className="flex-1">
                   <Typography variant="p" className="mb-1">
-                    {step.description}
+                    {step.instruction ?? step.description}
                   </Typography>
-                  {step.tips && (
-                    <Typography variant="p" className="text-sm bg-muted/40 p-2 rounded-md mt-2 text-muted-foreground">
-                      提示：{step.tips}
+                  {step.durationApproxMin && (
+                    <Typography variant="span" className="text-xs text-muted-foreground">
+                      预计 {step.durationApproxMin} 分钟
                     </Typography>
                   )}
                 </div>
