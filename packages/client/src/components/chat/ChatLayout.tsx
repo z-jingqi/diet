@@ -47,7 +47,7 @@ const ChatLayout = ({ children, currentSessionId }: ChatLayoutProps) => {
 
   // 使用 Sheet 组件统一布局
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-background">
+    <div className="flex flex-col h-[100dvh] w-full bg-background fixed inset-0">
       {/* Header - 仅在已登录状态下渲染 */}
       {isAuthenticated && (
         <div className="flex-shrink-0 border-b border-border/50">

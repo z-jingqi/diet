@@ -105,6 +105,10 @@ const ChatMessages = ({
       ref={containerRef}
       className="h-full w-full overflow-y-auto scrollbar-hide"
       onScroll={handleScroll}
+      style={{ 
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch'
+      }}
     >
       <div className="py-6 space-y-6 max-w-3xl mx-auto w-full px-4">
         {messages.map((message) => {
