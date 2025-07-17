@@ -14,6 +14,7 @@ import FavoriteRecipes from "./settings/favorites/FavoriteRecipes";
 import FavoriteHealthAdvice from "./settings/favorites/FavoriteHealthAdvice";
 import AccountActions from "./settings/account/AccountActions";
 import { cn } from "../../lib/utils";
+import { useSearch } from "@tanstack/react-router";
 
 interface SettingsPanelProps {
   group: SettingGroup | null;
@@ -28,15 +29,23 @@ const SettingsPanel = ({
   inDrawer = false,
   isMobile = false,
 }: SettingsPanelProps) => {
+  const search = useSearch({ from: '/profile' });
+  
   // Local state for favorites sub-view
   const [favoritesView, setFavoritesView] = React.useState<
     "menu" | "recipes" | "healthAdvice"
   >("menu");
 
   React.useEffect(() => {
-    // Reset sub-view when group changes
-    setFavoritesView("menu");
-  }, [group]);
+    // Check if we need to restore favorites view from URL
+    const urlSearch = search as any;
+    if (group?.title === SettingGroupTitle.Favorites && urlSearch?.settingsView === 'recipes' && urlSearch?.from === 'settings') {
+      setFavoritesView("recipes");
+    } else {
+      // Reset sub-view when group changes
+      setFavoritesView("menu");
+    }
+  }, [group, search]);
 
   if (!group) {
     return (

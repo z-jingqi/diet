@@ -67,7 +67,15 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   }, [sortedRecipes]);
 
   const onCardClick = (id: string) => {
-    navigate({ to: "/recipe/$id", params: { id } });
+    navigate({ 
+      to: "/recipe/$id", 
+      params: { id },
+      search: { 
+        from: 'settings',
+        settingsGroup: 'favorites',
+        settingsView: 'recipes'
+      }
+    });
   };
 
   return (

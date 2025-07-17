@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import { ThumbsDown, Utensils } from "lucide-react";
+import { ThumbsDown, Utensils, Clock, DollarSign, ChefHat } from "lucide-react";
 import { BasicRecipeInfo } from "@/types/recipe";
 import {
   useRecipePreferenceStatus,
@@ -79,62 +79,75 @@ const RecipeRecommendationItem = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 md:p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors">
-      {/* 基本信息 */}
+    <div className="group relative flex flex-col gap-4 p-4 rounded-lg bg-gradient-to-br from-card to-card/50 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border">
+      {/* 菜谱名称 */}
       <div className="flex-1 min-w-0">
-        <Typography variant="span" className="font-medium">
+        <Typography variant="span" className="font-semibold text-base leading-tight text-foreground group-hover:text-primary transition-colors">
           {recipe.name}
         </Typography>
-        <div className="text-xs text-muted-foreground mt-0.5 space-x-1 truncate">
+      </div>
+
+      {/* 菜谱信息标签 */}
+      <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">
+          <DollarSign className="h-3 w-3" />
           <span>{recipe.avgCost}</span>
-          <span>|</span>
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">
+          <Clock className="h-3 w-3" />
           <span>{recipe.duration}</span>
-          <span>|</span>
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">
+          <ChefHat className="h-3 w-3" />
           <span>{recipe.difficulty}</span>
         </div>
       </div>
 
       {/* 操作按钮 */}
-      <div className="flex items-center gap-2 mt-2 justify-end w-full">
+      <div className="flex items-center gap-3 pt-2 border-t border-border/30">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           className={cn(
-            "h-9 w-9 md:h-7 md:w-7",
+            "flex items-center gap-1.5 px-3 py-2 h-8 rounded-lg transition-all duration-200",
             isDisliked
-              ? "bg-red-100 text-red-600"
-              : "text-red-600 hover:text-red-700"
+              ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+              : "text-red-500 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-200"
           )}
           title="不喜欢"
           onClick={handleDislike}
           disabled={loading || isPending}
         >
-          <ThumbsDown className="h-4 w-4" />
+          <ThumbsDown className="h-3.5 w-3.5" />
+          <span className="text-xs font-medium">不喜欢</span>
         </Button>
+        
+        <div className="flex-1" />
+        
         {existingRecipe ? (
           <Button
-            variant="ghost"
+            variant="default"
             size="sm"
-            className="flex items-center gap-1 px-3 h-9 md:h-7 text-primary hover:text-primary/80"
+            className="flex items-center gap-1.5 px-4 py-2 h-8 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
             onClick={handleView}
           >
-            <Utensils className="h-4 w-4" />
-            <span className="text-sm">查看菜谱</span>
+            <Utensils className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">查看菜谱</span>
           </Button>
         ) : (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             className={cn(
-              "flex items-center gap-1 px-3 h-9 md:h-7 text-primary hover:text-primary/80",
-              isGenerating && "opacity-50 cursor-not-allowed"
+              "flex items-center gap-1.5 px-4 py-2 h-8 rounded-lg border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground shadow-sm transition-all duration-200",
+              isGenerating && "opacity-60 cursor-not-allowed animate-pulse"
             )}
             onClick={handleGenerate}
             disabled={isDisliked || isGenerating}
           >
-            <Utensils className="h-4 w-4" />
-            <span className="text-sm">
-              {isGenerating ? "生成中" : "生成菜谱"}
+            <Utensils className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">
+              {isGenerating ? "生成中..." : "生成菜谱"}
             </span>
           </Button>
         )}

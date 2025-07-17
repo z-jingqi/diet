@@ -1,4 +1,4 @@
-import { useParams } from "@tanstack/react-router";
+import { useParams, useSearch } from "@tanstack/react-router";
 import { useRecipeDetail } from "@/lib/gql/hooks/recipe-hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useNavigate } from "@tanstack/react-router";
 const RecipePage = () => {
   // 从URL获取菜谱ID
   const { id } = useParams({ from: "/recipe/$id" });
+  const search = useSearch({ from: "/recipe/$id" });
   
   // 获取菜谱详情
   const { data: recipe, isLoading, error } = useRecipeDetail(id);
@@ -27,6 +28,24 @@ const RecipePage = () => {
     
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    const urlSearch = search as any;
+    if (urlSearch?.from === 'settings' && urlSearch?.settingsGroup && urlSearch?.settingsView) {
+      // Navigate back to profile with settings state
+      navigate({
+        to: '/profile',
+        search: {
+          settingsGroup: urlSearch.settingsGroup,
+          settingsView: urlSearch.settingsView,
+          from: 'settings'
+        }
+      });
+    } else {
+      // Default browser back behavior
+      window.history.back();
+    }
+  };
+
   if (error) {
     return (
       <div className="p-8 flex flex-col items-center justify-center h-full">
@@ -42,11 +61,9 @@ const RecipePage = () => {
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       {/* 返回按钮 */}
-      <Button variant="ghost" className="mb-4" asChild>
-        <Link to="/">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          返回
-        </Link>
+      <Button variant="ghost" className="mb-4" onClick={handleBack}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        返回
       </Button>
       
       {/* 菜谱标题 */}

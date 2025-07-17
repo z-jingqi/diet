@@ -6,10 +6,11 @@ import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
-import { settingsGroups, SettingKey } from "./settings-config";
+import { settingsGroups, SettingKey, SettingGroupTitle } from "./settings-config";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import SettingsDrawer from "./SettingsDrawer";
 import SettingsPanel from "./SettingsPanel";
+import { useSearch } from "@tanstack/react-router";
 
 interface ProfileContentProps {
   className?: string;
@@ -18,6 +19,7 @@ interface ProfileContentProps {
 const ProfileContent = ({ className }: ProfileContentProps) => {
   const { user, logout } = useAuth();
   const authNavigate = useAuthNavigate();
+  const search = useSearch({ from: '/profile' });
 
   // Display name logic
   const displayName = user?.nickname || user?.username || "访客";
@@ -28,16 +30,25 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
     (typeof settingsGroups)[number] | null
   >(null);
 
-  // Default select first group on desktop
+  // Default select first group on desktop or restore from URL search params
   React.useEffect(() => {
     if (isMobile) {
       // On mobile, don't preselect
       setActiveGroup(null);
     } else if (!activeGroup) {
+      // Check if we need to restore settings state from URL
+      const urlSearch = search as any;
+      if (urlSearch?.settingsGroup === 'favorites' && urlSearch?.from === 'settings') {
+        const favoritesGroup = settingsGroups.find(g => g.title === SettingGroupTitle.Favorites);
+        if (favoritesGroup) {
+          setActiveGroup(favoritesGroup);
+          return;
+        }
+      }
       // Desktop default selection
       setActiveGroup(settingsGroups[0]);
     }
-  }, [isMobile]);
+  }, [isMobile, search]);
 
   // Click handler for settings item keys
   const handleSettingClick = async (key: SettingKey) => {
