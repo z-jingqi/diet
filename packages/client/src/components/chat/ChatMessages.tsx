@@ -103,7 +103,7 @@ const ChatMessages = ({
   return (
     <div
       ref={containerRef}
-      className="h-full overflow-y-auto w-full scrollbar-hide"
+      className="h-full w-full overflow-y-auto scrollbar-hide"
       onScroll={handleScroll}
     >
       <div className="py-6 space-y-6 max-w-3xl mx-auto w-full px-4">
@@ -124,9 +124,10 @@ const ChatMessages = ({
             </div>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
+      
+      {/* Scroll anchor at the bottom */}
+      <div ref={messagesEndRef} className="h-4" />
     </div>
   );
 };

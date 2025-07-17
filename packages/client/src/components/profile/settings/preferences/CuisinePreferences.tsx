@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MutedText } from "@/components/ui/typography";
 import { ChefHat } from "lucide-react";
-import usePreferencesStore from "@/store/preferences-store";
+import { useState } from "react";
 import { cuisineOptions } from "@/data/taste-preferences";
 
 interface CuisinePreferencesProps {
@@ -10,15 +10,14 @@ interface CuisinePreferencesProps {
 }
 
 const CuisinePreferences = ({ className }: CuisinePreferencesProps) => {
-  const { tastePreferences, addCuisinePreference, removeCuisinePreference } =
-    usePreferencesStore();
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
 
   const handleCuisineToggle = (cuisineId: string) => {
-    if (tastePreferences.cuisine.includes(cuisineId)) {
-      removeCuisinePreference(cuisineId);
-    } else {
-      addCuisinePreference(cuisineId);
-    }
+    setSelectedCuisines((prev) =>
+      prev.includes(cuisineId)
+        ? prev.filter((id) => id !== cuisineId)
+        : [...prev, cuisineId]
+    );
   };
 
   return (
@@ -33,7 +32,7 @@ const CuisinePreferences = ({ className }: CuisinePreferencesProps) => {
       <CardContent className="space-y-4 flex-1 lg:overflow-y-auto">
         <div className="flex flex-wrap gap-3">
           {cuisineOptions.map((cuisine) => {
-            const isSelected = tastePreferences.cuisine.includes(cuisine.id);
+            const isSelected = selectedCuisines.includes(cuisine.id);
             return (
               <Badge
                 key={cuisine.id}

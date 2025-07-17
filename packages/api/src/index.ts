@@ -4,6 +4,7 @@ import { compress } from "hono/compress";
 import { securityHeaders, rateLimit } from "./middleware/security";
 import { dataCleanup } from "./middleware/cleanup";
 import chat from "./routes/chat";
+import auth from "./routes/auth";
 import { Bindings } from "./types/bindings";
 import { createYoga } from "graphql-yoga";
 import { useCSRFPrevention } from "@graphql-yoga/plugin-csrf-prevention";
@@ -70,6 +71,9 @@ app.use("*", async (c, next) => {
 
 // 挂载聊天路由（需要认证）
 app.route("/chat", chat);
+
+// 挂载认证路由（刷新 token 等）
+app.route("/auth", auth);
 
 // 挂载 GraphQL Yoga
 const yoga = createYoga({

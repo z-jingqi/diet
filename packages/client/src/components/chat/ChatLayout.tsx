@@ -47,17 +47,19 @@ const ChatLayout = ({ children, currentSessionId }: ChatLayoutProps) => {
 
   // 使用 Sheet 组件统一布局
   return (
-    <div className="flex flex-col h-[100dvh] w-full overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-background">
       {/* Header - 仅在已登录状态下渲染 */}
       {isAuthenticated && (
-        <ChatHeader
-          onMenuClick={handleMenuClick}
-          currentSessionId={currentSessionId}
-        />
+        <div className="flex-shrink-0 border-b border-border/50">
+          <ChatHeader
+            onMenuClick={handleMenuClick}
+            currentSessionId={currentSessionId}
+          />
+        </div>
       )}
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0 w-full">{children}</div>
+      <div className="flex-1 min-h-0 w-full overflow-hidden">{children}</div>
 
       {/* Sidebar - 仅在已登录状态下渲染 */}
       {isAuthenticated && (

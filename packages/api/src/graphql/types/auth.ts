@@ -226,6 +226,7 @@ interface LoginResponse {
 interface RefreshResponse {
   sessionToken?: string | null;
   sessionExpiresAt?: string | null;
+  csrfToken?: string | null;
 }
 
 // LoginResponse GraphQL type
@@ -253,6 +254,7 @@ export const RefreshResponseRef = builder
         type: "DateTime",
         nullable: true,
       }),
+      csrfToken: t.exposeString("csrfToken", { nullable: true }),
     }),
   });
 
@@ -294,7 +296,13 @@ function issueLoginResponse(ctx: any, result: any) {
 
   if (result.csrfToken) {
     ctx.responseCookies.push(
-      [`csrf-token=${result.csrfToken}`, "Path=/", secure, "SameSite=Lax"]
+      [
+        `csrf-token=${result.csrfToken}`,
+        "Path=/",
+        secure,
+        "SameSite=Lax",
+        "Max-Age=604800", // 7 天，与 session_token 保持一致，防止浏览器重启后丢失
+      ]
         .filter(Boolean)
         .join("; ")
     );
@@ -556,7 +564,13 @@ builder.mutationFields((t) => ({
 
       if (result.csrfToken) {
         ctx.responseCookies.push(
-          [`csrf-token=${result.csrfToken}`, "Path=/", secure2, "SameSite=Lax"]
+          [
+            `csrf-token=${result.csrfToken}`,
+            "Path=/",
+            secure2,
+            "SameSite=Lax",
+            "Max-Age=604800", // 7 天，与 session_token 保持一致，防止浏览器重启后丢失
+          ]
             .filter(Boolean)
             .join("; ")
         );

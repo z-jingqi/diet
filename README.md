@@ -72,7 +72,7 @@
 | 项目结构 | Turborepo | Monorepo 管理工具 |
 | 前端框架 | Vite + React | 轻量级前端框架，开发体验好 |
 | UI | shadcn/ui + Tailwind CSS | 高颜值组件库和样式系统 |
-| 状态管理 | Zustand | 管理用户选择、搜索历史等状态 |
+| 状态管理 | Context Reducer | 管理用户选择、搜索历史等状态 |
 | 数据库 | Cloudflare D1 (SQLite) | Serverless SQLite 数据库 |
 | ORM | Drizzle ORM | 类型安全的数据库操作 |
 | 数据迁移 | Drizzle Kit | 数据库迁移和版本管理 |

@@ -2,6 +2,7 @@ import { builder } from './builder';
 import './types/tags';
 import './types/chat';
 import './types/auth';
+import './types/recipe';
 
 // 定义根查询类型
 builder.queryType({

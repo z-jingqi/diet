@@ -150,54 +150,54 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
   };
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden">
-      <ChatLayout currentSessionId={currentSessionId}>
-        <div className="flex flex-col h-full w-full">
-          {/* Main content area */}
-          <div className="flex-1 flex items-center justify-center overflow-hidden w-full">
-            {messages.length === 0 ? (
+    <ChatLayout currentSessionId={currentSessionId}>
+      <div className="flex flex-col h-full w-full">
+        {/* Main content area */}
+        <div className="flex-1 min-h-0 overflow-hidden w-full">
+          {messages.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
               <TypingPrompt />
-            ) : (
-              <ChatMessages
-                messages={messages}
-                gettingIntent={isGettingIntent}
-              />
-            )}
-          </div>
-
-          {/* Input area - fixed at bottom */}
-          <div className="w-full max-w-3xl mx-auto p-4">
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              disabled={isMessageLoading || isSessionLoading}
-              canAbort={!!abortController}
-              onAbort={handleAbortMessage}
-              placeholder={
-                isGuestMode
-                  ? "Enter message to start chatting..."
-                  : "Enter message..."
-              }
+            </div>
+          ) : (
+            <ChatMessages
+              messages={messages}
+              gettingIntent={isGettingIntent}
             />
-
-            {/* Guest mode notice */}
-            {isGuestMode && (
-              <div className="mt-2 text-center">
-                <p className="text-xs text-gray-500">
-                  Guest mode: Conversations aren't saved.{" "}
-                  <a
-                    href="/login"
-                    className="text-blue-600 hover:text-blue-700 underline"
-                  >
-                    Login
-                  </a>{" "}
-                  to save your conversations.
-                </p>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      </ChatLayout>
-    </div>
+
+        {/* Input area - fixed at bottom */}
+        <div className="flex-shrink-0 w-full max-w-3xl mx-auto p-4 bg-background">
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            disabled={isMessageLoading || isSessionLoading}
+            canAbort={!!abortController}
+            onAbort={handleAbortMessage}
+            placeholder={
+              isGuestMode
+                ? "Enter message to start chatting..."
+                : "Enter message..."
+            }
+          />
+
+          {/* Guest mode notice */}
+          {isGuestMode && (
+            <div className="mt-2 text-center">
+              <p className="text-xs text-gray-500">
+                Guest mode: Conversations aren't saved.{" "}
+                <a
+                  href="/login"
+                  className="text-blue-600 hover:text-blue-700 underline"
+                >
+                  Login
+                </a>{" "}
+                to save your conversations.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </ChatLayout>
   );
 };
 

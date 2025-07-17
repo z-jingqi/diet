@@ -5,6 +5,7 @@ import type { DB } from "../db";
 import type { AuthService } from "../services/auth-service";
 import type { ChatService } from "../services/chat-service";
 import type { TagService } from "../services/tag-service";
+import type { RecipeService } from "../services/recipe-service";
 
 // 使用 schema 定义作为单一来源
 export type UserModel = InferSelectModel<typeof users>;
@@ -78,6 +79,7 @@ export interface GraphQLContext {
     auth: AuthService;
     chat: ChatService;
     tag: TagService;
+    recipe: RecipeService;
   };
 }
 

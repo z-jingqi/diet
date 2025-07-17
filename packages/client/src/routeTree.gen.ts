@@ -17,6 +17,7 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as SessionIdRouteImport } from './routes/$sessionId'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipeIdRouteImport } from './routes/recipe.$id'
+import { Route as RecipeIdEditRouteImport } from './routes/recipe.$id.edit'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -58,6 +59,11 @@ const RecipeIdRoute = RecipeIdRouteImport.update({
   path: '/recipe/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipeIdEditRoute = RecipeIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => RecipeIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,7 +73,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/recipe/$id': typeof RecipeIdRoute
+  '/recipe/$id': typeof RecipeIdRouteWithChildren
+  '/recipe/$id/edit': typeof RecipeIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +84,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/recipe/$id': typeof RecipeIdRoute
+  '/recipe/$id': typeof RecipeIdRouteWithChildren
+  '/recipe/$id/edit': typeof RecipeIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +96,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/recipe/$id': typeof RecipeIdRoute
+  '/recipe/$id': typeof RecipeIdRouteWithChildren
+  '/recipe/$id/edit': typeof RecipeIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/recipe/$id'
+    | '/recipe/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/recipe/$id'
+    | '/recipe/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/recipe/$id'
+    | '/recipe/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,7 +143,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
-  RecipeIdRoute: typeof RecipeIdRoute
+  RecipeIdRoute: typeof RecipeIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -192,8 +204,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecipeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipe/$id/edit': {
+      id: '/recipe/$id/edit'
+      path: '/edit'
+      fullPath: '/recipe/$id/edit'
+      preLoaderRoute: typeof RecipeIdEditRouteImport
+      parentRoute: typeof RecipeIdRoute
+    }
   }
 }
+
+interface RecipeIdRouteChildren {
+  RecipeIdEditRoute: typeof RecipeIdEditRoute
+}
+
+const RecipeIdRouteChildren: RecipeIdRouteChildren = {
+  RecipeIdEditRoute: RecipeIdEditRoute,
+}
+
+const RecipeIdRouteWithChildren = RecipeIdRoute._addFileChildren(
+  RecipeIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -203,7 +234,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
-  RecipeIdRoute: RecipeIdRoute,
+  RecipeIdRoute: RecipeIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

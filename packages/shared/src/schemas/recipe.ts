@@ -1,52 +1,173 @@
-import { z } from "zod";
-import { NutritionSchema } from "./base";
+import { z } from 'zod';
 
+// ────────────────────────────────────────────────
+// Sub-schemas
+// ────────────────────────────────────────────────
+
+/**
+ * 营养成分对象
+ * 存储常见宏量营养素和钠含量，单位均为克（g）或毫克（mg）
+ */
+export const RecipeNutrientSchema = z.object({
+  calories: z
+    .number()
+    .nonnegative()
+    .describe('热量 ‑ kcal'),
+  protein: z
+    .number()
+    .nonnegative()
+    .describe('蛋白质 ‑ g'),
+  fat: z
+    .number()
+    .nonnegative()
+    .describe('脂肪 ‑ g'),
+  carbs: z
+    .number()
+    .nonnegative()
+    .describe('碳水化合物 ‑ g'),
+  fiber: z
+    .number()
+    .nonnegative()
+    .describe('膳食纤维 ‑ g'),
+  sodium: z
+    .number()
+    .nonnegative()
+    .describe('钠 ‑ mg'),
+  sugar: z
+    .number()
+    .nonnegative()
+    .describe('糖 ‑ g'),
+});
+
+/**
+ * 单条食材信息
+ */
 export const RecipeIngredientSchema = z.object({
+  order: z.number().int().nonnegative().describe('显示顺序（从 0 开始）'),
+  // ingredientId 字段移除，系统暂无统一食材表
   name: z.string().describe('食材名称'),
-  amount: z.number().describe('用量，例如：100'),
-  unit: z.string().describe('用量单位，例如："g"、"个"'),
-  price: z.string().describe('食材价格范围（元），例如："5-8"'),
-  nutrition: NutritionSchema.describe('该食材的营养成分'),
-  purpose: z.string().optional().describe('食材的用途说明')
-}).describe('菜谱中的单个食材');
+  quantity: z.number().positive().describe('数量'),
+  unit: z.string().describe('单位，如 g、ml、个'),
+  isOptional: z.boolean().default(false).describe('是否可省略'),
+  substitutes: z
+    .array(z.string())
+    .optional()
+    .describe('可替代食材名称列表'),
+  note: z.string().optional().describe('额外说明，如“切丁”'),
+  costApprox: z
+    .number()
+    .nonnegative()
+    .optional()
+    .describe('预估花费（与该食材用量对应，单位与菜谱 currency 一致）'),
+});
 
+/**
+ * 单条步骤信息
+ */
 export const RecipeStepSchema = z.object({
-  description: z.string().describe('步骤描述'),
-  time: z.number().describe('预估时间（分钟）'),
-  tips: z.string().optional().describe('烹饪技巧提示')
-}).describe('菜谱中的单个步骤');
+  order: z.number().int().nonnegative().describe('步骤顺序（从 0 开始）'),
+  instruction: z.string().describe('步骤文字说明'),
+  durationApproxMin: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('预估耗时（分钟，可选）'),
+  imageUrl: z
+    .string()
+    .url()
+    .optional()
+    .describe('步骤配图 URL（预留）'),
+});
 
-export const RecipeCostSchema = z.string().describe('总成本范围（元），例如："20-35"');
-
-export const KitchenToolSchema = z.object({
+/**
+ * 需要特殊厨具时的记录
+ */
+export const RecipeEquipmentSchema = z.object({
   name: z.string().describe('厨具名称'),
-  description: z.string().optional().describe('厨具用途说明'),
-  required: z.boolean().describe('是否必需，true为必需，false为可选')
-}).describe('菜谱需要的厨具');
+  note: z.string().optional().describe('使用提示 / 规格说明（可选）'),
+});
 
+// ────────────────────────────────────────────────
+// 主 Recipe Schema
+// ────────────────────────────────────────────────
+
+/**
+ * 完整菜谱对象
+ * 时间和成本均为 AI 估算值，字段名以 "Approx" 标识
+ */
 export const RecipeSchema = z.object({
-  name: z.string().describe('菜谱名称'),
-  description: z.string().describe('菜谱的简要描述，使用markdown格式，包括菜品特点、口感、适合人群等信息。可以使用**加粗**、*斜体*等markdown语法来强调重要信息'),
-  ingredients: z.array(RecipeIngredientSchema).describe('所需食材列表'),
-  steps: z.array(RecipeStepSchema).describe('烹饪步骤列表'),
-  kitchenTools: z.array(KitchenToolSchema).describe('需要的厨具列表'),
-  nutrition: NutritionSchema.describe('菜谱的营养成分信息'),
-  cost: RecipeCostSchema.describe('菜谱成本信息'),
-  leftoverTips: z.string().optional().describe('剩菜处理建议'),
-  dietNote: z.string().optional().describe('饮食注意事项'),
-  tags: z.array(z.string()).optional().describe('菜谱标签，例如：["低钠", "低脂", "家常菜"]'),
-  difficulty: z.enum(['easy', 'medium', 'hard']).describe('烹饪难度'),
-  cookingTime: z.number().describe('总烹饪时间，例如：30'),
-  servings: z.number().describe('可供食用的人数')
-}).describe('菜谱信息');
+  id: z.string().uuid().describe('菜谱唯一标识'),
+  name: z.string().min(1).describe('菜名'),
+  description: z.string().describe('味型 / 卖点简介'),
+  coverImageUrl: z
+    .string()
+    .url()
+    .optional()
+    .describe('主图 URL（预留）'),
+  cuisineType: z.string().describe('菜系，如 "川菜"'),
+  mealType: z.string().describe('餐次 / 场景'),
+  servings: z.number().int().positive().describe('适用人数'),
+  difficulty: z
+    .enum(['easy', 'medium', 'hard'])
+    .describe('难度等级'),
+  prepTimeApproxMin: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('备料时间（估算，分钟）'),
+  cookTimeApproxMin: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('烹饪时间（估算，分钟）'),
+  totalTimeApproxMin: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('总耗时（估算，分钟）'),
+  costApprox: z
+    .number()
+    .nonnegative()
+    .describe('参考花费（单份，估算）'),
+  currency: z
+    .string()
+    .length(3)
+    .describe('货币代码，ISO 4217，例如 CNY'),
+  dietaryTags: z.array(z.string()).describe('饮食/健康标签列表'),
+  allergens: z.array(z.string()).describe('过敏原列表'),
+  tips: z.string().optional().describe('关键小贴士'),
+  leftoverHandling: z
+    .string()
+    .optional()
+    .describe('剩菜处理建议'),
+  version: z.number().int().min(1).default(1).describe('修订版本号'),
+  checksum: z.string().describe('内容哈希，便于去重/审计'),
+  createdAt: z
+    .string()
+    .describe('创建时间，ISO 字符串'),
+  updatedAt: z
+    .string()
+    .describe('最近更新时间，ISO 字符串'),
 
-// 生成的菜谱类型，包含本地唯一ID
-export interface GeneratedRecipe extends Recipe {
-  id: string;
-}
+  // 与聊天消息关联
+  sourceMessageId: z
+    .string()
+    .describe('生成该菜谱所依据的聊天消息 ID'),
+
+  // 关联字段
+  ingredients: z
+    .array(RecipeIngredientSchema)
+    .min(1)
+    .describe('食材列表'),
+  steps: z.array(RecipeStepSchema).min(1).describe('步骤列表'),
+  nutrients: RecipeNutrientSchema.describe('营养成分信息'),
+  equipments: z
+    .array(RecipeEquipmentSchema)
+    .optional()
+    .describe('所需厨具列表（可选）'),
+});
 
 export type Recipe = z.infer<typeof RecipeSchema>;
-export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
-export type RecipeStep = z.infer<typeof RecipeStepSchema>;
-export type RecipeCost = z.infer<typeof RecipeCostSchema>;
-export type KitchenTool = z.infer<typeof KitchenToolSchema>; 
+
+export default RecipeSchema;

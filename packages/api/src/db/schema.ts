@@ -2,3 +2,4 @@
 export * from "./schema/auth";
 export * from "./schema/tags";
 export * from "./schema/chat";
+export * from "./schema/recipes";
