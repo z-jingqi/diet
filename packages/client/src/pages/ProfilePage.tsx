@@ -21,15 +21,17 @@ const ProfilePage = () => {
   // 未登录状态
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col h-dvh min-h-0 p-4">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="w-full max-w-md">
+      <div className="flex flex-col h-dvh min-h-0 bg-background">
+        <div className="flex-1 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md border">
             <CardHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <User className="w-6 h-6 text-gray-600" />
+              <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                <User className="w-6 h-6 text-muted-foreground" />
               </div>
-              <CardTitle>未登录</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl font-semibold">
+                未登录
+              </CardTitle>
+              <CardDescription className="mt-2">
                 {isGuestMode
                   ? "您当前处于游客模式，登录后可以使用更多功能"
                   : "请登录后查看个人资料和偏好设置"}
@@ -44,7 +46,7 @@ const ProfilePage = () => {
                 去登录
               </Button>
               {isGuestMode && (
-                <MutedText className="text-center text-sm">
+                <MutedText className="text-center text-sm bg-muted p-3 rounded">
                   游客模式下只能使用聊天功能
                 </MutedText>
               )}
@@ -56,12 +58,12 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="flex flex-col h-dvh min-h-0">
+    <div className="flex flex-col h-dvh min-h-0 bg-background">
       {/* Header */}
       <div className="p-4 border-b flex items-center gap-2">
         <Button
           variant="ghost"
-          className="flex items-center gap-1 text-base font-medium"
+          className="flex items-center gap-2 text-base font-medium"
           onClick={() => navigate({ to: ".." })}
         >
           <ChevronLeft className="h-4 w-4" />
