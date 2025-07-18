@@ -1,5 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
 import { useMyRecipesQuery } from "@/lib/gql/graphql";
 import { graphqlClient } from "@/lib/gql/client";
@@ -80,11 +79,7 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
 
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <CardTitle className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-red-500" />
-          收藏的菜谱
-        </CardTitle>
+      <CardHeader className="flex justify-end">
         {/* 排序选择器 */}
         <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
           <SelectTrigger className="w-40 h-9">
