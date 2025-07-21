@@ -24,9 +24,11 @@ const SettingsPanel = ({
   if (!group) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <Typography variant="span" className="text-muted-foreground">
-          选择一个设置分类
-        </Typography>
+        <div className="text-center space-y-2">
+          <Typography variant="span" className="text-muted-foreground">
+            选择一个设置分类
+          </Typography>
+        </div>
       </div>
     );
   }

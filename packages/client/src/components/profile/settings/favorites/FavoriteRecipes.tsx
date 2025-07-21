@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import React from "react";
 import { Recipe } from "@/lib/gql/graphql";
+import { cn } from "@/lib/utils";
 
 interface FavoriteRecipesProps {
   className?: string;
@@ -78,32 +79,55 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex justify-end">
-        {/* 排序选择器 */}
-        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-          <SelectTrigger className="w-40 h-9">
-            <SelectValue placeholder="排序" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={SortOption.Latest}>最新</SelectItem>
-            <SelectItem value={SortOption.Oldest}>最旧</SelectItem>
-            <SelectItem value={SortOption.NameAsc}>名称 A→Z</SelectItem>
-            <SelectItem value={SortOption.NameDesc}>名称 Z→A</SelectItem>
-          </SelectContent>
-        </Select>
+    <Card className={cn("border", className)}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">我的收藏</h3>
+            <MutedText className="text-sm">
+              {visibleRecipes.length} 个菜谱
+            </MutedText>
+          </div>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger className="w-40 h-9">
+              <SelectValue placeholder="排序" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SortOption.Latest}>最新</SelectItem>
+              <SelectItem value={SortOption.Oldest}>最旧</SelectItem>
+              <SelectItem value={SortOption.NameAsc}>名称 A→Z</SelectItem>
+              <SelectItem value={SortOption.NameDesc}>名称 Z→A</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-32 w-full" />
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
             ))}
           </div>
         )}
-        {!!error && <MutedText>加载失败，请稍后再试。</MutedText>}
+        {!!error && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <MutedText className="text-center">加载失败，请稍后再试。</MutedText>
+          </div>
+        )}
         {!isLoading && !error && sortedRecipes.length === 0 && (
-          <MutedText>暂无已收藏的菜谱。</MutedText>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <span className="text-muted-foreground text-2xl">📝</span>
+            </div>
+            <h4 className="text-base font-medium mb-2">还没有收藏的菜谱</h4>
+            <MutedText className="text-center text-sm">
+              浏览菜谱时点击收藏按钮，收藏的菜谱会显示在这里。
+            </MutedText>
+          </div>
         )}
         {!isLoading && visibleRecipes.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

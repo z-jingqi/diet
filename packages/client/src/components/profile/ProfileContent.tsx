@@ -10,7 +10,7 @@ import { settingsGroups, SettingKey, SettingGroupTitle } from "./settings-config
 import useMediaQuery from "@/hooks/useMediaQuery";
 import SettingsDrawer from "./SettingsDrawer";
 import SettingsPanel from "./SettingsPanel";
-import { useSearch } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 
 interface ProfileContentProps {
   className?: string;
@@ -19,7 +19,10 @@ interface ProfileContentProps {
 const ProfileContent = ({ className }: ProfileContentProps) => {
   const { user, logout } = useAuth();
   const authNavigate = useAuthNavigate();
-  const search = useSearch({ from: '/profile' });
+  const location = useLocation();
+  
+  // Only use search params if we're on the profile route
+  const search = location.pathname === '/profile' ? location.search : {};
 
   // Display name logic
   const displayName = user?.nickname || user?.username || "访客";
@@ -75,34 +78,45 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
   return (
     <div className={cn("flex flex-col flex-1 overflow-hidden", className)}>
       {/* Header */}
-      <div className="flex flex-col items-center justify-center gap-4 py-6 lg:flex-row lg:justify-start lg:items-center lg:px-6 border-b">
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={user?.avatarUrl || undefined} alt={displayName} />
-          <AvatarFallback className="text-xl font-semibold">
-            {displayName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <Typography variant="h2" className="text-xl font-semibold">
-          {displayName}
-        </Typography>
+      <div className="bg-muted/30 border-b">
+        <div className="flex items-center gap-4 py-6 px-4 lg:py-8 lg:px-6">
+          <Avatar className="h-16 w-16 lg:h-24 lg:w-24 border-2 border-background">
+            <AvatarImage src={user?.avatarUrl || undefined} alt={displayName} />
+            <AvatarFallback className="text-lg lg:text-2xl font-bold bg-primary/10 text-primary">
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <Typography variant="h2" className="text-xl lg:text-2xl font-bold truncate">
+              {displayName}
+            </Typography>
+          </div>
+        </div>
       </div>
 
       {/* Body */}
       {isMobile ? (
-        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4">
+        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {settingsGroups.map((group) => (
             <Card
               key={group.title}
-              className="cursor-pointer hover:bg-muted/50"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => setActiveGroup(group)}
             >
               <CardContent className="flex items-center gap-4 p-4">
-                <span className="text-primary h-6 w-6">
-                  {group.items[0]?.icon}
-                </span>
-                <Typography variant="span" className="font-medium">
-                  {group.title}
-                </Typography>
+                <div className="flex items-center justify-center w-10 h-10 rounded bg-muted">
+                  <span className="text-foreground h-5 w-5">
+                    {group.items[0]?.icon}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <Typography variant="span" className="font-medium">
+                    {group.title}
+                  </Typography>
+                  <Typography variant="span" className="text-muted-foreground text-sm block">
+                    {group.items.length} 项设置
+                  </Typography>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -128,13 +142,13 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
                 key={group.title}
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start h-12 px-2",
+                  "w-full justify-start h-10 px-3",
                   activeGroup?.title === group.title && "bg-muted"
                 )}
                 onClick={() => setActiveGroup(group)}
               >
-                <span className="mr-3">{group.items[0]?.icon}</span>
-                <Typography variant="span" className="font-medium">
+                <span className="mr-3 h-4 w-4">{group.items[0]?.icon}</span>
+                <Typography variant="span" className="font-medium text-sm">
                   {group.title}
                 </Typography>
               </Button>
