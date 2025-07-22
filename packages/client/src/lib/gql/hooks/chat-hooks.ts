@@ -27,6 +27,8 @@ import {
   createEmptyChatSessionV2,
 } from "@/utils/chat-utils";
 import { CHAT_QUERY_KEYS } from "./common";
+import { useRecipePreferences } from "./recipe-hooks";
+import { useMyRecipesQuery } from "../graphql";
 
 /**
  * Options for sending a chat message
@@ -136,9 +138,9 @@ export const useDeleteChatSession = () => {
 };
 
 /**
- * Hook for chat message handling including streaming responses
+ * Internal hook for chat messaging functionality
  */
-export const useChatMessaging = () => {
+const useChatMessagingInternal = (isGuestMode = false) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingIntent, setIsGettingIntent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -242,12 +244,43 @@ export const useChatMessaging = () => {
     [sendWithStream]
   );
 
-  // Handle sending a recipe message with streaming response
+  // 获取用户已有菜谱和不喜欢的菜谱（仅在非游客模式下）
+  const { data: recipePreferences } = useRecipePreferences(!isGuestMode);
+  const { data: myRecipesData } = useMyRecipesQuery(createAuthenticatedClient(), undefined, {
+    enabled: !isGuestMode,
+  });
+
   const sendRecipeWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
-      return sendWithStream(sendRecipeChatMessage, options);
+      // 准备现有菜谱和不喜欢的菜谱列表
+      const existingRecipes = myRecipesData?.myRecipes
+        ?.map(recipe => recipe.name)
+        .filter((name): name is string => Boolean(name)) || [];
+      const dislikedRecipes = recipePreferences
+        ?.filter(pref => pref.preference === 'DISLIKE')
+        ?.map(pref => pref.recipeName)
+        .filter((name): name is string => Boolean(name)) || [];
+
+      // 创建带有菜谱限制的发送函数
+      const sendRecipeWithRestrictions = (
+        messages: any[],
+        onMessage: any,
+        onError: any,
+        signal?: AbortSignal,
+        isGuestMode?: boolean
+      ) => sendRecipeChatMessage(
+        messages, 
+        onMessage, 
+        onError, 
+        signal, 
+        isGuestMode, 
+        existingRecipes, 
+        dislikedRecipes
+      );
+
+      return sendWithStream(sendRecipeWithRestrictions, options);
     },
-    [sendWithStream]
+    [sendWithStream, myRecipesData, recipePreferences]
   );
 
   // Handle sending a health advice message with streaming response
@@ -400,4 +433,9 @@ export const useChatMessaging = () => {
     abortCurrentMessage,
     createTemporarySession,
   };
+};
+
+// 导出 hook
+export const useChatMessaging = (isGuestMode = false) => {
+  return useChatMessagingInternal(isGuestMode);
 };

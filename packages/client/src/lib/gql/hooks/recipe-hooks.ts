@@ -25,7 +25,7 @@ import { generateRecipeDetail } from "@/lib/api/recipe-api";
 /**
  * 查询用户标记的菜谱喜好
  */
-export const useRecipePreferences = () => {
+export const useRecipePreferences = (enabled = true) => {
   return useQuery({
     queryKey: RECIPE_QUERY_KEYS.RECIPE_PREFERENCES,
     queryFn: async () => {
@@ -40,6 +40,7 @@ export const useRecipePreferences = () => {
         return [];
       }
     },
+    enabled,
   });
 };
 
