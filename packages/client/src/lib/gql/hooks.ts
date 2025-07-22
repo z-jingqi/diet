@@ -6,5 +6,6 @@
 export * from "./hooks/tags";
 export * from "./hooks/chat-hooks";
 export * from "./hooks/common";
+export * from "./hooks/recipe-hooks";
 
 // 保持核心 hooks 导出一致

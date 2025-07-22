@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { graphqlClient } from "../client";
-import { QUERY_KEYS } from "./common";
+import { TAG_QUERY_KEYS } from "./common";
 import {
   useGetTagsQuery,
   useGetTagCategoriesQuery,
@@ -91,11 +91,11 @@ export function useCreateTag() {
   return useCreateTagMutation(graphqlClient, {
     onSuccess: () => {
       // 刷新相关查询
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_TAGS });
+      queryClient.invalidateQueries({ queryKey: TAG_QUERY_KEYS.TAGS });
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.GET_TAG_CATEGORIES,
+        queryKey: TAG_QUERY_KEYS.TAG_CATEGORIES,
       });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GET_TAG_CONFLICTS });
+      queryClient.invalidateQueries({ queryKey: TAG_QUERY_KEYS.TAG_CONFLICTS });
     },
   });
 }

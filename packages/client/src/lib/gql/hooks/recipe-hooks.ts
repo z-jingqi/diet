@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { graphqlClient } from "../client";
 import { BasicRecipeInfo } from "@/types/recipe";
+import { RECIPE_QUERY_KEYS } from "./common";
 import {
   GetRecipePreferencesDocument,
   GetRecipePreferencesQuery,
@@ -16,23 +17,23 @@ import {
   RecipeInput,
   CreateRecipeDocument,
   CreateRecipeMutation,
-  CreateRecipeMutationVariables
+  CreateRecipeMutationVariables,
 } from "../graphql";
 
 import { generateRecipeDetail } from "@/lib/api/recipe-api";
-import { useNavigate } from "@tanstack/react-router";
 
 /**
  * 查询用户标记的菜谱喜好
  */
 export const useRecipePreferences = () => {
   return useQuery({
-    queryKey: ["recipePreferences"],
+    queryKey: RECIPE_QUERY_KEYS.RECIPE_PREFERENCES,
     queryFn: async () => {
       try {
-        const { myRecipePreferences } = await graphqlClient.request<GetRecipePreferencesQuery>(
-          GetRecipePreferencesDocument
-        );
+        const { myRecipePreferences } =
+          await graphqlClient.request<GetRecipePreferencesQuery>(
+            GetRecipePreferencesDocument
+          );
         return myRecipePreferences || [];
       } catch (error) {
         console.error("获取菜谱喜好失败:", error);
@@ -48,11 +49,11 @@ export const useRecipePreferences = () => {
  */
 export const useSetRecipePreference = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({
       recipe,
-      preference
+      preference,
     }: {
       recipe: BasicRecipeInfo;
       preference: PreferenceType;
@@ -64,16 +65,16 @@ export const useSetRecipePreference = () => {
         input: {
           recipeName: recipe.name,
           recipeBasicInfo: JSON.stringify(recipe),
-          preference
-        }
+          preference,
+        },
       });
-      
+
       return response.setRecipePreference;
     },
     onSuccess: () => {
       // 成功后刷新菜谱喜好列表
-      queryClient.invalidateQueries({ queryKey: ["recipePreferences"] });
-    }
+      queryClient.invalidateQueries({ queryKey: RECIPE_QUERY_KEYS.RECIPE_PREFERENCES });
+    },
   });
 };
 
@@ -82,16 +83,16 @@ export const useSetRecipePreference = () => {
  */
 export const useRecipePreferenceStatus = (recipeName: string) => {
   const { data: preferences, isLoading } = useRecipePreferences();
-  
+
   if (isLoading || !preferences) {
     return { isDisliked: false, loading: true };
   }
-  
-  const preference = preferences.find(p => p.recipeName === recipeName);
-  
+
+  const preference = preferences.find((p) => p.recipeName === recipeName);
+
   return {
     isDisliked: preference?.preference === PreferenceType.Dislike,
-    loading: false
+    loading: false,
   };
 };
 
@@ -100,7 +101,6 @@ export const useRecipePreferenceStatus = (recipeName: string) => {
  */
 export const useGenerateRecipe = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async (basicInfo: BasicRecipeInfo) => {
@@ -115,11 +115,8 @@ export const useGenerateRecipe = () => {
 
       return createRecipe;
     },
-    onSuccess: (recipe) => {
-      queryClient.invalidateQueries({ queryKey: ["myRecipes"] });
-      if (recipe?.id) {
-        navigate({ to: "/recipe/$id", params: { id: recipe.id } });
-      }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: RECIPE_QUERY_KEYS.MY_RECIPES });
     },
   });
 };
@@ -129,7 +126,7 @@ export const useGenerateRecipe = () => {
  */
 export const useRecipeDetail = (id: string) => {
   return useQuery({
-    queryKey: ["recipe", id],
+    queryKey: RECIPE_QUERY_KEYS.RECIPE(id),
     queryFn: async () => {
       const { recipe } = await graphqlClient.request<GetRecipeQuery>(
         GetRecipeDocument,
@@ -137,7 +134,7 @@ export const useRecipeDetail = (id: string) => {
       );
       return recipe;
     },
-    enabled: !!id
+    enabled: !!id,
   });
 };
 
@@ -158,7 +155,7 @@ export const useUpdateRecipe = () => {
     onSuccess: () => {
       // 更新成功后刷新缓存数据
       queryClient.invalidateQueries({ queryKey: ["recipe"] });
-      queryClient.invalidateQueries({ queryKey: ["myRecipes"] });
+      queryClient.invalidateQueries({ queryKey: RECIPE_QUERY_KEYS.MY_RECIPES });
     },
   });
-}; 
+};

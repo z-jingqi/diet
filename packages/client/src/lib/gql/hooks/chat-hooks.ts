@@ -26,14 +26,7 @@ import {
   toAIMessagesV2,
   createEmptyChatSessionV2,
 } from "@/utils/chat-utils";
-
-/**
- * Query key constants for chat related queries
- */
-export const CHAT_QUERY_KEYS = {
-  MY_CHAT_SESSIONS: ["GetMyChatSessions"] as const,
-  CHAT_SESSION: (id: string) => ["GetChatSession", { id }] as const,
-};
+import { CHAT_QUERY_KEYS } from "./common";
 
 /**
  * Options for sending a chat message
