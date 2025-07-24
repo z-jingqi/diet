@@ -11,6 +11,7 @@ const ChatMessages = ({
   messages,
   gettingIntent = false,
 }: ChatMessagesProps) => {
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);

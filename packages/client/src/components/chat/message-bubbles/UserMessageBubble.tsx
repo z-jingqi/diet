@@ -9,7 +9,7 @@ const UserMessageBubble = ({
   content: string | null | undefined;
 }) => (
   <div className="flex w-full justify-end">
-    <div className="max-w-[80%] bg-[#e9e9e9]/80 rounded-lg p-2">
+    <div className="bg-[#e9e9e9]/80 rounded-lg p-2">
       <Markdown content={content || ""} className="max-w-none" />
     </div>
   </div>

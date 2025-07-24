@@ -68,64 +68,45 @@ const ChatInput = ({
   const isEmpty = !content.trim();
 
   return (
-    <div className="space-y-3">
-      {/* 终止按钮 - 居中显示 */}
-      {canAbort && (
-        <div className="flex justify-center">
-          <div className="relative">
-            {/* 公转圆弧 */}
-            <div className="absolute inset-0 w-6 h-6 rounded-full border-2 border-transparent border-t-primary/50 animate-spin"></div>
-            {/* 终止按钮 */}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onAbort}
-              size="sm"
-              className="relative h-6 w-6 rounded-full p-0 hover:bg-primary/10 !px-[5px] !py-0"
-            >
-              <Square size={24} />
-            </Button>
-          </div>
-        </div>
-      )}
+    <div className="relative rounded-lg border bg-background p-2">
+      <form onSubmit={handleSubmit}>
+        {/* Message Input - Top Section */}
+        <Textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setContent(e.target.value)
+          }
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          disabled={disabled}
+          enterKeyHint="enter"
+          rows={1}
+        />
 
-      {/* 输入框 */}
-      <div className="relative rounded-lg border bg-background p-2">
-        <form onSubmit={handleSubmit}>
-          {/* Message Input - Top Section */}
-          <Textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setContent(e.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+        {/* Bottom Section - Tags and Action Button */}
+        <div className="flex justify-between items-center mt-4">
+          <TagSelector
+            selectedTagIds={selectedTagIds}
+            onTagsChange={handleTagsChange}
             disabled={disabled}
-            enterKeyHint="enter"
-            rows={1}
           />
 
-          {/* Bottom Section - Tags and Send Button */}
-          <div className="flex justify-between items-center mt-4">
-            <TagSelector
-              selectedTagIds={selectedTagIds}
-              onTagsChange={handleTagsChange}
-              disabled={disabled}
-            />
-
-            <Button
-              type="submit"
-              disabled={disabled || isEmpty}
-              size="icon"
-              className="h-8 w-8"
-            >
-              <Send size={18} />
-            </Button>
-          </div>
-        </form>
-      </div>
+          <Button
+            type={canAbort ? "button" : "submit"}
+            onClick={canAbort ? onAbort : undefined}
+            disabled={canAbort ? false : disabled || isEmpty}
+            size="icon"
+            className={canAbort ? "h-8 w-8 relative" : "h-8 w-8"}
+          >
+            {canAbort && (
+              <div className="absolute top-0.5 left-0.5 w-7 h-7 rounded-full border-2 border-transparent border-r-white/70 animate-spin"></div>
+            )}
+            {canAbort ? <Square size={18} /> : <Send size={18} />}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

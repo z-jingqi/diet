@@ -31,38 +31,36 @@ const HealthAdviceMessageBubble = ({
 
   return (
     <div className="flex w-full justify-start">
-      <div className="max-w-[80%]">
-        <div className="bg-white rounded-lg p-4">
-          {/* 健康建议内容 */}
-          <div className="mb-4">
-            <Markdown content={content} className="max-w-none" />
-          </div>
-
-          {/* 操作按钮 - 只在生成完成后显示 */}
-          {message.status === MessageStatus.Done && (
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSave}
-                disabled={saved}
-                className={cn(
-                  "flex items-center gap-1",
-                  saved && "text-green-600"
-                )}
-              >
-                {saved ? (
-                  <BookmarkCheck className="w-4 h-4" />
-                ) : (
-                  <Bookmark className="w-4 h-4" />
-                )}
-                <Typography variant="span" className="text-sm">
-                  {saved ? "已保存" : "保存建议"}
-                </Typography>
-              </Button>
-            </div>
-          )}
+      <div className="bg-white rounded-lg p-4">
+        {/* 健康建议内容 */}
+        <div className="mb-4">
+          <Markdown content={content} className="max-w-none" />
         </div>
+
+        {/* 操作按钮 - 只在生成完成后显示 */}
+        {message.status === MessageStatus.Done && (
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSave}
+              disabled={saved}
+              className={cn(
+                "flex items-center gap-1",
+                saved && "text-green-600"
+              )}
+            >
+              {saved ? (
+                <BookmarkCheck className="w-4 h-4" />
+              ) : (
+                <Bookmark className="w-4 h-4" />
+              )}
+              <Typography variant="span" className="text-sm">
+                {saved ? "已保存" : "保存建议"}
+              </Typography>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

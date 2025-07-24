@@ -4,6 +4,7 @@ import ChatInput from "@/components/chat/ChatInput";
 import ChatMessages from "@/components/chat/ChatMessages";
 import TypingPrompt from "@/components/chat/TypingPrompt";
 import ChatLayout from "@/components/chat/ChatLayout";
+import FloatingRecipeButton from "@/components/chat/FloatingRecipeButton";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   useChatSession,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/gql/hooks/chat-hooks";
 import { ChatMessage, MessageRole, MessageStatus } from "@/lib/gql/graphql";
 import { buildUserMessage } from "@/utils/message-builder";
+import { useAllRecipes } from "@/hooks";
 
 interface ChatPageProps {
   sessionId?: string;
@@ -144,6 +146,9 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
     }
   };
 
+  // 获取所有菜谱信息，按名称去重
+  const allRecipes = useAllRecipes(messages);
+
   // 处理中止消息
   const handleAbortMessage = () => {
     abortCurrentMessage();
@@ -167,7 +172,14 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
         </div>
 
         {/* Input area - fixed at bottom */}
-        <div className="flex-shrink-0 w-full max-w-3xl mx-auto p-4 bg-background">
+        <div className="flex-shrink-0 w-full max-w-3xl mx-auto p-4 bg-background relative">
+          {/* 浮动菜谱按钮 */}
+          {allRecipes.length > 0 && (
+            <div className="absolute -top-9 right-4 z-50">
+              <FloatingRecipeButton recipes={allRecipes} />
+            </div>
+          )}
+          
           <ChatInput
             onSendMessage={handleSendMessage}
             disabled={isMessageLoading || isSessionLoading}
