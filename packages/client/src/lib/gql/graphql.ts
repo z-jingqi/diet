@@ -520,6 +520,7 @@ export type RecipePreferenceInput = {
 
 export type RefreshResponse = {
   __typename?: 'RefreshResponse';
+  csrfToken?: Maybe<Scalars['String']['output']>;
   sessionExpiresAt?: Maybe<Scalars['DateTime']['output']>;
   sessionToken?: Maybe<Scalars['String']['output']>;
 };
@@ -684,12 +685,12 @@ export type DeleteChatSessionMutation = { __typename?: 'Mutation', deleteChatSes
 
 export type RecipeFieldsFragment = { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null };
 
-export type RecipeBasicFieldsFragment = { __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, createdAt?: any | null, updatedAt?: any | null };
+export type RecipeBasicFieldsFragment = { __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, costApprox?: number | null, totalTimeApproxMin?: number | null, difficulty?: Difficulty | null, createdAt?: any | null, updatedAt?: any | null };
 
 export type MyRecipesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyRecipesQuery = { __typename?: 'Query', myRecipes?: Array<{ __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, createdAt?: any | null, updatedAt?: any | null }> | null };
+export type MyRecipesQuery = { __typename?: 'Query', myRecipes?: Array<{ __typename?: 'Recipe', id?: string | null, name?: string | null, servings?: number | null, cuisineType?: CuisineType | null, mealType?: MealType | null, costApprox?: number | null, totalTimeApproxMin?: number | null, difficulty?: Difficulty | null, createdAt?: any | null, updatedAt?: any | null }> | null };
 
 export type GetRecipeQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -855,6 +856,9 @@ export const RecipeBasicFieldsFragmentDoc = `
   servings
   cuisineType
   mealType
+  costApprox
+  totalTimeApproxMin
+  difficulty
   createdAt
   updatedAt
 }

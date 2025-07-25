@@ -34,6 +34,9 @@ fragment RecipeBasicFields on Recipe {
   servings
   cuisineType
   mealType
+  costApprox
+  totalTimeApproxMin
+  difficulty
   createdAt
   updatedAt
 }

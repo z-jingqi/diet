@@ -12,8 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as KitchenToolsRouteImport } from './routes/kitchen-tools'
-import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as SessionIdRouteImport } from './routes/$sessionId'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipeIdRouteImport } from './routes/recipe.$id'
@@ -31,16 +29,6 @@ const ProfileRoute = ProfileRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KitchenToolsRoute = KitchenToolsRouteImport.update({
-  id: '/kitchen-tools',
-  path: '/kitchen-tools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavoritesRoute = FavoritesRouteImport.update({
-  id: '/favorites',
-  path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SessionIdRoute = SessionIdRouteImport.update({
@@ -62,8 +50,6 @@ const RecipeIdRoute = RecipeIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$sessionId': typeof SessionIdRoute
-  '/favorites': typeof FavoritesRoute
-  '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -72,8 +58,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$sessionId': typeof SessionIdRoute
-  '/favorites': typeof FavoritesRoute
-  '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -83,8 +67,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$sessionId': typeof SessionIdRoute
-  '/favorites': typeof FavoritesRoute
-  '/kitchen-tools': typeof KitchenToolsRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -95,28 +77,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$sessionId'
-    | '/favorites'
-    | '/kitchen-tools'
     | '/login'
     | '/profile'
     | '/register'
     | '/recipe/$id'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/$sessionId'
-    | '/favorites'
-    | '/kitchen-tools'
-    | '/login'
-    | '/profile'
-    | '/register'
-    | '/recipe/$id'
+  to: '/' | '/$sessionId' | '/login' | '/profile' | '/register' | '/recipe/$id'
   id:
     | '__root__'
     | '/'
     | '/$sessionId'
-    | '/favorites'
-    | '/kitchen-tools'
     | '/login'
     | '/profile'
     | '/register'
@@ -126,8 +96,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SessionIdRoute: typeof SessionIdRoute
-  FavoritesRoute: typeof FavoritesRoute
-  KitchenToolsRoute: typeof KitchenToolsRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
@@ -157,20 +125,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/kitchen-tools': {
-      id: '/kitchen-tools'
-      path: '/kitchen-tools'
-      fullPath: '/kitchen-tools'
-      preLoaderRoute: typeof KitchenToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favorites': {
-      id: '/favorites'
-      path: '/favorites'
-      fullPath: '/favorites'
-      preLoaderRoute: typeof FavoritesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$sessionId': {
       id: '/$sessionId'
       path: '/$sessionId'
@@ -198,8 +152,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SessionIdRoute: SessionIdRoute,
-  FavoritesRoute: FavoritesRoute,
-  KitchenToolsRoute: KitchenToolsRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
