@@ -2,7 +2,11 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Recipe } from "@/lib/gql/graphql";
-import { cuisineTypeLabels, mealTypeLabels, difficultyLabels } from "@/data/recipe-mappings";
+import {
+  cuisineTypeLabels,
+  mealTypeLabels,
+  difficultyLabels,
+} from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
 
 interface RecipeCardProps {
@@ -14,13 +18,13 @@ interface RecipeCardProps {
   selectable?: boolean;
 }
 
-const RecipeCard = ({ 
-  recipe, 
-  className, 
-  onClick, 
-  isSelected = false, 
+const RecipeCard = ({
+  recipe,
+  className,
+  onClick,
+  isSelected = false,
   onSelectionChange,
-  selectable = false 
+  selectable = false,
 }: RecipeCardProps) => {
   const handleClick = () => {
     if (recipe.id) {
@@ -35,14 +39,10 @@ const RecipeCard = ({
   };
 
   // 计算显示的badge数量
-  const hasCuisine = !!recipe.cuisineType;
-  const hasMealType = !!recipe.mealType;
   const hasDifficulty = !!recipe.difficulty;
   const hasTime = !!recipe.totalTimeApproxMin;
   const hasServings = !!recipe.servings;
   const hasCost = !!recipe.costApprox;
-
-  const badgeCount = [hasCuisine, hasMealType, hasDifficulty, hasTime, hasServings, hasCost].filter(Boolean).length;
 
   return (
     <Card
@@ -54,7 +54,10 @@ const RecipeCard = ({
       onClick={handleClick}
     >
       <CardHeader className="p-3 sm:p-4 pb-1">
-        <Typography variant="h4" className="text-base sm:text-lg font-semibold truncate">
+        <Typography
+          variant="h4"
+          className="text-base sm:text-lg font-semibold truncate"
+        >
           {recipe.name}
         </Typography>
       </CardHeader>
@@ -79,9 +82,7 @@ const RecipeCard = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
               {recipe.difficulty && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    难度:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">难度</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {difficultyLabels[recipe.difficulty]}
                   </Badge>
@@ -89,9 +90,7 @@ const RecipeCard = ({
               )}
               {recipe.totalTimeApproxMin && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    时间:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">时间</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {recipe.totalTimeApproxMin}分钟
                   </Badge>
@@ -99,9 +98,7 @@ const RecipeCard = ({
               )}
               {recipe.servings && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    份量:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">份量</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {recipe.servings}人份
                   </Badge>
@@ -109,9 +106,7 @@ const RecipeCard = ({
               )}
               {recipe.costApprox && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    预估成本:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">成本</MutedText>
                   <Badge variant="outline" className="text-xs">
                     ¥{recipe.costApprox}
                   </Badge>
@@ -125,4 +120,4 @@ const RecipeCard = ({
   );
 };
 
-export default RecipeCard; 
+export default RecipeCard;
