@@ -46,4 +46,4 @@ const RecipeHeader = ({ isLoading, recipe, onBack }: RecipeHeaderProps) => {
   );
 };
 
-export default RecipeHeader; 
+export default RecipeHeader;

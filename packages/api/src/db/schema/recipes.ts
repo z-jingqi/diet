@@ -39,7 +39,7 @@ export const recipes = sqliteTable("recipes", {
   created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
   deleted_at: text("deleted_at"), // 软删除
-}); 
+});
 
 /**
  * 菜谱喜好表
@@ -52,7 +52,9 @@ export const recipePreferences = sqliteTable("recipe_preferences", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   // recipe_id可以为空，因为可能只是基础推荐的菜谱，没有完整菜谱记录
-  recipe_id: text("recipe_id").references(() => recipes.id, { onDelete: "set null" }),
+  recipe_id: text("recipe_id").references(() => recipes.id, {
+    onDelete: "set null",
+  }),
   // 存储基础菜谱名称，即使没有完整菜谱记录
   recipe_name: text("recipe_name").notNull(),
   // 存储菜谱基础信息的JSON字符串(可选)
@@ -61,4 +63,4 @@ export const recipePreferences = sqliteTable("recipe_preferences", {
   preference: text("preference").notNull(),
   created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
-}); 
+});

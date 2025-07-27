@@ -30,7 +30,7 @@ interface WechatSessionResp {
 export class AuthService {
   constructor(
     private db: DB,
-    private env: Bindings
+    private env: Bindings,
   ) {}
 
   // 密码加密（使用PBKDF2和随机盐值）
@@ -47,7 +47,7 @@ export class AuthService {
       passwordData,
       { name: "PBKDF2" },
       false,
-      ["deriveBits"]
+      ["deriveBits"],
     );
 
     const hashBuffer = await crypto.subtle.deriveBits(
@@ -58,7 +58,7 @@ export class AuthService {
         hash: "SHA-256",
       },
       key,
-      256 // 32字节 = 256位
+      256, // 32字节 = 256位
     );
 
     // 将盐值和哈希值组合存储
@@ -76,7 +76,7 @@ export class AuthService {
   // 验证密码
   private async verifyPassword(
     password: string,
-    storedHash: string
+    storedHash: string,
   ): Promise<boolean> {
     try {
       const encoder = new TextEncoder();
@@ -84,7 +84,7 @@ export class AuthService {
 
       // 从存储的哈希中提取盐值和哈希值
       const combined = new Uint8Array(
-        storedHash.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
+        storedHash.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || [],
       );
 
       if (combined.length < 48) {
@@ -101,7 +101,7 @@ export class AuthService {
         passwordData,
         { name: "PBKDF2" },
         false,
-        ["deriveBits"]
+        ["deriveBits"],
       );
 
       const hashBuffer = await crypto.subtle.deriveBits(
@@ -112,7 +112,7 @@ export class AuthService {
           hash: "SHA-256",
         },
         key,
-        256
+        256,
       );
 
       const newHash = new Uint8Array(hashBuffer);
@@ -160,7 +160,7 @@ export class AuthService {
 
     // 检查用户名是否已存在
     const existingUser = await this.getFirstRow(
-      this.db.select().from(users).where(eq(users.username, username))
+      this.db.select().from(users).where(eq(users.username, username)),
     );
 
     if (existingUser) {
@@ -187,7 +187,7 @@ export class AuthService {
       this.db
         .select()
         .from(users)
-        .where(and(eq(users.username, username), eq(users.is_active, true)))
+        .where(and(eq(users.username, username), eq(users.is_active, true))),
     );
 
     if (!user) {
@@ -196,7 +196,7 @@ export class AuthService {
 
     const isValidPassword = await this.verifyPassword(
       password,
-      user.password_hash!
+      user.password_hash!,
     );
 
     if (!isValidPassword) {
@@ -226,15 +226,15 @@ export class AuthService {
   async createSession(
     userId: string,
     ipAddress?: string,
-    userAgent?: string
+    userAgent?: string,
   ): Promise<UserSession> {
     const sessionToken = this.generateSessionToken();
     const refreshToken = this.generateRefreshToken();
     const sessionExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
     ).toISOString(); // 7天
     const refreshExpiresAt = new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000
+      Date.now() + 30 * 24 * 60 * 60 * 1000,
     ).toISOString(); // 30天
 
     const [session] = await this.db
@@ -278,9 +278,9 @@ export class AuthService {
         .where(
           and(
             eq(user_sessions.session_token, sessionToken),
-            sql`${user_sessions.session_expires_at} > CURRENT_TIMESTAMP`
-          )
-        )
+            sql`${user_sessions.session_expires_at} > CURRENT_TIMESTAMP`,
+          ),
+        ),
     );
 
     if (!session) {
@@ -292,7 +292,7 @@ export class AuthService {
 
   // 验证refresh token
   async validateRefreshToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<AuthContext | null> {
     const session = await this.getFirstRow(
       this.db
@@ -305,9 +305,9 @@ export class AuthService {
         .where(
           and(
             eq(user_sessions.refresh_token, refreshToken),
-            sql`${user_sessions.refresh_expires_at} > CURRENT_TIMESTAMP`
-          )
-        )
+            sql`${user_sessions.refresh_expires_at} > CURRENT_TIMESTAMP`,
+          ),
+        ),
     );
 
     if (!session) {
@@ -342,7 +342,7 @@ export class AuthService {
       this.db
         .select()
         .from(user_sessions)
-        .where(eq(user_sessions.refresh_token, refreshToken))
+        .where(eq(user_sessions.refresh_token, refreshToken)),
     );
 
     if (!session) {
@@ -358,7 +358,7 @@ export class AuthService {
     // 生成新的session token
     const newSessionToken = this.generateSessionToken();
     const newSessionExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
     ).toISOString(); // 7天
 
     // 更新会话
@@ -403,7 +403,7 @@ export class AuthService {
   // 根据ID获取用户
   async getUserById(userId: string): Promise<User> {
     const user = await this.getFirstRow(
-      this.db.select().from(users).where(eq(users.id, userId))
+      this.db.select().from(users).where(eq(users.id, userId)),
     );
 
     if (!user) {
@@ -454,15 +454,15 @@ export class AuthService {
         .where(
           and(
             eq(oauth_accounts.provider, provider),
-            eq(oauth_accounts.provider_user_id, openid)
-          )
-        )
+            eq(oauth_accounts.provider_user_id, openid),
+          ),
+        ),
     );
 
     if (existingOauth) {
       // existing user
       user = await this.getFirstRow(
-        this.db.select().from(users).where(eq(users.id, existingOauth.user_id))
+        this.db.select().from(users).where(eq(users.id, existingOauth.user_id)),
       );
       if (!user) {
         throw new Error("关联用户不存在");
@@ -487,7 +487,7 @@ export class AuthService {
       });
 
       user = await this.getFirstRow(
-        this.db.select().from(users).where(eq(users.id, userId))
+        this.db.select().from(users).where(eq(users.id, userId)),
       );
     }
 
@@ -519,7 +519,7 @@ export class AuthService {
   // 检查用户名是否存在
   async checkUsernameExists(username: string): Promise<boolean> {
     const user = await this.getFirstRow(
-      this.db.select().from(users).where(eq(users.username, username))
+      this.db.select().from(users).where(eq(users.username, username)),
     );
     return !!user;
   }
@@ -544,7 +544,7 @@ export class AuthService {
   // 以下方法在无状态 CSRF 策略下不再需要，但保留空实现以兼容旧调用
   async validateCsrfToken(
     _userId: string,
-    _csrfToken: string
+    _csrfToken: string,
   ): Promise<boolean> {
     // 始终返回 true，因为验证交由中间件等值比较
     return true;

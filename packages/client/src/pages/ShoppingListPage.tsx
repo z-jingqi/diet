@@ -26,7 +26,7 @@ const ShoppingListPage = () => {
   const { data, isLoading } = useRecipesByIdsQuery(
     graphqlClient,
     { ids: idList },
-    { enabled: idList.length > 0 }
+    { enabled: idList.length > 0 },
   );
 
   const recipes = React.useMemo(() => {
@@ -50,7 +50,8 @@ const ShoppingListPage = () => {
   });
 
   // 使用新 hook
-  const { buildLocalList, optimizeListWithAI, generating } = useGenerateShoppingList(recipes);
+  const { buildLocalList, optimizeListWithAI, generating } =
+    useGenerateShoppingList(recipes);
 
   // 首次加载且本地无数据时生成购物清单
   React.useEffect(() => {
@@ -116,7 +117,9 @@ const ShoppingListPage = () => {
 
     if (shoppingList.length === 0) {
       return (
-        <div className="text-muted-foreground text-center py-8">暂无购物清单</div>
+        <div className="text-muted-foreground text-center py-8">
+          暂无购物清单
+        </div>
       );
     }
 
@@ -127,13 +130,22 @@ const ShoppingListPage = () => {
             key={idx}
             className="flex justify-between items-center border-b border-dashed border-muted-foreground/30 py-2 last:border-0"
           >
-            <div className="flex items-center gap-2 flex-1" onClick={() => togglePurchased(idx)}>
+            <div
+              className="flex items-center gap-2 flex-1"
+              onClick={() => togglePurchased(idx)}
+            >
               {item.purchased ? (
                 <CheckSquare className="w-4 h-4 text-primary" />
               ) : (
                 <Square className="w-4 h-4 text-muted-foreground" />
               )}
-              <span className={item.purchased ? "line-through text-muted-foreground" : "font-medium"}>
+              <span
+                className={
+                  item.purchased
+                    ? "line-through text-muted-foreground"
+                    : "font-medium"
+                }
+              >
                 {item.name}
               </span>
             </div>
@@ -178,4 +190,4 @@ const ShoppingListPage = () => {
   );
 };
 
-export default ShoppingListPage; 
+export default ShoppingListPage;

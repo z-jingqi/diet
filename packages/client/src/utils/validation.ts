@@ -14,7 +14,7 @@ export const PASSWORD_RULES = {
 // 验证用户名
 export const validateUsername = (
   username: string,
-  isAvailable?: boolean | null
+  isAvailable?: boolean | null,
 ): string | null => {
   if (!username.trim()) {
     return "用户名不能为空";
@@ -45,7 +45,7 @@ export const validatePassword = (password: string): string | null => {
 // 验证表单数据
 export const validateFormData = (
   formData: { username: string; password: string },
-  isAvailable?: boolean | null
+  isAvailable?: boolean | null,
 ) => {
   const errors: Record<string, string> = {};
 

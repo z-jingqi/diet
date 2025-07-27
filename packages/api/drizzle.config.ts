@@ -33,7 +33,7 @@ export default defineConfig({
             try {
               const base = path.resolve(
                 __dirname,
-                "../../.wrangler/state/v3/d1/miniflare-D1DatabaseObject"
+                "../../.wrangler/state/v3/d1/miniflare-D1DatabaseObject",
               );
 
               const sqliteFiles = fs
@@ -42,7 +42,7 @@ export default defineConfig({
                 .sort(
                   (a, b) =>
                     fs.statSync(path.join(base, b)).mtimeMs -
-                    fs.statSync(path.join(base, a)).mtimeMs
+                    fs.statSync(path.join(base, a)).mtimeMs,
                 );
 
               if (sqliteFiles.length === 0) {
@@ -53,7 +53,7 @@ export default defineConfig({
               return `file:${path.join(base, sqliteFiles[0])}`;
             } catch (err) {
               console.warn(
-                '⚠️  未找到本地 D1 数据库文件，已使用内存数据库。请先运行 `wrangler d1 execute DB --local --command="SELECT 1"` 以生成本地数据库。'
+                '⚠️  未找到本地 D1 数据库文件，已使用内存数据库。请先运行 `wrangler d1 execute DB --local --command="SELECT 1"` 以生成本地数据库。',
               );
               return ":memory:";
             }

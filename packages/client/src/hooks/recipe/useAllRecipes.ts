@@ -11,9 +11,12 @@ import { BasicRecipeInfo } from "@/types/recipe";
 export const useAllRecipes = (messages: ChatMessage[]): BasicRecipeInfo[] => {
   return useMemo(() => {
     const recipesMap = new Map<string, BasicRecipeInfo>();
-    
+
     messages.forEach((message) => {
-      if (message.type === MessageType.Recipe && message.status === MessageStatus.Done) {
+      if (
+        message.type === MessageType.Recipe &&
+        message.status === MessageStatus.Done
+      ) {
         const messageRecipes = extractBasicRecipeInfos(message.content || "");
         messageRecipes.forEach((recipe) => {
           // 使用菜谱名称作为key进行去重
@@ -21,7 +24,7 @@ export const useAllRecipes = (messages: ChatMessage[]): BasicRecipeInfo[] => {
         });
       }
     });
-    
+
     return Array.from(recipesMap.values());
   }, [messages]);
-}; 
+};

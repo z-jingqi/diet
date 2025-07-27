@@ -1,12 +1,12 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import tseslint from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import js from "@eslint/js";
+import globals from "globals";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2020,
@@ -15,18 +15,18 @@ export default [
       },
     },
     plugins: {
-      '@typescript-eslint': tseslint,
+      "@typescript-eslint": tseslint,
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
         {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
           ignoreRestSiblings: true,
         },
       ],
-      'no-unused-vars': 'off',
+      "no-unused-vars": "off",
     },
   },
-] 
+];

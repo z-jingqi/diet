@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import { ThumbsDown, Utensils, Clock, DollarSign, ChefHat } from "lucide-react";
+import { ThumbsDown, Utensils, Clock, ChefHat } from "lucide-react";
 import { BasicRecipeInfo } from "@/types/recipe";
 import {
   useRecipePreferenceStatus,
@@ -34,7 +34,7 @@ const RecipeRecommendationItem = ({
   const { data: myRecipesData } = useMyRecipesQuery(graphqlClient, {});
 
   const existingRecipe = myRecipesData?.myRecipes?.find(
-    (r) => r?.name === recipe.name
+    (r) => r?.name === recipe.name,
   );
 
   // 生成菜谱 hook
@@ -60,7 +60,7 @@ const RecipeRecommendationItem = ({
         onError: () => {
           toast.error("操作失败，请稍后再试");
         },
-      }
+      },
     );
   };
 
@@ -133,7 +133,7 @@ const RecipeRecommendationItem = ({
             "flex items-center gap-1.5 px-2 py-1.5 h-7 rounded-md transition-all duration-200 text-xs",
             isDisliked
               ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
-              : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              : "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
           )}
           title="不喜欢"
           onClick={handleDislike}
@@ -161,7 +161,7 @@ const RecipeRecommendationItem = ({
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 h-7 rounded-md border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs font-medium",
               isCurrentlyGenerating &&
-                "opacity-60 cursor-not-allowed animate-pulse"
+                "opacity-60 cursor-not-allowed animate-pulse",
             )}
             onClick={handleGenerate}
             disabled={isDisliked || isCurrentlyGenerating}

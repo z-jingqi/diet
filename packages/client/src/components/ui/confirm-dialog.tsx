@@ -17,7 +17,13 @@ interface ConfirmDialogProps {
   description?: string;
   confirmText?: string;
   cancelText?: string;
-  confirmVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  confirmVariant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 }
 
 const ConfirmDialog = ({
@@ -44,9 +50,13 @@ const ConfirmDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleConfirm} 
-            className={confirmVariant === "destructive" ? "!bg-destructive !text-white hover:!bg-destructive/90 focus:!bg-destructive focus:!text-white" : ""}
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className={
+              confirmVariant === "destructive"
+                ? "!bg-destructive !text-white hover:!bg-destructive/90 focus:!bg-destructive focus:!text-white"
+                : ""
+            }
           >
             {confirmText}
           </AlertDialogAction>
@@ -57,4 +67,4 @@ const ConfirmDialog = ({
 };
 
 export type { ConfirmDialogProps };
-export default ConfirmDialog; 
+export default ConfirmDialog;

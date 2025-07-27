@@ -45,5 +45,5 @@ export const tag_conflicts = sqliteTable("tag_conflicts", {
 // 创建唯一索引，确保同一对标签只有一个冲突记录
 uniqueIndex("tag_conflicts_unique").on(
   tag_conflicts.tag_id_1,
-  tag_conflicts.tag_id_2
+  tag_conflicts.tag_id_2,
 );

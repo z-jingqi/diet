@@ -48,7 +48,7 @@ export class TagService {
       name: string;
       description: string | null;
       sortOrder: number;
-    }>
+    }>,
   ) {
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
@@ -131,7 +131,7 @@ export class TagService {
       aiPrompt: string | null;
       restrictions: string[];
       sortOrder: number | null;
-    }>
+    }>,
   ) {
     const upd: any = {};
     if (data.name !== undefined) upd.name = data.name;
@@ -169,13 +169,13 @@ export class TagService {
       .where(
         and(
           inArray(tag_conflicts.tag_id_1, tagIds),
-          inArray(tag_conflicts.tag_id_2, tagIds)
-        )
+          inArray(tag_conflicts.tag_id_2, tagIds),
+        ),
       );
 
     const grouped = {
       mutual_exclusive: conflicts.filter(
-        (c) => c.conflict_type === "mutual_exclusive"
+        (c) => c.conflict_type === "mutual_exclusive",
       ),
       warning: conflicts.filter((c) => c.conflict_type === "warning"),
       info: conflicts.filter((c) => c.conflict_type === "info"),

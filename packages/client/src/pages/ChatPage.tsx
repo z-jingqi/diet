@@ -25,7 +25,7 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
 
   // 当前会话状态
   const [currentSessionId, setCurrentSessionId] = useState<string>(
-    sessionId || ""
+    sessionId || "",
   );
   const [isTemporarySession, setIsTemporarySession] = useState(!sessionId);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -164,10 +164,7 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
               <TypingPrompt />
             </div>
           ) : (
-            <ChatMessages
-              messages={messages}
-              gettingIntent={isGettingIntent}
-            />
+            <ChatMessages messages={messages} gettingIntent={isGettingIntent} />
           )}
         </div>
 
@@ -179,7 +176,7 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
               <FloatingRecipeButton recipes={allRecipes} />
             </div>
           )}
-          
+
           <ChatInput
             onSendMessage={handleSendMessage}
             disabled={isMessageLoading || isSessionLoading}

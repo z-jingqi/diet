@@ -13,7 +13,9 @@ export interface ShoppingItem {
 interface UseGenerateShoppingListReturn {
   generating: boolean;
   buildLocalList: () => ShoppingItem[];
-  optimizeListWithAI: (baseList: ShoppingItem[]) => Promise<ShoppingItem[] | null>;
+  optimizeListWithAI: (
+    baseList: ShoppingItem[],
+  ) => Promise<ShoppingItem[] | null>;
 }
 
 /**
@@ -21,7 +23,7 @@ interface UseGenerateShoppingListReturn {
  * 返回的购物清单不包含 purchased 字段，hook 会附加默认值。
  */
 export const useGenerateShoppingList = (
-  recipes: Recipe[]
+  recipes: Recipe[],
 ): UseGenerateShoppingListReturn => {
   const [generating, setGenerating] = React.useState(false);
 
@@ -49,7 +51,10 @@ export const useGenerateShoppingList = (
           } else {
             const existing = map[key];
             const qty = ing.quantity ?? ing.amount;
-            if (typeof qty === "number" && typeof existing.quantity === "number") {
+            if (
+              typeof qty === "number" &&
+              typeof existing.quantity === "number"
+            ) {
               existing.quantity += qty;
             } else if (qty) {
               existing.notes?.push(String(qty));
@@ -68,39 +73,42 @@ export const useGenerateShoppingList = (
   }, [recipes]);
 
   // 调用 AI 对基础列表做进一步优化
-  const optimizeListWithAI = React.useCallback(async (baseList: ShoppingItem[]) => {
-    if (baseList.length === 0) {
-      return null;
-    }
-
-    setGenerating(true);
-    try {
-      const userContent =
-        "以下 JSON 是购物清单基础版本，请你合并同义词、统一单位，并保持字段: name, quantity, unit, notes(可选)。输出 JSON 数组，不要包含 purchased 字段。\n" +
-        JSON.stringify(baseList, null, 2);
-
-      const response = await sendMessage({
-        systemPrompt: "你是一位擅长整理食材清单的专业厨师助理。",
-        messages: [{ role: "user", content: userContent }],
-        format: "json",
-      });
-
-      if (Array.isArray(response)) {
-        return (response as any[]).map((it) => ({
-          ...it,
-          purchased: false,
-        })) as ShoppingItem[];
+  const optimizeListWithAI = React.useCallback(
+    async (baseList: ShoppingItem[]) => {
+      if (baseList.length === 0) {
+        return null;
       }
-      return null;
-    } catch (e) {
-      console.error("优化购物清单失败", e);
-      return null;
-    } finally {
-      setGenerating(false);
-    }
-  }, []);
+
+      setGenerating(true);
+      try {
+        const userContent =
+          "以下 JSON 是购物清单基础版本，请你合并同义词、统一单位，并保持字段: name, quantity, unit, notes(可选)。输出 JSON 数组，不要包含 purchased 字段。\n" +
+          JSON.stringify(baseList, null, 2);
+
+        const response = await sendMessage({
+          systemPrompt: "你是一位擅长整理食材清单的专业厨师助理。",
+          messages: [{ role: "user", content: userContent }],
+          format: "json",
+        });
+
+        if (Array.isArray(response)) {
+          return (response as any[]).map((it) => ({
+            ...it,
+            purchased: false,
+          })) as ShoppingItem[];
+        }
+        return null;
+      } catch (e) {
+        console.error("优化购物清单失败", e);
+        return null;
+      } finally {
+        setGenerating(false);
+      }
+    },
+    [],
+  );
 
   return { generating, buildLocalList, optimizeListWithAI };
 };
 
-export default useGenerateShoppingList; 
+export default useGenerateShoppingList;

@@ -41,7 +41,7 @@ const ChatInput = ({
 
     onSendMessage(
       content,
-      selectedTagIds.length > 0 ? selectedTagIds : undefined
+      selectedTagIds.length > 0 ? selectedTagIds : undefined,
     );
     setContent("");
     // 保留已选标签，不需要清空
@@ -54,7 +54,7 @@ const ChatInput = ({
 
       onSendMessage(
         content,
-        selectedTagIds.length > 0 ? selectedTagIds : undefined
+        selectedTagIds.length > 0 ? selectedTagIds : undefined,
       );
       setContent("");
       // 保留已选标签，不需要清空

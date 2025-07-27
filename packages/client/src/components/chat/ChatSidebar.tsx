@@ -42,7 +42,7 @@ const ChatSidebar = ({
   const { requireAuth, user } = useAuth();
   const authCheck = createAuthCheck(
     () => authNavigate({ to: "/login" }),
-    requireAuth
+    requireAuth,
   );
 
   const confirm = useConfirmDialog();
@@ -85,8 +85,8 @@ const ChatSidebar = ({
 
   const filteredCategories = timeCategories.filter((category) =>
     category.sessions.some((session) =>
-      session.title.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+      session.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const handleChatSelect = (sessionId: string) => {
@@ -217,7 +217,7 @@ const ChatSidebar = ({
                     .filter((session) =>
                       session.title
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        .includes(searchTerm.toLowerCase()),
                     )
                     .map((session) => (
                       <SessionHistoryItem

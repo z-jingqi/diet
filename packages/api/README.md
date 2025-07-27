@@ -53,13 +53,16 @@ pnpm run deploy
 ## API 接口
 
 ### 健康检查
+
 - GET /health
 - 返回服务状态
 
 ### 聊天接口
+
 - POST /api/chat/guest - 游客聊天
 - POST /api/chat - 认证用户聊天
 - 请求体：
+
 ```json
 {
   "messages": [
@@ -72,11 +75,13 @@ pnpm run deploy
 ```
 
 ### 标签接口
+
 - GET /api/tags/all - 获取所有标签和分类
 - GET /api/tags - 获取标签列表（支持筛选）
 - GET /api/tags/categories - 获取标签分类
 
 ### 认证接口
+
 - POST /api/auth/login - 用户登录
 - POST /api/auth/register - 用户注册
 - POST /api/auth/logout - 用户登出
@@ -103,11 +108,13 @@ This is the API service for the Diet application, built with Hono and deployed o
 ## Setup
 
 1. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 2. Create a `.env` file in the root directory with the following variables:
+
 ```env
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key
@@ -122,6 +129,7 @@ QWEN_API_KEY=your_qwen_api_key
 ## Development
 
 Run the development server:
+
 ```bash
 pnpm run dev
 ```
@@ -129,6 +137,7 @@ pnpm run dev
 ## Building
 
 Build the project:
+
 ```bash
 pnpm run build
 ```
@@ -136,7 +145,7 @@ pnpm run build
 ## Deployment
 
 Deploy to Cloudflare Workers:
+
 ```bash
 pnpm run deploy
 ```
- 

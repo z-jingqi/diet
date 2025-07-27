@@ -1,4 +1,9 @@
-import { ChatMessage, MessageRole, MessageStatus, MessageType } from "@/lib/gql/graphql";
+import {
+  ChatMessage,
+  MessageRole,
+  MessageStatus,
+  MessageType,
+} from "@/lib/gql/graphql";
 import { nanoid } from "nanoid";
 
 /**
@@ -17,7 +22,7 @@ const generateRandomId = (): string => {
  */
 export const buildMessage = (
   type: MessageType,
-  role: MessageRole = MessageRole.Assistant
+  role: MessageRole = MessageRole.Assistant,
 ): ChatMessage => {
   return {
     id: generateRandomId(),
@@ -25,7 +30,8 @@ export const buildMessage = (
     content: "",
     role,
     createdAt: new Date(),
-    status: role === MessageRole.User ? MessageStatus.Done : MessageStatus.Pending,
+    status:
+      role === MessageRole.User ? MessageStatus.Done : MessageStatus.Pending,
   } as ChatMessage;
 };
 

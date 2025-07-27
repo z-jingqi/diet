@@ -10,12 +10,12 @@ export const dataCleanup = async (c: Context, next: Next) => {
     try {
       // 清理过期的会话
       await c.env.DB.prepare(
-        "DELETE FROM user_sessions WHERE session_expires_at <= CURRENT_TIMESTAMP"
+        "DELETE FROM user_sessions WHERE session_expires_at <= CURRENT_TIMESTAMP",
       ).run();
 
       // 清理过期的 refresh token
       await c.env.DB.prepare(
-        "DELETE FROM user_sessions WHERE refresh_expires_at <= CURRENT_TIMESTAMP"
+        "DELETE FROM user_sessions WHERE refresh_expires_at <= CURRENT_TIMESTAMP",
       ).run();
 
       console.log("🧹 数据清理完成:", now.toISOString());

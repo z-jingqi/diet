@@ -1,7 +1,8 @@
+import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
-import { Recipe, PreferenceType } from "@/lib/gql/graphql";
+import { Recipe } from "@/lib/gql/graphql";
 import {
   cuisineTypeLabels,
   mealTypeLabels,
@@ -71,7 +72,7 @@ const RecipeCard = ({
       className={cn(
         "cursor-pointer hover:shadow-md transition-shadow relative",
         isSelected && "ring-2 ring-primary",
-        className
+        className,
       )}
       onClick={handleClick}
     >
@@ -84,11 +85,14 @@ const RecipeCard = ({
               size="icon"
               className={cn(
                 "h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background",
-                isStarred && "text-yellow-500 hover:text-yellow-600"
+                isStarred && "text-yellow-500 hover:text-yellow-600",
               )}
               onClick={handleStar}
             >
-              <Star className="h-4 w-4" fill={isStarred ? "currentColor" : "none"} />
+              <Star
+                className="h-4 w-4"
+                fill={isStarred ? "currentColor" : "none"}
+              />
             </Button>
           )}
           {onDelete && (

@@ -81,7 +81,6 @@ const RecipePage = () => {
       <RecipeHeader isLoading={isLoading} recipe={recipe} onBack={handleBack} />
 
       <ScrollArea className="flex-1 overflow-y-auto pr-2 mt-4">
-
         <RecipeBasicInfo
           isLoading={isLoading}
           recipe={recipe}
@@ -96,7 +95,7 @@ const RecipePage = () => {
 
         <RecipeTips tips={recipe?.tips} />
 
-      {/* ScrollArea 结束 */}
+        {/* ScrollArea 结束 */}
       </ScrollArea>
     </div>
   );

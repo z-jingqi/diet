@@ -47,7 +47,7 @@ const HealthAdviceMessageBubble = ({
               disabled={saved}
               className={cn(
                 "flex items-center gap-1",
-                saved && "text-green-600"
+                saved && "text-green-600",
               )}
             >
               {saved ? (

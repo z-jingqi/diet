@@ -1,6 +1,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, X, Trash2, ListPlus, Loader2 } from "lucide-react";
+import {
+  CheckSquare,
+  Square,
+  X,
+  Trash2,
+  ListPlus,
+  Loader2,
+} from "lucide-react";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -51,7 +58,7 @@ const BatchActionToolbar: React.FC<BatchActionToolbarProps> = ({
       <div
         className={cn(
           "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-background border rounded-lg shadow-lg p-3 sm:p-4 max-w-[calc(100vw-2rem)]",
-          className
+          className,
         )}
       >
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
@@ -129,4 +136,4 @@ const BatchActionToolbar: React.FC<BatchActionToolbarProps> = ({
   );
 };
 
-export default BatchActionToolbar; 
+export default BatchActionToolbar;

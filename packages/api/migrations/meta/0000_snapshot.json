@@ -86,12 +86,8 @@
           "name": "oauth_accounts_user_id_users_id_fk",
           "tableFrom": "oauth_accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -179,16 +175,12 @@
       "indexes": {
         "user_sessions_session_token_unique": {
           "name": "user_sessions_session_token_unique",
-          "columns": [
-            "session_token"
-          ],
+          "columns": ["session_token"],
           "isUnique": true
         },
         "user_sessions_refresh_token_unique": {
           "name": "user_sessions_refresh_token_unique",
-          "columns": [
-            "refresh_token"
-          ],
+          "columns": ["refresh_token"],
           "isUnique": true
         }
       },
@@ -197,12 +189,8 @@
           "name": "user_sessions_user_id_users_id_fk",
           "tableFrom": "user_sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -306,16 +294,12 @@
       "indexes": {
         "users_username_unique": {
           "name": "users_username_unique",
-          "columns": [
-            "username"
-          ],
+          "columns": ["username"],
           "isUnique": true
         },
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -432,12 +416,8 @@
           "name": "tag_conflicts_tag_id_1_tags_id_fk",
           "tableFrom": "tag_conflicts",
           "tableTo": "tags",
-          "columnsFrom": [
-            "tag_id_1"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id_1"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -445,12 +425,8 @@
           "name": "tag_conflicts_tag_id_2_tags_id_fk",
           "tableFrom": "tag_conflicts",
           "tableTo": "tags",
-          "columnsFrom": [
-            "tag_id_2"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id_2"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -543,12 +519,8 @@
           "name": "tags_category_id_tag_categories_id_fk",
           "tableFrom": "tags",
           "tableTo": "tag_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -834,12 +806,8 @@
           "name": "recipes_user_id_users_id_fk",
           "tableFrom": "recipes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

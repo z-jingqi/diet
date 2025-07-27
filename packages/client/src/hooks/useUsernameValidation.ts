@@ -69,7 +69,7 @@ export const useUsernameValidation = () => {
     (val: string) => {
       debouncedSetUsername(val);
     },
-    [debouncedSetUsername]
+    [debouncedSetUsername],
   );
 
   const resetValidation = useCallback(() => {

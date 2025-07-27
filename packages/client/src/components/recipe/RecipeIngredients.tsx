@@ -15,7 +15,10 @@ interface RecipeIngredientsProps {
   ingredients: Ingredient[];
 }
 
-const RecipeIngredients = ({ isLoading, ingredients }: RecipeIngredientsProps) => {
+const RecipeIngredients = ({
+  isLoading,
+  ingredients,
+}: RecipeIngredientsProps) => {
   return (
     <div className="mb-8">
       <Typography variant="h3" className="text-xl font-semibold mb-4">
@@ -43,13 +46,17 @@ const RecipeIngredients = ({ isLoading, ingredients }: RecipeIngredientsProps) =
                     {ing.unit ?? ""}
                   </span>
                   {(ing.note || ing.notes) && (
-                    <span className="ml-2 text-xs">({ing.note || ing.notes})</span>
+                    <span className="ml-2 text-xs">
+                      ({ing.note || ing.notes})
+                    </span>
                   )}
                 </div>
               </li>
             ))}
             {ingredients.length === 0 && (
-              <li className="text-center text-muted-foreground py-2">暂无食材信息</li>
+              <li className="text-center text-muted-foreground py-2">
+                暂无食材信息
+              </li>
             )}
           </ul>
         </div>
@@ -58,4 +65,4 @@ const RecipeIngredients = ({ isLoading, ingredients }: RecipeIngredientsProps) =
   );
 };
 
-export default RecipeIngredients; 
+export default RecipeIngredients;

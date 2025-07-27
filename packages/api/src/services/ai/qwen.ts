@@ -29,7 +29,7 @@ export class QwenService {
 
   async chat(
     messages: ChatCompletionMessageParam[],
-    format: ResponseFormat = "stream"
+    format: ResponseFormat = "stream",
   ): Promise<string | ReadableStream> {
     const isStream = format === "stream";
 

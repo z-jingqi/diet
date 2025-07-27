@@ -11,7 +11,6 @@ const ChatMessages = ({
   messages,
   gettingIntent = false,
 }: ChatMessagesProps) => {
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -66,7 +65,7 @@ const ChatMessages = ({
 
     // 检查是否有消息正在流式传输
     const hasStreamingMessage = messages.some(
-      (msg) => msg.status === MessageStatus.Streaming
+      (msg) => msg.status === MessageStatus.Streaming,
     );
 
     if (
@@ -106,9 +105,9 @@ const ChatMessages = ({
       ref={containerRef}
       className="h-full w-full overflow-y-auto scrollbar-hide"
       onScroll={handleScroll}
-      style={{ 
-        overscrollBehavior: 'contain',
-        WebkitOverflowScrolling: 'touch'
+      style={{
+        overscrollBehavior: "contain",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       <div className="py-6 space-y-6 max-w-3xl mx-auto w-full px-4">
@@ -130,7 +129,7 @@ const ChatMessages = ({
           </div>
         )}
       </div>
-      
+
       {/* Scroll anchor at the bottom */}
       <div ref={messagesEndRef} className="h-4" />
     </div>

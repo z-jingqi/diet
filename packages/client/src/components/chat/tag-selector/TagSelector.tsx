@@ -54,13 +54,13 @@ const TagSelector = ({
   const tags = useMemo(() => tagsQueryData?.tags || [], [tagsQueryData?.tags]);
   const categories = useMemo(
     () => categoriesQueryData?.tagCategories || [],
-    [categoriesQueryData?.tagCategories]
+    [categoriesQueryData?.tagCategories],
   );
 
   // 根据 selectedTagIds 计算已选标签对象列表
   const selectedTags = useMemo(
     () => tags.filter((tag) => selectedTagIds.includes(tag.id || "")),
-    [tags, selectedTagIds]
+    [tags, selectedTagIds],
   );
 
   // 使用 useMemo 计算冲突状态，基于本地冲突数据
@@ -145,7 +145,7 @@ const TagSelector = ({
         onTagsChange(
           selectedTags
             .filter((t: Tag) => t.id !== tagId)
-            .map((t: Tag) => t.id || "")
+            .map((t: Tag) => t.id || ""),
         );
       } else {
         // 检查要添加的标签是否与已选标签有互斥冲突
@@ -181,7 +181,7 @@ const TagSelector = ({
       warningTagIds,
       conflictDescriptions,
       onTagsChange,
-    ]
+    ],
   );
 
   const handleRemoveTag = useCallback(
@@ -189,10 +189,10 @@ const TagSelector = ({
       onTagsChange(
         selectedTags
           .filter((t: Tag) => t.id !== tagId)
-          .map((t: Tag) => t.id || "")
+          .map((t: Tag) => t.id || ""),
       );
     },
-    [selectedTags, onTagsChange]
+    [selectedTags, onTagsChange],
   );
 
   const handleRetry = useCallback(() => {
@@ -207,7 +207,7 @@ const TagSelector = ({
       tags: tags,
       categories: categories,
     }),
-    [tags, categories]
+    [tags, categories],
   );
 
   const isLoading = tagsLoading || categoriesLoading || conflictsLoading;

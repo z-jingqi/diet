@@ -15,7 +15,10 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "type-check": "turbo run type-check",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "eslint-fix": "echo \"\\033[1;33mRunning ESLint to fix auto-fixable issues...\\033[0m\" && eslint --fix \"./packages/*/src/**/*.{ts,tsx,js,jsx}\" --max-warnings=100 --no-error-on-unmatched-pattern || echo \"\\033[1;33mESLint completed with warnings/errors that require manual fixes.\\033[0m\"",
+    "prettier-fix": "echo \"\\033[1;34mFormatting code with Prettier...\\033[0m\" && prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "lint-fix": "pnpm eslint-fix & pnpm prettier-fix && echo \"\\033[1;32m✓ Linting and formatting completed!\\033[0m\""
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "2.0.1",

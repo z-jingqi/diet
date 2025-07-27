@@ -153,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         dispatch({ type: AuthActionType.SET_LOADING, payload: false });
       }
     },
-    []
+    [],
   );
 
   const register = useCallback(
@@ -192,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         dispatch({ type: AuthActionType.SET_LOADING, payload: false });
       }
     },
-    []
+    [],
   );
 
   const logout = useCallback(async (): Promise<void> => {

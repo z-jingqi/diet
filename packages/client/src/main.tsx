@@ -10,7 +10,7 @@ const preventZoomOnFocus = () => {
   // 检测是否为移动设备
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
+      navigator.userAgent,
     ) || window.innerWidth < 768; // 添加屏幕宽度检测
 
   if (isMobile) {
@@ -56,5 +56,5 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </ConfirmDialogProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );

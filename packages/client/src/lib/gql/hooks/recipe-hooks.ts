@@ -32,7 +32,7 @@ export const useRecipePreferences = (enabled = true) => {
       try {
         const { myRecipePreferences } =
           await graphqlClient.request<GetRecipePreferencesQuery>(
-            GetRecipePreferencesDocument
+            GetRecipePreferencesDocument,
           );
         return myRecipePreferences || [];
       } catch (error) {
@@ -74,7 +74,9 @@ export const useSetRecipePreference = () => {
     },
     onSuccess: () => {
       // 成功后刷新菜谱喜好列表
-      queryClient.invalidateQueries({ queryKey: RECIPE_QUERY_KEYS.RECIPE_PREFERENCES });
+      queryClient.invalidateQueries({
+        queryKey: RECIPE_QUERY_KEYS.RECIPE_PREFERENCES,
+      });
     },
   });
 };
@@ -131,7 +133,7 @@ export const useRecipeDetail = (id: string) => {
     queryFn: async () => {
       const { recipe } = await graphqlClient.request<GetRecipeQuery>(
         GetRecipeDocument,
-        { id }
+        { id },
       );
       return recipe;
     },

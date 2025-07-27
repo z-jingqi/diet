@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  Palette,
-  LogOut,
-  Trash2,
-  Heart,
-} from "lucide-react";
+import { Palette, LogOut, Trash2, Heart } from "lucide-react";
 
 export type SettingVariant = "default" | "danger";
 

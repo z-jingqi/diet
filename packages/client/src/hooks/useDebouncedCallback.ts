@@ -9,7 +9,7 @@ import type { DebouncedFunc } from "lodash";
 export default function useDebouncedCallback<T extends (...args: any[]) => any>(
   fn: T,
   delay = 300,
-  options?: Parameters<typeof debounce>[2]
+  options?: Parameters<typeof debounce>[2],
 ): DebouncedFunc<T> {
   const fnRef = useRef(fn);
 
@@ -19,7 +19,11 @@ export default function useDebouncedCallback<T extends (...args: any[]) => any>(
   }, [fn]);
 
   const debouncedRef = useRef(
-    debounce((...args: Parameters<T>) => fnRef.current(...args), delay, options)
+    debounce(
+      (...args: Parameters<T>) => fnRef.current(...args),
+      delay,
+      options,
+    ),
   );
 
   // Cancel on unmount

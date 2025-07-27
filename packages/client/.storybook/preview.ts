@@ -1,25 +1,25 @@
-import type { Preview } from '@storybook/react'
-import '../src/index.css'; // 引入全局样式
+import type { Preview } from "@storybook/react";
+import "../src/index.css"; // 引入全局样式
 
 const preview: Preview = {
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },
     controls: {
       matchers: {
-       color: /(background|color)$/i,
-       date: /Date$/i,
+        color: /(background|color)$/i,
+        date: /Date$/i,
       },
     },
     backgrounds: {
-      default: 'light',
+      default: "light",
       values: [
         {
-          name: 'light',
-          value: 'hsl(var(--background))',
+          name: "light",
+          value: "hsl(var(--background))",
         },
         {
-          name: 'dark',
-          value: 'hsl(var(--background))',
+          name: "dark",
+          value: "hsl(var(--background))",
         },
       ],
     },
@@ -28,8 +28,8 @@ const preview: Preview = {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
-      test: 'todo'
-    }
+      test: "todo",
+    },
   },
 };
 

@@ -8,4 +8,4 @@ export const isWeChatMiniProgram = (): boolean => {
 
   const ua = navigator.userAgent || "";
   return /miniProgram/i.test(ua);
-}; 
+};

@@ -33,74 +33,76 @@ interface TagSelectorDialogProps {
   conflictDescriptions?: Record<string, string>;
 }
 
-const TagSelectorDialog = memo(({
-  isOpen,
-  onOpenChange,
-  disabled,
-  tagsData,
-  categories,
-  selectedTags,
-  onTagToggle,
-  isLoading,
-  error,
-  onRetry,
-  disabledTagIds = [],
-  warningTagIds = [],
-  conflictDescriptions = {},
-}: TagSelectorDialogProps) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          className="h-8 w-8 p-0 hover:bg-muted"
-          title="添加标签"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
-      </DialogTrigger>
+const TagSelectorDialog = memo(
+  ({
+    isOpen,
+    onOpenChange,
+    disabled,
+    tagsData,
+    categories,
+    selectedTags,
+    onTagToggle,
+    isLoading,
+    error,
+    onRetry,
+    disabledTagIds = [],
+    warningTagIds = [],
+    conflictDescriptions = {},
+  }: TagSelectorDialogProps) => {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            className="h-8 w-8 p-0 hover:bg-muted"
+            title="添加标签"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </DialogTrigger>
 
-      <DialogContent className="flex flex-col w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] sm:h-auto sm:max-h-[80vh] overflow-hidden rounded-lg sm:rounded-xl">
-        <DialogHeader className="pb-4">
-          <DialogTitle>选择标签</DialogTitle>
-        </DialogHeader>
+        <DialogContent className="flex flex-col w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] sm:h-auto sm:max-h-[80vh] overflow-hidden rounded-lg sm:rounded-xl">
+          <DialogHeader className="pb-4">
+            <DialogTitle>选择标签</DialogTitle>
+          </DialogHeader>
 
-        {/* 标签列表 */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {isLoading ? (
-            <TagSkeleton />
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-4">
-              <MutedText>加载失败</MutedText>
-              <Button variant="outline" size="sm" onClick={onRetry}>
-                重试
-              </Button>
-            </div>
-          ) : (
-            <TagList
-              tagsData={tagsData}
-              categories={categories}
-              selectedTags={selectedTags}
-              onTagToggle={onTagToggle}
-              disabledTagIds={disabledTagIds}
-              warningTagIds={warningTagIds}
-              conflictDescriptions={conflictDescriptions}
-            />
-          )}
-        </div>
-
-        <DialogFooter className="pt-4 border-t">
-          <div className="flex justify-between items-center w-full">
-            <MutedText>已选择 {selectedTags.length} 个标签</MutedText>
-            <Button onClick={() => onOpenChange(false)}>确定</Button>
+          {/* 标签列表 */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {isLoading ? (
+              <TagSkeleton />
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                <MutedText>加载失败</MutedText>
+                <Button variant="outline" size="sm" onClick={onRetry}>
+                  重试
+                </Button>
+              </div>
+            ) : (
+              <TagList
+                tagsData={tagsData}
+                categories={categories}
+                selectedTags={selectedTags}
+                onTagToggle={onTagToggle}
+                disabledTagIds={disabledTagIds}
+                warningTagIds={warningTagIds}
+                conflictDescriptions={conflictDescriptions}
+              />
+            )}
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-});
+
+          <DialogFooter className="pt-4 border-t">
+            <div className="flex justify-between items-center w-full">
+              <MutedText>已选择 {selectedTags.length} 个标签</MutedText>
+              <Button onClick={() => onOpenChange(false)}>确定</Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+);
 
 TagSelectorDialog.displayName = "TagSelectorDialog";
 

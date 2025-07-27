@@ -44,7 +44,10 @@ const RecipeSteps = ({ isLoading, steps }: RecipeStepsProps) => {
                   {step.instruction ?? step.description}
                 </Typography>
                 {step.durationApproxMin && (
-                  <Typography variant="span" className="text-xs text-muted-foreground">
+                  <Typography
+                    variant="span"
+                    className="text-xs text-muted-foreground"
+                  >
                     预计 {step.durationApproxMin} 分钟
                   </Typography>
                 )}
@@ -52,7 +55,9 @@ const RecipeSteps = ({ isLoading, steps }: RecipeStepsProps) => {
             </li>
           ))}
           {steps.length === 0 && (
-            <li className="text-center text-muted-foreground py-2">暂无步骤信息</li>
+            <li className="text-center text-muted-foreground py-2">
+              暂无步骤信息
+            </li>
           )}
         </ol>
       )}
@@ -60,4 +65,4 @@ const RecipeSteps = ({ isLoading, steps }: RecipeStepsProps) => {
   );
 };
 
-export default RecipeSteps; 
+export default RecipeSteps;

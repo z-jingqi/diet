@@ -52,7 +52,7 @@ auth.post("/refresh", async (c) => {
           "Max-Age=604800", // 7 天
         ]
           .filter(Boolean)
-          .join("; ")
+          .join("; "),
       );
     }
 
@@ -66,7 +66,7 @@ auth.post("/refresh", async (c) => {
           "Max-Age=604800",
         ]
           .filter(Boolean)
-          .join("; ")
+          .join("; "),
       );
     }
 
@@ -85,4 +85,4 @@ auth.post("/refresh", async (c) => {
   }
 });
 
-export default auth; 
+export default auth;

@@ -6,7 +6,11 @@ import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
-import { settingsGroups, SettingKey, SettingGroupTitle } from "./settings-config";
+import {
+  settingsGroups,
+  SettingKey,
+  SettingGroupTitle,
+} from "./settings-config";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import SettingsDrawer from "./SettingsDrawer";
 import SettingsPanel from "./SettingsPanel";
@@ -20,9 +24,9 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
   const { user, logout } = useAuth();
   const authNavigate = useAuthNavigate();
   const location = useLocation();
-  
+
   // Only use search params if we're on the profile route
-  const search = location.pathname === '/profile' ? location.search : {};
+  const search = location.pathname === "/profile" ? location.search : {};
 
   // Display name logic
   const displayName = user?.nickname || user?.username || "访客";
@@ -41,8 +45,13 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
     } else if (!activeGroup) {
       // Check if we need to restore settings state from URL
       const urlSearch = search as any;
-      if (urlSearch?.settingsGroup === 'favorites' && urlSearch?.from === 'settings') {
-        const favoritesGroup = settingsGroups.find(g => g.title === SettingGroupTitle.Favorites);
+      if (
+        urlSearch?.settingsGroup === "favorites" &&
+        urlSearch?.from === "settings"
+      ) {
+        const favoritesGroup = settingsGroups.find(
+          (g) => g.title === SettingGroupTitle.Favorites,
+        );
         if (favoritesGroup) {
           setActiveGroup(favoritesGroup);
           return;
@@ -87,7 +96,10 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <Typography variant="h2" className="text-xl lg:text-2xl font-bold truncate">
+            <Typography
+              variant="h2"
+              className="text-xl lg:text-2xl font-bold truncate"
+            >
               {displayName}
             </Typography>
           </div>
@@ -113,7 +125,10 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
                   <Typography variant="span" className="font-medium">
                     {group.title}
                   </Typography>
-                  <Typography variant="span" className="text-muted-foreground text-sm block">
+                  <Typography
+                    variant="span"
+                    className="text-muted-foreground text-sm block"
+                  >
                     {group.items.length} 项设置
                   </Typography>
                 </div>
@@ -143,7 +158,7 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
                 variant="ghost"
                 className={cn(
                   "w-full justify-start h-10 px-3",
-                  activeGroup?.title === group.title && "bg-muted"
+                  activeGroup?.title === group.title && "bg-muted",
                 )}
                 onClick={() => setActiveGroup(group)}
               >

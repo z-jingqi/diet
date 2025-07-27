@@ -40,7 +40,7 @@ const TypingPrompt = () => {
 
         if (currentIndexRef.current < currentPromptText.length) {
           setDisplayText(
-            currentPromptText.slice(0, currentIndexRef.current + 1)
+            currentPromptText.slice(0, currentIndexRef.current + 1),
           );
           currentIndexRef.current++;
           timerRef.current = setTimeout(typeText, 100);

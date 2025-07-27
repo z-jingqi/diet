@@ -67,7 +67,7 @@ export const useChatSessions = () => {
     ...result,
     sessions:
       result.data?.myChatSessions?.filter(
-        (session): session is NonNullable<typeof session> => session !== null
+        (session): session is NonNullable<typeof session> => session !== null,
       ) || [],
   };
 };
@@ -183,7 +183,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
         setIsGettingIntent(false);
       }
     },
-    []
+    [],
   );
 
   // Generic handler for sending messages with streaming response
@@ -194,9 +194,9 @@ const useChatMessagingInternal = (isGuestMode = false) => {
         onMessage: (data: { done: boolean; response?: string }) => void,
         onError: (error: Error) => void,
         signal: AbortSignal,
-        isGuestMode: boolean
+        isGuestMode: boolean,
       ) => Promise<void>,
-      options: StreamSendOptions
+      options: StreamSendOptions,
     ): Promise<string> => {
       const { aiMessages, onChunkReceived, isGuestMode = false } = options;
       const controller = new AbortController();
@@ -225,7 +225,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
             throw error;
           },
           controller.signal,
-          isGuestMode
+          isGuestMode,
         );
 
         return content;
@@ -233,7 +233,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
         setIsLoading(false);
       }
     },
-    [setAbortController, setIsLoading, setError]
+    [setAbortController, setIsLoading, setError],
   );
 
   // Handle sending a chat message with streaming response
@@ -241,25 +241,31 @@ const useChatMessagingInternal = (isGuestMode = false) => {
     async (options: StreamSendOptions): Promise<string> => {
       return sendWithStream(sendChatMessage, options);
     },
-    [sendWithStream]
+    [sendWithStream],
   );
 
   // 获取用户已有菜谱和不喜欢的菜谱（仅在非游客模式下）
   const { data: recipePreferences } = useRecipePreferences(!isGuestMode);
-  const { data: myRecipesData } = useMyRecipesQuery(createAuthenticatedClient(), undefined, {
-    enabled: !isGuestMode,
-  });
+  const { data: myRecipesData } = useMyRecipesQuery(
+    createAuthenticatedClient(),
+    undefined,
+    {
+      enabled: !isGuestMode,
+    },
+  );
 
   const sendRecipeWithStream = useCallback(
     async (options: StreamSendOptions): Promise<string> => {
       // 准备现有菜谱和不喜欢的菜谱列表
-      const existingRecipes = myRecipesData?.myRecipes
-        ?.map(recipe => recipe.name)
-        .filter((name): name is string => Boolean(name)) || [];
-      const dislikedRecipes = recipePreferences
-        ?.filter(pref => pref.preference === 'DISLIKE')
-        ?.map(pref => pref.recipeName)
-        .filter((name): name is string => Boolean(name)) || [];
+      const existingRecipes =
+        myRecipesData?.myRecipes
+          ?.map((recipe) => recipe.name)
+          .filter((name): name is string => Boolean(name)) || [];
+      const dislikedRecipes =
+        recipePreferences
+          ?.filter((pref) => pref.preference === "DISLIKE")
+          ?.map((pref) => pref.recipeName)
+          .filter((name): name is string => Boolean(name)) || [];
 
       // 创建带有菜谱限制的发送函数
       const sendRecipeWithRestrictions = (
@@ -267,20 +273,21 @@ const useChatMessagingInternal = (isGuestMode = false) => {
         onMessage: any,
         onError: any,
         signal?: AbortSignal,
-        isGuestMode?: boolean
-      ) => sendRecipeChatMessage(
-        messages, 
-        onMessage, 
-        onError, 
-        signal, 
-        isGuestMode, 
-        existingRecipes, 
-        dislikedRecipes
-      );
+        isGuestMode?: boolean,
+      ) =>
+        sendRecipeChatMessage(
+          messages,
+          onMessage,
+          onError,
+          signal,
+          isGuestMode,
+          existingRecipes,
+          dislikedRecipes,
+        );
 
       return sendWithStream(sendRecipeWithRestrictions, options);
     },
-    [sendWithStream, myRecipesData, recipePreferences]
+    [sendWithStream, myRecipesData, recipePreferences],
   );
 
   // Handle sending a health advice message with streaming response
@@ -288,7 +295,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
     async (options: StreamSendOptions): Promise<string> => {
       return sendWithStream(sendHealthAdviceChatMessage, options);
     },
-    [sendWithStream]
+    [sendWithStream],
   );
 
   // Main handler for sending user messages
@@ -389,7 +396,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
           } catch (error) {
             console.error(
               "Failed to update session with completed message:",
-              error
+              error,
             );
           }
         }
@@ -421,7 +428,7 @@ const useChatMessagingInternal = (isGuestMode = false) => {
       sendRecipeWithStream,
       sendHealthAdviceWithStream,
       updateSession,
-    ]
+    ],
   );
 
   return {

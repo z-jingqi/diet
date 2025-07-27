@@ -9,7 +9,7 @@ interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
 const Typography = React.forwardRef<HTMLElement, TypographyProps>(
   ({ className, variant = "p", as, ...props }, ref) => {
     const Component = as || variant;
-    
+
     const variantStyles = {
       h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl",
       h2: "scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0",
@@ -29,7 +29,7 @@ const Typography = React.forwardRef<HTMLElement, TypographyProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Typography.displayName = "Typography";
@@ -75,18 +75,8 @@ const SuccessText = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-green-600", className)}
-    {...props}
-  />
+  <p ref={ref} className={cn("text-sm text-green-600", className)} {...props} />
 ));
 SuccessText.displayName = "SuccessText";
 
-export {
-  Typography,
-  Text,
-  MutedText,
-  ErrorText,
-  SuccessText,
-}; 
+export { Typography, Text, MutedText, ErrorText, SuccessText };

@@ -63,13 +63,14 @@ export const TAG_QUERY_KEYS = {
   TAG_CATEGORIES: ["GetTagCategories"] as const,
   TAG_CONFLICTS: ["GetTagConflicts"] as const,
   TAG: (id: string) => ["GetTag", { id }] as const,
-  CHECK_CONFLICTS: (tagIds: string[]) => ["CheckTagConflicts", { tagIds }] as const,
+  CHECK_CONFLICTS: (tagIds: string[]) =>
+    ["CheckTagConflicts", { tagIds }] as const,
 } as const;
 
 // ============================================================================
 // 类型定义
 // ============================================================================
-export type QueryKey = 
+export type QueryKey =
   | (typeof AUTH_QUERY_KEYS)[keyof typeof AUTH_QUERY_KEYS]
   | (typeof RECIPE_QUERY_KEYS)[keyof typeof RECIPE_QUERY_KEYS]
   | (typeof CHAT_QUERY_KEYS)[keyof typeof CHAT_QUERY_KEYS]

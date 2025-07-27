@@ -31,7 +31,7 @@ async function seedLocalDatabase() {
         });
       } catch (clearError) {
         console.log(
-          `清理命令执行结果: ${clearError instanceof Error ? clearError.message : "未知错误"}`
+          `清理命令执行结果: ${clearError instanceof Error ? clearError.message : "未知错误"}`,
         );
         // 继续执行，因为表可能本来就是空的
       }

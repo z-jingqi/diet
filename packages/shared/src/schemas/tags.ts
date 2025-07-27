@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // 标签分类 Schema
 export const TagCategorySchema = z.object({
@@ -45,4 +45,4 @@ export const TagsResponseSchema = z.object({
   tags: z.array(TagSchema),
 });
 
-export type TagsResponse = z.infer<typeof TagsResponseSchema>; 
+export type TagsResponse = z.infer<typeof TagsResponseSchema>;

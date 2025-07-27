@@ -113,7 +113,7 @@ builder.objectField(OAuthAccountRef, "user", (t) =>
         .limit(1);
       return user ? toGraphQLUser(user) : null;
     },
-  })
+  }),
 );
 
 builder.objectField(UserSessionRef, "user", (t) =>
@@ -127,7 +127,7 @@ builder.objectField(UserSessionRef, "user", (t) =>
         .limit(1);
       return user ? toGraphQLUser(user) : null;
     },
-  })
+  }),
 );
 
 // ----------------------
@@ -275,7 +275,7 @@ function issueLoginResponse(ctx: any, result: any) {
         "Max-Age=604800", // 7 天
       ]
         .filter(Boolean)
-        .join("; ")
+        .join("; "),
     );
   }
 
@@ -290,7 +290,7 @@ function issueLoginResponse(ctx: any, result: any) {
         "Max-Age=2592000", // 30 天
       ]
         .filter(Boolean)
-        .join("; ")
+        .join("; "),
     );
   }
 
@@ -304,7 +304,7 @@ function issueLoginResponse(ctx: any, result: any) {
         "Max-Age=604800", // 7 天，与 session_token 保持一致，防止浏览器重启后丢失
       ]
         .filter(Boolean)
-        .join("; ")
+        .join("; "),
     );
   }
 
@@ -512,7 +512,7 @@ builder.mutationFields((t) => ({
           "Secure",
           "SameSite=Lax",
           "Max-Age=0",
-        ].join("; ")
+        ].join("; "),
       );
 
       return true;
@@ -533,7 +533,7 @@ builder.mutationFields((t) => ({
           cookieHeader.split(";").map((c: string) => {
             const [k, v] = c.trim().split("=");
             return [k, v];
-          })
+          }),
         );
         token = cookieMap["refresh_token"];
       }
@@ -558,7 +558,7 @@ builder.mutationFields((t) => ({
             "Max-Age=604800", // 7 天
           ]
             .filter(Boolean)
-            .join("; ")
+            .join("; "),
         );
       }
 
@@ -572,7 +572,7 @@ builder.mutationFields((t) => ({
             "Max-Age=604800", // 7 天，与 session_token 保持一致，防止浏览器重启后丢失
           ]
             .filter(Boolean)
-            .join("; ")
+            .join("; "),
         );
       }
 
