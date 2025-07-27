@@ -1,6 +1,6 @@
 import { DB } from "../db";
 import { recipes, recipePreferences } from "../db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, inArray } from "drizzle-orm";
 
 export interface RecipeCreateInput {
   name: string;
@@ -56,6 +56,25 @@ export class RecipeService {
       .select()
       .from(recipes)
       .where(and(eq(recipes.user_id, userId), isNull(recipes.deleted_at)));
+  }
+
+  async getRecipesByIds(
+    ids: string[],
+    userId: string
+  ): Promise<RecipeModel[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    return this.db
+      .select()
+      .from(recipes)
+      .where(
+        and(
+          inArray(recipes.id, ids),
+          eq(recipes.user_id, userId),
+          isNull(recipes.deleted_at)
+        )
+      );
   }
 
   async getRecipe(id: string, userId: string): Promise<RecipeModel | null> {
@@ -176,6 +195,16 @@ export class RecipeService {
     return rec !== undefined;
   }
 
+  async deleteRecipes(ids: string[], userId: string): Promise<boolean> {
+    const result = await this.db
+      .update(recipes)
+      .set({ deleted_at: new Date().toISOString() })
+      .where(and(inArray(recipes.id, ids), eq(recipes.user_id, userId)))
+      .returning();
+
+    return result.length > 0;
+  }
+
   async getRecipePreferences(userId: string): Promise<RecipePreferenceModel[]> {
     return this.db
       .select()
@@ -235,6 +264,40 @@ export class RecipeService {
       .returning();
     
     return created;
+  }
+
+  // 删除菜谱喜好
+  async removeRecipePreference(
+    userId: string,
+    recipeId: string
+  ): Promise<boolean> {
+    try {
+      // 查找对应的记录
+      const [existing] = await this.db
+        .select()
+        .from(recipePreferences)
+        .where(
+          and(
+            eq(recipePreferences.user_id, userId),
+            eq(recipePreferences.recipe_id, recipeId)
+          )
+        )
+        .limit(1);
+
+      if (!existing) {
+        return false;
+      }
+
+      // 删除记录
+      await this.db
+        .delete(recipePreferences)
+        .where(eq(recipePreferences.id, existing.id));
+      
+      return true;
+    } catch (error) {
+      console.error("删除菜谱喜好失败:", error);
+      return false;
+    }
   }
 
   // 添加生成菜谱方法

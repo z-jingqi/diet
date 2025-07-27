@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { CuisineType, MealType } from "@/lib/gql/graphql";
 import { cuisineTypeLabels, mealTypeLabels } from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ export enum SortOption {
 export interface RecipeFilters {
   cuisineType?: CuisineType;
   mealType?: MealType;
+  starred?: boolean;
 }
 
 interface RecipeSortFilterProps {
@@ -58,7 +59,14 @@ const RecipeSortFilter = ({
     onFiltersChange({});
   };
 
-  const hasActiveFilters = filters.cuisineType || filters.mealType;
+  const toggleStarredFilter = () => {
+    onFiltersChange({
+      ...filters,
+      starred: !filters.starred,
+    });
+  };
+
+  const hasActiveFilters = filters.cuisineType || filters.mealType || filters.starred;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -125,6 +133,17 @@ const RecipeSortFilter = ({
             </SelectContent>
           </Select>
 
+          {/* 星标筛选按钮 */}
+          <Button
+            variant={filters.starred ? "default" : "outline"}
+            size="sm"
+            onClick={toggleStarredFilter}
+            className="h-9 px-3 text-xs w-full sm:w-auto flex items-center gap-1"
+          >
+            <Star className="h-4 w-4" fill={filters.starred ? "currentColor" : "none"} />
+            <span>{filters.starred ? "已收藏" : "收藏"}</span>
+          </Button>
+
           {/* 清除筛选按钮 */}
           {hasActiveFilters && (
             <Button
@@ -159,6 +178,17 @@ const RecipeSortFilter = ({
               餐次: {mealTypeLabels[filters.mealType]}
               <button
                 onClick={() => handleFilterChange("mealType", undefined)}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {filters.starred && (
+            <Badge variant="secondary" className="text-xs text-yellow-600 border-yellow-300">
+              仅显示收藏
+              <button
+                onClick={() => handleFilterChange("starred", undefined)}
                 className="ml-1 hover:text-destructive"
               >
                 <X className="h-3 w-3" />

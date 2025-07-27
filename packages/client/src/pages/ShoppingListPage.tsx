@@ -1,17 +1,19 @@
 import React from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { useQueries } from "@tanstack/react-query";
+import { useRecipesByIdsQuery } from "@/lib/gql/graphql";
 import { graphqlClient } from "@/lib/gql/client";
-import { GetRecipeDocument, Recipe } from "@/lib/gql/graphql";
+import { Recipe } from "@/lib/gql/graphql";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Sparkles, CheckSquare, Square } from "lucide-react";
-import { useGenerateShoppingList, ShoppingItem } from "@/hooks/recipe/useGenerateShoppingList";
+import {
+  useGenerateShoppingList,
+  ShoppingItem,
+} from "@/hooks/recipe/useGenerateShoppingList";
 
 const ShoppingListPage = () => {
   // 解析查询参数中的菜谱 ID
-  // @ts-ignore - 路由文件在同 PR 中新增，生成类型后将自动消失
   const search = useSearch({ from: "/shopping-list" });
   const ids = (search as any).ids ?? "";
   const navigate = useNavigate();
@@ -21,24 +23,15 @@ const ShoppingListPage = () => {
   }, [ids]);
 
   // 并行获取所有菜谱详情
-  const recipeQueries = useQueries({
-    queries: idList.map((id: string) => ({
-      queryKey: ["recipe", id],
-      // @ts-ignore
-      queryFn: async () => {
-        const result: any = await graphqlClient.request(GetRecipeDocument, { id });
-        return result.recipe as Recipe;
-      },
-      enabled: !!id,
-    })),
-  }) as any;
+  const { data, isLoading } = useRecipesByIdsQuery(
+    graphqlClient,
+    { ids: idList },
+    { enabled: idList.length > 0 }
+  );
 
-  // @ts-ignore
-  const isLoading = recipeQueries.some((q: any) => q.isLoading);
-  // @ts-ignore
-  const recipes: Recipe[] = recipeQueries
-    .map((q: any) => q.data)
-    .filter(Boolean) as Recipe[];
+  const recipes = React.useMemo(() => {
+    return (data?.recipesByIds?.filter(Boolean) as Recipe[]) ?? [];
+  }, [data]);
 
   // 本地存储购物清单
   const [shoppingList, setShoppingList] = React.useState<ShoppingItem[]>(() => {

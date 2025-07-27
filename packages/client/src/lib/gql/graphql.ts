@@ -142,6 +142,7 @@ export type Mutation = {
   createUserSession?: Maybe<UserSession>;
   deleteChatSession?: Maybe<Scalars['Boolean']['output']>;
   deleteRecipe?: Maybe<Scalars['Boolean']['output']>;
+  deleteRecipes?: Maybe<Scalars['Boolean']['output']>;
   deleteTag?: Maybe<Scalars['Boolean']['output']>;
   deleteTagCategory?: Maybe<Scalars['Boolean']['output']>;
   deleteTagConflict?: Maybe<Scalars['Boolean']['output']>;
@@ -151,6 +152,7 @@ export type Mutation = {
   logout?: Maybe<Scalars['Boolean']['output']>;
   refreshSession?: Maybe<RefreshResponse>;
   register?: Maybe<LoginResponse>;
+  removeRecipePreference?: Maybe<Scalars['Boolean']['output']>;
   setRecipePreference?: Maybe<RecipePreference>;
   updateChatSession?: Maybe<ChatSession>;
   updateRecipe?: Maybe<Recipe>;
@@ -240,6 +242,11 @@ export type MutationDeleteRecipeArgs = {
 };
 
 
+export type MutationDeleteRecipesArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
 export type MutationDeleteTagArgs = {
   id: Scalars['ID']['input'];
 };
@@ -279,6 +286,11 @@ export type MutationRefreshSessionArgs = {
 export type MutationRegisterArgs = {
   password: Scalars['String']['input'];
   username: Scalars['String']['input'];
+};
+
+
+export type MutationRemoveRecipePreferenceArgs = {
+  recipeId: Scalars['ID']['input'];
 };
 
 
@@ -366,6 +378,7 @@ export type Query = {
   myRecipes?: Maybe<Array<Recipe>>;
   oauthAccounts?: Maybe<Array<OAuthAccount>>;
   recipe?: Maybe<Recipe>;
+  recipesByIds?: Maybe<Array<Recipe>>;
   tag?: Maybe<Tag>;
   tagCategories?: Maybe<Array<TagCategory>>;
   tagCategory?: Maybe<TagCategory>;
@@ -400,6 +413,11 @@ export type QueryOauthAccountsArgs = {
 
 export type QueryRecipeArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryRecipesByIdsArgs = {
+  ids: Array<Scalars['ID']['input']>;
 };
 
 
@@ -736,7 +754,14 @@ export type SetRecipePreferenceMutationVariables = Exact<{
 }>;
 
 
-export type SetRecipePreferenceMutation = { __typename?: 'Mutation', setRecipePreference?: { __typename?: 'RecipePreference', id?: string | null, recipeId?: string | null, recipeName?: string | null, preference?: PreferenceType | null } | null };
+export type SetRecipePreferenceMutation = { __typename?: 'Mutation', setRecipePreference?: { __typename?: 'RecipePreference', id?: string | null, recipeName?: string | null, preference?: PreferenceType | null } | null };
+
+export type RemoveRecipePreferenceMutationVariables = Exact<{
+  recipeId: Scalars['ID']['input'];
+}>;
+
+
+export type RemoveRecipePreferenceMutation = { __typename?: 'Mutation', removeRecipePreference?: boolean | null };
 
 export type GenerateRecipeMutationVariables = Exact<{
   input: RecipeGenerateInput;
@@ -744,6 +769,20 @@ export type GenerateRecipeMutationVariables = Exact<{
 
 
 export type GenerateRecipeMutation = { __typename?: 'Mutation', generateRecipe?: { __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null } | null };
+
+export type RecipesByIdsQueryVariables = Exact<{
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type RecipesByIdsQuery = { __typename?: 'Query', recipesByIds?: Array<{ __typename?: 'Recipe', id?: string | null, name?: string | null, description?: string | null, coverImageUrl?: string | null, cuisineType?: CuisineType | null, mealType?: MealType | null, servings?: number | null, difficulty?: Difficulty | null, prepTimeApproxMin?: number | null, cookTimeApproxMin?: number | null, totalTimeApproxMin?: number | null, costApprox?: number | null, currency?: string | null, dietaryTags?: Array<string> | null, allergens?: Array<string> | null, tips?: string | null, leftoverHandling?: string | null, ingredientsJson?: string | null, stepsJson?: string | null, nutrientsJson?: string | null, equipmentsJson?: string | null, version?: number | null, checksum?: string | null, createdAt?: any | null, updatedAt?: any | null }> | null };
+
+export type DeleteRecipesMutationVariables = Exact<{
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type DeleteRecipesMutation = { __typename?: 'Mutation', deleteRecipes?: boolean | null };
 
 export type TagFieldsFragment = { __typename?: 'Tag', id?: string | null, name?: string | null, description?: string | null, categoryId?: string | null, aiPrompt?: string | null, sortOrder?: number | null, isActive?: boolean | null, createdAt?: any | null, updatedAt?: any | null, restrictions?: Array<string> | null };
 
@@ -1506,7 +1545,6 @@ export const SetRecipePreferenceDocument = `
     mutation SetRecipePreference($input: RecipePreferenceInput!) {
   setRecipePreference(input: $input) {
     id
-    recipeId
     recipeName
     preference
   }
@@ -1532,6 +1570,32 @@ export const useSetRecipePreferenceMutation = <
 
 
 useSetRecipePreferenceMutation.fetcher = (client: GraphQLClient, variables: SetRecipePreferenceMutationVariables, headers?: RequestInit['headers']) => fetcher<SetRecipePreferenceMutation, SetRecipePreferenceMutationVariables>(client, SetRecipePreferenceDocument, variables, headers);
+
+export const RemoveRecipePreferenceDocument = `
+    mutation RemoveRecipePreference($recipeId: ID!) {
+  removeRecipePreference(recipeId: $recipeId)
+}
+    `;
+
+export const useRemoveRecipePreferenceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<RemoveRecipePreferenceMutation, TError, RemoveRecipePreferenceMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<RemoveRecipePreferenceMutation, TError, RemoveRecipePreferenceMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveRecipePreference'],
+    mutationFn: (variables?: RemoveRecipePreferenceMutationVariables) => fetcher<RemoveRecipePreferenceMutation, RemoveRecipePreferenceMutationVariables>(client, RemoveRecipePreferenceDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useRemoveRecipePreferenceMutation.fetcher = (client: GraphQLClient, variables: RemoveRecipePreferenceMutationVariables, headers?: RequestInit['headers']) => fetcher<RemoveRecipePreferenceMutation, RemoveRecipePreferenceMutationVariables>(client, RemoveRecipePreferenceDocument, variables, headers);
 
 export const GenerateRecipeDocument = `
     mutation GenerateRecipe($input: RecipeGenerateInput!) {
@@ -1560,6 +1624,63 @@ export const useGenerateRecipeMutation = <
 
 
 useGenerateRecipeMutation.fetcher = (client: GraphQLClient, variables: GenerateRecipeMutationVariables, headers?: RequestInit['headers']) => fetcher<GenerateRecipeMutation, GenerateRecipeMutationVariables>(client, GenerateRecipeDocument, variables, headers);
+
+export const RecipesByIdsDocument = `
+    query RecipesByIds($ids: [ID!]!) {
+  recipesByIds(ids: $ids) {
+    ...RecipeFields
+  }
+}
+    ${RecipeFieldsFragmentDoc}`;
+
+export const useRecipesByIdsQuery = <
+      TData = RecipesByIdsQuery,
+      TError = unknown
+    >(
+      client: GraphQLClient,
+      variables: RecipesByIdsQueryVariables,
+      options?: Omit<UseQueryOptions<RecipesByIdsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<RecipesByIdsQuery, TError, TData>['queryKey'] },
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useQuery<RecipesByIdsQuery, TError, TData>(
+      {
+    queryKey: ['RecipesByIds', variables],
+    queryFn: fetcher<RecipesByIdsQuery, RecipesByIdsQueryVariables>(client, RecipesByIdsDocument, variables, headers),
+    ...options
+  }
+    )};
+
+useRecipesByIdsQuery.getKey = (variables: RecipesByIdsQueryVariables) => ['RecipesByIds', variables];
+
+
+useRecipesByIdsQuery.fetcher = (client: GraphQLClient, variables: RecipesByIdsQueryVariables, headers?: RequestInit['headers']) => fetcher<RecipesByIdsQuery, RecipesByIdsQueryVariables>(client, RecipesByIdsDocument, variables, headers);
+
+export const DeleteRecipesDocument = `
+    mutation DeleteRecipes($ids: [ID!]!) {
+  deleteRecipes(ids: $ids)
+}
+    `;
+
+export const useDeleteRecipesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      client: GraphQLClient,
+      options?: UseMutationOptions<DeleteRecipesMutation, TError, DeleteRecipesMutationVariables, TContext>,
+      headers?: RequestInit['headers']
+    ) => {
+    
+    return useMutation<DeleteRecipesMutation, TError, DeleteRecipesMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteRecipes'],
+    mutationFn: (variables?: DeleteRecipesMutationVariables) => fetcher<DeleteRecipesMutation, DeleteRecipesMutationVariables>(client, DeleteRecipesDocument, variables, headers)(),
+    ...options
+  }
+    )};
+
+
+useDeleteRecipesMutation.fetcher = (client: GraphQLClient, variables: DeleteRecipesMutationVariables, headers?: RequestInit['headers']) => fetcher<DeleteRecipesMutation, DeleteRecipesMutationVariables>(client, DeleteRecipesDocument, variables, headers);
 
 export const GetTagsDocument = `
     query GetTags($categoryId: ID, $search: String) {

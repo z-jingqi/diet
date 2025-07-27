@@ -163,6 +163,18 @@ builder.queryFields((t) => ({
     },
   }),
 
+  recipesByIds: t.field({
+    type: [RecipeRef],
+    args: { ids: t.arg.idList({ required: true }) },
+    resolve: (_r, { ids }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.getRecipesByIds(
+        ids as string[],
+        auth.user.id
+      );
+    },
+  }),
+
   recipe: t.field({
     type: RecipeRef,
     args: { id: t.arg.id({ required: true }) },
@@ -216,6 +228,15 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  deleteRecipes: t.field({
+    type: "Boolean",
+    args: { ids: t.arg.idList({ required: true }) },
+    resolve: (_r, { ids }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.deleteRecipes(ids as string[], auth.user.id);
+    },
+  }),
+
   // 添加设置菜谱喜好的变更操作
   setRecipePreference: t.field({
     type: RecipePreferenceRef,
@@ -229,6 +250,18 @@ builder.mutationFields((t) => ({
         recipeId: input.recipeId ?? undefined,
         recipeBasicInfo: input.recipeBasicInfo ?? undefined,
       });
+    },
+  }),
+
+  // 添加删除菜谱喜好的变更操作
+  removeRecipePreference: t.field({
+    type: "Boolean",
+    args: {
+      recipeId: t.arg.id({ required: true }),
+    },
+    resolve: (_r, { recipeId }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.removeRecipePreference(auth.user.id, recipeId as string);
     },
   }),
 

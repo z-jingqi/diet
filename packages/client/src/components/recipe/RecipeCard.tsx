@@ -1,13 +1,15 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
-import { Recipe } from "@/lib/gql/graphql";
+import { Recipe, PreferenceType } from "@/lib/gql/graphql";
 import {
   cuisineTypeLabels,
   mealTypeLabels,
   difficultyLabels,
 } from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
+import { Star, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -16,6 +18,9 @@ interface RecipeCardProps {
   isSelected?: boolean;
   onSelectionChange?: (id: string, selected: boolean) => void;
   selectable?: boolean;
+  onDelete?: (id: string) => void;
+  onStar?: (id: string, isStarred: boolean) => void;
+  isStarred?: boolean;
 }
 
 const RecipeCard = ({
@@ -25,6 +30,9 @@ const RecipeCard = ({
   isSelected = false,
   onSelectionChange,
   selectable = false,
+  onDelete,
+  onStar,
+  isStarred = false,
 }: RecipeCardProps) => {
   const handleClick = () => {
     if (recipe.id) {
@@ -35,6 +43,20 @@ const RecipeCard = ({
         // 非选择模式下，点击卡片跳转
         onClick(recipe.id);
       }
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (recipe.id && onDelete) {
+      onDelete(recipe.id);
+    }
+  };
+
+  const handleStar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (recipe.id && onStar) {
+      onStar(recipe.id, !isStarred);
     }
   };
 
@@ -53,6 +75,35 @@ const RecipeCard = ({
       )}
       onClick={handleClick}
     >
+      {/* Action buttons */}
+      {(onDelete || onStar) && (
+        <div className="absolute top-2 right-2 flex gap-1 z-10">
+          {onStar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background",
+                isStarred && "text-yellow-500 hover:text-yellow-600"
+              )}
+              onClick={handleStar}
+            >
+              <Star className="h-4 w-4" fill={isStarred ? "currentColor" : "none"} />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background hover:text-destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
+
       <CardHeader className="p-3 sm:p-4 pb-1">
         <Typography
           variant="h4"

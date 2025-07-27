@@ -1,6 +1,14 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { MutedText } from "@/components/ui/typography";
-import { useMyRecipesQuery } from "@/lib/gql/graphql";
+import { 
+  useMyRecipesQuery, 
+  useDeleteRecipesMutation, 
+  useDeleteRecipeMutation,
+  useSetRecipePreferenceMutation,
+  useRemoveRecipePreferenceMutation,
+  useGetRecipePreferencesQuery,
+  PreferenceType
+} from "@/lib/gql/graphql";
 import { graphqlClient } from "@/lib/gql/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecipeCard from "@/components/recipe/RecipeCard";
@@ -12,6 +20,7 @@ import React from "react";
 import { Recipe, CuisineType, MealType, Difficulty } from "@/lib/gql/graphql";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface FavoriteRecipesProps {
   className?: string;
@@ -23,6 +32,7 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   const [filters, setFilters] = React.useState<RecipeFilters>({});
   const [isSelectionMode, setIsSelectionMode] = React.useState(false);
   const [selectedRecipes, setSelectedRecipes] = React.useState<Set<string>>(new Set());
+  const [recipeToDelete, setRecipeToDelete] = React.useState<string | null>(null);
 
   // 检查本地购物清单并提示
   React.useEffect(() => {
@@ -71,7 +81,104 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   }, [navigate]);
 
   // 获取收藏菜谱列表
-  const { data, isLoading, error } = useMyRecipesQuery(graphqlClient, {});
+  const { data, isLoading, error, refetch } = useMyRecipesQuery(
+    graphqlClient,
+    {}
+  );
+
+  // 获取菜谱喜好列表
+  const { data: preferencesData } = useGetRecipePreferencesQuery(
+    graphqlClient,
+    {}
+  );
+
+  // 创建喜好映射
+  const recipePreferences = React.useMemo(() => {
+    const map = new Map<string, PreferenceType>();
+    if (preferencesData?.myRecipePreferences) {
+      preferencesData.myRecipePreferences.forEach(pref => {
+        if (pref.recipeId && pref.preference) {
+          map.set(pref.recipeId, pref.preference);
+        }
+      });
+    }
+    return map;
+  }, [preferencesData]);
+
+  // 批量删除
+  const deleteRecipesMutation = useDeleteRecipesMutation(graphqlClient, {
+    onSuccess: () => {
+      toast.success("选中的菜谱已删除");
+      refetch();
+      clearSelection();
+    },
+    onError: (err) => {
+      toast.error("删除失败，请稍后再试");
+      console.error("批量删除菜谱失败", err);
+    },
+  });
+
+  // 单个删除
+  const deleteRecipeMutation = useDeleteRecipeMutation(graphqlClient, {
+    onSuccess: () => {
+      toast.success("菜谱已删除");
+      refetch();
+    },
+    onError: (err) => {
+      toast.error("删除失败，请稍后再试");
+      console.error("删除菜谱失败", err);
+    },
+  });
+
+  // 设置收藏状态
+  const setRecipePreferenceMutation = useSetRecipePreferenceMutation(graphqlClient, {
+    onSuccess: () => {
+      // We're now using optimistic updates, so no need to refetch
+    },
+    onError: (err) => {
+      toast.error("设置收藏状态失败");
+      console.error("设置菜谱收藏状态失败", err);
+      // On error, refetch to restore correct state
+      refetch();
+    },
+  });
+
+  // 移除收藏状态
+  const removeRecipePreferenceMutation = useRemoveRecipePreferenceMutation(graphqlClient, {
+    onSuccess: () => {
+      // We're now using optimistic updates, so no need to refetch
+    },
+    onError: (err) => {
+      toast.error("取消收藏失败");
+      console.error("取消菜谱收藏状态失败", err);
+      // On error, refetch to restore correct state
+      refetch();
+    },
+  });
+
+  // 本地状态跟踪星标状态，用于优化UI响应
+  const [optimisticStars, setOptimisticStars] = React.useState<Map<string, boolean>>(new Map());
+
+  // 合并后端数据和本地优化状态
+  const effectiveStarredStatus = React.useMemo(() => {
+    const result = new Map<string, boolean>();
+    
+    // 首先添加后端数据
+    if (preferencesData?.myRecipePreferences) {
+      preferencesData.myRecipePreferences.forEach(pref => {
+        if (pref.recipeId) {
+          result.set(pref.recipeId, pref.preference === PreferenceType.Like);
+        }
+      });
+    }
+    
+    // 然后覆盖本地优化状态
+    optimisticStars.forEach((isStarred, id) => {
+      result.set(id, isStarred);
+    });
+    
+    return result;
+  }, [preferencesData, optimisticStars]);
 
   const sortedAndFilteredRecipes = React.useMemo(() => {
     if (!data?.myRecipes) return [];
@@ -84,6 +191,14 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
     }
     if (filters.mealType) {
       list = list.filter(recipe => recipe.mealType === filters.mealType);
+    }
+    if (filters.starred) {
+      list = list.filter(recipe => 
+        recipe.id && (
+          effectiveStarredStatus.get(recipe.id) === true || 
+          recipePreferences.get(recipe.id) === PreferenceType.Like
+        )
+      );
     }
 
     // 应用排序
@@ -125,7 +240,7 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
       default:
         return list;
     }
-  }, [data?.myRecipes, sort, filters]);
+  }, [data?.myRecipes, sort, filters, recipePreferences, effectiveStarredStatus]);
 
   // 过滤掉空值，避免在渲染时出现 null
   const visibleRecipes = React.useMemo<Recipe[]>(() => {
@@ -181,8 +296,53 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   };
 
   const handleBatchDelete = () => {
-    // TODO: 实现批量删除功能
-    console.log("批量删除:", Array.from(selectedRecipes));
+    const ids = Array.from(selectedRecipes);
+    if (ids.length === 0) {
+      toast.info("请先选择要删除的菜谱");
+      return;
+    }
+
+    deleteRecipesMutation.mutate({ ids });
+  };
+
+  const handleDeleteRecipe = (id: string) => {
+    setRecipeToDelete(id);
+  };
+
+  const confirmDeleteRecipe = () => {
+    if (recipeToDelete) {
+      deleteRecipeMutation.mutate({ id: recipeToDelete });
+      setRecipeToDelete(null);
+    }
+  };
+
+  const handleStarRecipe = (id: string, isStarred: boolean) => {
+    const recipe = visibleRecipes.find(r => r.id === id);
+    if (!recipe || !recipe.name) return;
+
+    // 立即更新本地状态，实现乐观更新
+    setOptimisticStars(prev => {
+      const newMap = new Map(prev);
+      newMap.set(id, isStarred);
+      return newMap;
+    });
+
+    // 发送到服务器
+    if (isStarred) {
+      // 收藏菜谱
+      setRecipePreferenceMutation.mutate({
+        input: {
+          recipeId: id,
+          recipeName: recipe.name,
+          preference: PreferenceType.Like
+        }
+      });
+    } else {
+      // 取消收藏
+      removeRecipePreferenceMutation.mutate({
+        recipeId: id
+      });
+    }
   };
 
   const handleGenerateShoppingList = () => {
@@ -279,6 +439,9 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
                   isSelected={selectedRecipes.has(rec.id || "")}
                   onSelectionChange={handleSelectionChange}
                   selectable={isSelectionMode}
+                  onDelete={!isSelectionMode ? handleDeleteRecipe : undefined}
+                  onStar={!isSelectionMode ? handleStarRecipe : undefined}
+                  isStarred={!!rec.id && effectiveStarredStatus.get(rec.id) === true}
                 />
               ))}
             </div>
@@ -295,7 +458,31 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
         onSelectAll={handleSelectAll}
         onDelete={handleBatchDelete}
         onGenerateShoppingList={handleGenerateShoppingList}
+        isDeleting={deleteRecipesMutation.isPending}
       />
+
+      {/* 删除确认对话框 */}
+      <AlertDialog open={!!recipeToDelete} onOpenChange={(open) => !open && setRecipeToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除{recipeToDelete ? 
+                `「${visibleRecipes.find(r => r.id === recipeToDelete)?.name || ""}」` 
+                : "这个"}菜谱吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteRecipe}
+              disabled={deleteRecipeMutation.isPending}
+            >
+              {deleteRecipeMutation.isPending ? "删除中..." : "删除"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
