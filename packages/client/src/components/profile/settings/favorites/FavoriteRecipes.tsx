@@ -23,6 +23,7 @@ import React from "react";
 import { Recipe, CuisineType, MealType, Difficulty } from "@/lib/gql/graphql";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import useShoppingListToast from "@/hooks/useShoppingListToast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,54 +50,9 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
   const [recipeToDelete, setRecipeToDelete] = React.useState<string | null>(
     null,
   );
-
-  // 检查本地购物清单并提示
-  React.useEffect(() => {
-    const stored = localStorage.getItem("shoppingListData");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed.items) && parsed.items.length > 0) {
-          toast.custom(
-            (t: any) => {
-              return (
-                <div className="flex flex-col gap-3 p-4 bg-popover border rounded-md shadow-lg w-[260px]">
-                  <span className="text-sm font-medium">
-                    存在未完成的购物清单
-                  </span>
-                  <div className="flex gap-2 self-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigate({ to: "/shopping-list" });
-                        toast.dismiss(t.id as string);
-                      }}
-                    >
-                      查看
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        localStorage.removeItem("shoppingListData");
-                        toast.dismiss(t.id as string);
-                      }}
-                    >
-                      删除
-                    </Button>
-                  </div>
-                </div>
-              );
-            },
-            { duration: Infinity, id: "shopping-list-toast" },
-          );
-        }
-      } catch (e) {
-        console.error("解析本地购物清单失败", e);
-      }
-    }
-  }, [navigate]);
+  
+  // 使用购物清单提示 hook
+  useShoppingListToast();
 
   // 获取收藏菜谱列表
   const { data, isLoading, error, refetch } = useMyRecipesQuery(

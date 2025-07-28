@@ -8,170 +8,170 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as ShoppingListRouteImport } from "./routes/shopping-list";
-import { Route as RegisterRouteImport } from "./routes/register";
-import { Route as ProfileRouteImport } from "./routes/profile";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as SessionIdRouteImport } from "./routes/$sessionId";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as RecipeIdRouteImport } from "./routes/recipe.$id";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as ShoppingListRouteImport } from './routes/shopping-list'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as SessionIdRouteImport } from './routes/$sessionId'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecipeIdRouteImport } from './routes/recipe.$id'
 
 const ShoppingListRoute = ShoppingListRouteImport.update({
-  id: "/shopping-list",
-  path: "/shopping-list",
+  id: '/shopping-list',
+  path: '/shopping-list',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
-  id: "/register",
-  path: "/register",
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
-  id: "/profile",
-  path: "/profile",
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SessionIdRoute = SessionIdRouteImport.update({
-  id: "/$sessionId",
-  path: "/$sessionId",
+  id: '/$sessionId',
+  path: '/$sessionId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const RecipeIdRoute = RecipeIdRouteImport.update({
-  id: "/recipe/$id",
-  path: "/recipe/$id",
+  id: '/recipe/$id',
+  path: '/recipe/$id',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/$sessionId": typeof SessionIdRoute;
-  "/login": typeof LoginRoute;
-  "/profile": typeof ProfileRoute;
-  "/register": typeof RegisterRoute;
-  "/shopping-list": typeof ShoppingListRoute;
-  "/recipe/$id": typeof RecipeIdRoute;
+  '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/shopping-list': typeof ShoppingListRoute
+  '/recipe/$id': typeof RecipeIdRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/$sessionId": typeof SessionIdRoute;
-  "/login": typeof LoginRoute;
-  "/profile": typeof ProfileRoute;
-  "/register": typeof RegisterRoute;
-  "/shopping-list": typeof ShoppingListRoute;
-  "/recipe/$id": typeof RecipeIdRoute;
+  '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/shopping-list': typeof ShoppingListRoute
+  '/recipe/$id': typeof RecipeIdRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/$sessionId": typeof SessionIdRoute;
-  "/login": typeof LoginRoute;
-  "/profile": typeof ProfileRoute;
-  "/register": typeof RegisterRoute;
-  "/shopping-list": typeof ShoppingListRoute;
-  "/recipe/$id": typeof RecipeIdRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/$sessionId': typeof SessionIdRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/shopping-list': typeof ShoppingListRoute
+  '/recipe/$id': typeof RecipeIdRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/$sessionId"
-    | "/login"
-    | "/profile"
-    | "/register"
-    | "/shopping-list"
-    | "/recipe/$id";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/$sessionId'
+    | '/login'
+    | '/profile'
+    | '/register'
+    | '/shopping-list'
+    | '/recipe/$id'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/$sessionId"
-    | "/login"
-    | "/profile"
-    | "/register"
-    | "/shopping-list"
-    | "/recipe/$id";
+    | '/'
+    | '/$sessionId'
+    | '/login'
+    | '/profile'
+    | '/register'
+    | '/shopping-list'
+    | '/recipe/$id'
   id:
-    | "__root__"
-    | "/"
-    | "/$sessionId"
-    | "/login"
-    | "/profile"
-    | "/register"
-    | "/shopping-list"
-    | "/recipe/$id";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/$sessionId'
+    | '/login'
+    | '/profile'
+    | '/register'
+    | '/shopping-list'
+    | '/recipe/$id'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  SessionIdRoute: typeof SessionIdRoute;
-  LoginRoute: typeof LoginRoute;
-  ProfileRoute: typeof ProfileRoute;
-  RegisterRoute: typeof RegisterRoute;
-  ShoppingListRoute: typeof ShoppingListRoute;
-  RecipeIdRoute: typeof RecipeIdRoute;
+  IndexRoute: typeof IndexRoute
+  SessionIdRoute: typeof SessionIdRoute
+  LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
+  ShoppingListRoute: typeof ShoppingListRoute
+  RecipeIdRoute: typeof RecipeIdRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/shopping-list": {
-      id: "/shopping-list";
-      path: "/shopping-list";
-      fullPath: "/shopping-list";
-      preLoaderRoute: typeof ShoppingListRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/register": {
-      id: "/register";
-      path: "/register";
-      fullPath: "/register";
-      preLoaderRoute: typeof RegisterRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/profile": {
-      id: "/profile";
-      path: "/profile";
-      fullPath: "/profile";
-      preLoaderRoute: typeof ProfileRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$sessionId": {
-      id: "/$sessionId";
-      path: "/$sessionId";
-      fullPath: "/$sessionId";
-      preLoaderRoute: typeof SessionIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/recipe/$id": {
-      id: "/recipe/$id";
-      path: "/recipe/$id";
-      fullPath: "/recipe/$id";
-      preLoaderRoute: typeof RecipeIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/shopping-list': {
+      id: '/shopping-list'
+      path: '/shopping-list'
+      fullPath: '/shopping-list'
+      preLoaderRoute: typeof ShoppingListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$sessionId': {
+      id: '/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/$sessionId'
+      preLoaderRoute: typeof SessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipe/$id': {
+      id: '/recipe/$id'
+      path: '/recipe/$id'
+      fullPath: '/recipe/$id'
+      preLoaderRoute: typeof RecipeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,7 +183,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ShoppingListRoute: ShoppingListRoute,
   RecipeIdRoute: RecipeIdRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
