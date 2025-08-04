@@ -1,4 +1,3 @@
-import { Typography } from "@/components/ui/typography";
 
 interface RecipeNutrientsProps {
   nutrients: Record<string, number> | null;
@@ -20,34 +19,25 @@ const RecipeNutrients = ({ nutrients }: RecipeNutrientsProps) => {
   };
 
   return (
-    <div className="mb-8">
-      <Typography variant="h3" className="text-xl font-semibold mb-4">
-        营养信息
-      </Typography>
+    <div className="mb-6">
+      <h3 className="text-lg font-medium mb-3">
+        补充营养信息
+      </h3>
 
-      <div className="bg-muted/20 rounded-lg p-3 flex flex-wrap gap-2 sm:gap-3">
+      <div className="flex flex-wrap gap-3 sm:gap-4">
         {Object.entries(nutrients).map(([key, value]) => {
           const meta = nutrientMeta[key] ?? ({ label: key } as any);
-          const displayLabel = meta.unit
-            ? `${meta.label} (${meta.unit})`
-            : meta.label;
           return (
             <div
               key={key}
-              className="flex flex-col items-center justify-center px-3 py-2 sm:px-4 sm:py-3 bg-background rounded-lg border border-muted/30 min-w-[72px]"
+              className="flex items-baseline gap-1"
             >
-              <Typography
-                variant="span"
-                className="text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap"
-              >
-                {displayLabel}
-              </Typography>
-              <Typography
-                variant="p"
-                className="text-base sm:text-lg font-bold leading-none"
-              >
-                {String(value)}
-              </Typography>
+              <span className="text-sm text-muted-foreground">
+                {meta.label}
+              </span>
+              <span className="text-sm font-medium">
+                {String(value)}{meta.unit}
+              </span>
             </div>
           );
         })}

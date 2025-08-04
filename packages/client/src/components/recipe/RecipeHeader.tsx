@@ -1,8 +1,6 @@
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Typography } from "@/components/ui/typography";
-import { Markdown } from "@/components/ui/markdown";
 
 interface RecipeHeaderProps {
   isLoading: boolean;
@@ -15,34 +13,22 @@ interface RecipeHeaderProps {
 
 const RecipeHeader = ({ isLoading, recipe, onBack }: RecipeHeaderProps) => {
   return (
-    <>
-      {/* 返回按钮 */}
-      <Button variant="ghost" className="mb-4" onClick={onBack}>
-        <ArrowLeft className="mr-2 h-4 w-4" />
+    <div className="flex items-center justify-between mb-6 -mx-2">
+      <Button variant="ghost" size="sm" className="shrink-0" onClick={onBack}>
+        <ChevronLeft className="mr-2 h-4 w-4" />
         返回
       </Button>
-
-      {/* 标题与描述 */}
-      <div className="mb-8 flex items-start justify-between flex-col md:flex-row md:items-center md:gap-4">
-        <div className="flex-1">
-          {isLoading ? (
-            <Skeleton className="h-10 w-3/4 mb-2" />
-          ) : (
-            <Typography variant="h2" className="text-2xl md:text-3xl font-bold">
-              {recipe?.name ?? "加载中..."}
-            </Typography>
-          )}
-          {isLoading ? (
-            <Skeleton className="h-6 w-1/2" />
-          ) : (
-            <Markdown
-              content={recipe?.description ?? ""}
-              className="text-muted-foreground"
-            />
-          )}
-        </div>
+      
+      <div className="flex-1 min-w-0 ml-4 flex justify-end">
+        {isLoading ? (
+          <Skeleton className="h-6 w-full max-w-xs" />
+        ) : (
+          <h1 className="text-lg font-semibold text-right truncate max-w-full">
+            {recipe?.name ?? "加载中..."}
+          </h1>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

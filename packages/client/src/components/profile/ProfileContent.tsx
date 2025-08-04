@@ -18,7 +18,7 @@ interface ProfileContentProps {
 }
 
 const ProfileContent = ({ className }: ProfileContentProps) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const authNavigate = useAuthNavigate();
   const location = useLocation();
 
@@ -33,24 +33,25 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
 
   // Default select first group on desktop or restore from URL search params
   React.useEffect(() => {
-    if (isMobile) {
-      // On mobile, don't preselect
-      setActiveGroup(null);
-    } else if (!activeGroup) {
-      // Check if we need to restore settings state from URL
-      const urlSearch = search as any;
-      if (
-        urlSearch?.settingsGroup === "favorites" &&
-        urlSearch?.from === "settings"
-      ) {
-        const favoritesGroup = settingsGroups.find(
-          (g) => g.title === SettingGroupTitle.Favorites
-        );
-        if (favoritesGroup) {
-          setActiveGroup(favoritesGroup);
-          return;
-        }
+    const urlSearch = search as any;
+    
+    // Check if we need to restore settings state from URL (mobile and desktop)
+    if (urlSearch?.settingsGroup === "favorites" && urlSearch?.from === "settings") {
+      const favoritesGroup = settingsGroups.find(
+        (g) => g.title === SettingGroupTitle.Favorites
+      );
+      if (favoritesGroup) {
+        setActiveGroup(favoritesGroup);
+        return;
       }
+    }
+    
+    if (isMobile) {
+      // On mobile, don't preselect unless returning from settings
+      if (!urlSearch?.from) {
+        setActiveGroup(null);
+      }
+    } else if (!activeGroup) {
       // Desktop default selection
       setActiveGroup(settingsGroups[0]);
     }
@@ -59,6 +60,12 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
   // Click handler for settings item keys
   const handleSettingClick = async (key: SettingKey) => {
     switch (key) {
+      case SettingKey.FavoriteRecipes:
+        if (isMobile) {
+          authNavigate({ to: "/favorite-recipes" });
+        }
+        // On desktop, do nothing - the panel will show the content
+        break;
       case SettingKey.Logout:
         try {
           await logout();
@@ -89,7 +96,13 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
                 <button
                   key={group.title}
                   className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-left group"
-                  onClick={() => setActiveGroup(group)}
+                  onClick={() => {
+                    if (group.title === SettingGroupTitle.Favorites && isMobile) {
+                      authNavigate({ to: "/favorite-recipes" });
+                    } else {
+                      setActiveGroup(group);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center w-7 h-7">
                     <span className="text-muted-foreground h-3.5 w-3.5 flex items-center justify-center">

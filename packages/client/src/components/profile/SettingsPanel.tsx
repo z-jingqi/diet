@@ -38,7 +38,7 @@ const SettingsPanel = ({
     </div>
   );
 
-  const sectionClass = "shadow-none border-none";
+  const sectionClass = "shadow-none border-none p-0";
 
   switch (group.title) {
     case SettingGroupTitle.General:

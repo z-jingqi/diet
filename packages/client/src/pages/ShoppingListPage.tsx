@@ -6,7 +6,7 @@ import { Recipe } from "@/lib/gql/graphql";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Sparkles, CheckSquare, Square } from "lucide-react";
+import { ChevronLeft, Sparkles, CheckSquare, Square } from "lucide-react";
 import {
   useGenerateShoppingList,
   ShoppingItem,
@@ -26,7 +26,7 @@ const ShoppingListPage = () => {
   const { data, isLoading } = useRecipesByIdsQuery(
     graphqlClient,
     { ids: idList },
-    { enabled: idList.length > 0 },
+    { enabled: idList.length > 0 }
   );
 
   const recipes = React.useMemo(() => {
@@ -169,7 +169,7 @@ const ShoppingListPage = () => {
             window.history.back();
           }}
         >
-          <ArrowLeft className="w-4 h-4 mr-1" /> 返回
+          <ChevronLeft className="w-4 h-4 mr-1" /> 返回
         </Button>
 
         <Button

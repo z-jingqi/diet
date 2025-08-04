@@ -1,4 +1,3 @@
-import { Typography } from "@/components/ui/typography";
 import { Markdown } from "@/components/ui/markdown";
 
 interface RecipeTipsProps {
@@ -8,12 +7,12 @@ interface RecipeTipsProps {
 const RecipeTips = ({ tips }: RecipeTipsProps) => {
   if (!tips) return null;
   return (
-    <div className="mb-8">
-      <Typography variant="h3" className="text-xl font-semibold mb-4">
+    <div className="mb-6">
+      <h3 className="text-lg font-medium mb-3">
         小贴士
-      </Typography>
-      <div className="bg-muted/30 rounded-lg p-4">
-        <Markdown content={tips} />
+      </h3>
+      <div className="text-sm text-muted-foreground leading-relaxed">
+        <Markdown content={tips} className="prose-sm" />
       </div>
     </div>
   );

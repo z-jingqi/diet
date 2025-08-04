@@ -70,151 +70,92 @@ const RecipeSortFilter = ({
     filters.cuisineType || filters.mealType || filters.starred;
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* 排序选择 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
-          排序:
-        </span>
+    <div className={cn("", className)}>
+      {/* Compact single row layout */}
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        {/* Sort selector */}
         <Select
           value={sort}
           onValueChange={(v) => onSortChange(v as SortOption)}
         >
-          <SelectTrigger className="w-full sm:w-48 h-9 text-xs sm:text-sm">
-            <SelectValue placeholder="选择排序方式" />
+          <SelectTrigger className="h-8 w-auto min-w-24 text-xs border-border/40">
+            <SelectValue placeholder="排序" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={SortOption.Latest}>最新创建</SelectItem>
-            <SelectItem value={SortOption.Oldest}>最早创建</SelectItem>
-            <SelectItem value={SortOption.NameAsc}>名称 A→Z</SelectItem>
-            <SelectItem value={SortOption.NameDesc}>名称 Z→A</SelectItem>
-            <SelectItem value={SortOption.DifficultyAsc}>
-              难度 简单→困难
-            </SelectItem>
-            <SelectItem value={SortOption.DifficultyDesc}>
-              难度 困难→简单
-            </SelectItem>
-            <SelectItem value={SortOption.TimeAsc}>时间 短→长</SelectItem>
-            <SelectItem value={SortOption.TimeDesc}>时间 长→短</SelectItem>
-            <SelectItem value={SortOption.CostAsc}>预估成本 低→高</SelectItem>
-            <SelectItem value={SortOption.CostDesc}>预估成本 高→低</SelectItem>
+            <SelectItem value={SortOption.Latest}>最新</SelectItem>
+            <SelectItem value={SortOption.Oldest}>最早</SelectItem>
+            <SelectItem value={SortOption.NameAsc}>名称↑</SelectItem>
+            <SelectItem value={SortOption.NameDesc}>名称↓</SelectItem>
+            <SelectItem value={SortOption.DifficultyAsc}>难度↑</SelectItem>
+            <SelectItem value={SortOption.DifficultyDesc}>难度↓</SelectItem>
+            <SelectItem value={SortOption.TimeAsc}>时间↑</SelectItem>
+            <SelectItem value={SortOption.TimeDesc}>时间↓</SelectItem>
+            <SelectItem value={SortOption.CostAsc}>成本↑</SelectItem>
+            <SelectItem value={SortOption.CostDesc}>成本↓</SelectItem>
           </SelectContent>
         </Select>
-      </div>
 
-      {/* 筛选选项 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
-          筛选:
-        </span>
+        {/* Cuisine filter */}
+        <Select
+          value={filters.cuisineType || "ALL"}
+          onValueChange={(v) => handleFilterChange("cuisineType", v)}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-20 text-xs border-border/40">
+            <SelectValue placeholder="菜系" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">菜系</SelectItem>
+            {Object.entries(cuisineTypeLabels).map(([key, label]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-          {/* 菜系筛选 */}
-          <Select
-            value={filters.cuisineType || "ALL"}
-            onValueChange={(v) => handleFilterChange("cuisineType", v)}
-          >
-            <SelectTrigger className="w-full sm:w-32 h-9 text-xs sm:text-sm">
-              <SelectValue placeholder="菜系" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部菜系</SelectItem>
-              {Object.entries(cuisineTypeLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Meal type filter */}
+        <Select
+          value={filters.mealType || "ALL"}
+          onValueChange={(v) => handleFilterChange("mealType", v)}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-20 text-xs border-border/40">
+            <SelectValue placeholder="餐次" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">餐次</SelectItem>
+            {Object.entries(mealTypeLabels).map(([key, label]) => (
+              <SelectItem key={key} value={key}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          {/* 餐次筛选 */}
-          <Select
-            value={filters.mealType || "ALL"}
-            onValueChange={(v) => handleFilterChange("mealType", v)}
-          >
-            <SelectTrigger className="w-full sm:w-32 h-9 text-xs sm:text-sm">
-              <SelectValue placeholder="餐次" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">全部餐次</SelectItem>
-              {Object.entries(mealTypeLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Star filter toggle */}
+        <Button
+          variant={filters.starred ? "default" : "ghost"}
+          size="sm"
+          onClick={toggleStarredFilter}
+          className="h-8 px-2 text-xs"
+        >
+          <Star
+            className="h-3 w-3"
+            fill={filters.starred ? "currentColor" : "none"}
+          />
+        </Button>
 
-          {/* 星标筛选按钮 */}
+        {/* Clear filters */}
+        {hasActiveFilters && (
           <Button
-            variant={filters.starred ? "default" : "outline"}
+            variant="ghost"
             size="sm"
-            onClick={toggleStarredFilter}
-            className="h-9 px-3 text-xs w-full sm:w-auto flex items-center gap-1"
+            onClick={clearFilters}
+            className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            <Star
-              className="h-4 w-4"
-              fill={filters.starred ? "currentColor" : "none"}
-            />
-            <span>{filters.starred ? "已收藏" : "收藏"}</span>
+            <X className="h-3 w-3" />
           </Button>
-
-          {/* 清除筛选按钮 */}
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              className="h-9 px-2 text-xs w-full sm:w-auto"
-            >
-              <X className="h-4 w-4 mr-1" />
-              清除
-            </Button>
-          )}
-        </div>
+        )}
       </div>
-
-      {/* 活跃筛选标签 */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-2">
-          {filters.cuisineType && (
-            <Badge variant="secondary" className="text-xs">
-              菜系: {cuisineTypeLabels[filters.cuisineType]}
-              <button
-                onClick={() => handleFilterChange("cuisineType", undefined)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-          {filters.mealType && (
-            <Badge variant="secondary" className="text-xs">
-              餐次: {mealTypeLabels[filters.mealType]}
-              <button
-                onClick={() => handleFilterChange("mealType", undefined)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-          {filters.starred && (
-            <Badge
-              variant="secondary"
-              className="text-xs text-yellow-600 border-yellow-300"
-            >
-              仅显示收藏
-              <button
-                onClick={() => handleFilterChange("starred", undefined)}
-                className="ml-1 hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-        </div>
-      )}
     </div>
   );
 };

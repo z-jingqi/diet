@@ -17,13 +17,13 @@ import RecipeSortFilter, {
   RecipeFilters,
 } from "@/components/recipe/RecipeSortFilter";
 import BatchActionToolbar from "@/components/recipe/BatchActionToolbar";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { Recipe, CuisineType, MealType, Difficulty } from "@/lib/gql/graphql";
+import { Recipe, Difficulty } from "@/lib/gql/graphql";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import useShoppingListToast from "@/hooks/useShoppingListToast";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,13 +37,25 @@ import {
 
 interface FavoriteRecipesProps {
   className?: string;
+  isSelectionMode?: boolean;
+  onToggleSelectionMode?: () => void;
 }
 
-const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
+const FavoriteRecipes = ({ 
+  className, 
+  isSelectionMode: externalIsSelectionMode,
+  onToggleSelectionMode: externalOnToggleSelectionMode 
+}: FavoriteRecipesProps) => {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const [sort, setSort] = React.useState<SortOption>(SortOption.Latest);
   const [filters, setFilters] = React.useState<RecipeFilters>({});
-  const [isSelectionMode, setIsSelectionMode] = React.useState(false);
+  // Use external selection mode if provided, otherwise use internal state
+  const [internalIsSelectionMode, setInternalIsSelectionMode] = React.useState(false);
+  const isSelectionMode = externalIsSelectionMode ?? internalIsSelectionMode;
+  const setIsSelectionMode = externalOnToggleSelectionMode ? 
+    () => externalOnToggleSelectionMode() : 
+    setInternalIsSelectionMode;
   const [selectedRecipes, setSelectedRecipes] = React.useState<Set<string>>(
     new Set(),
   );
@@ -259,15 +271,27 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
 
   const onCardClick = (id: string) => {
     if (!isSelectionMode) {
-      navigate({
-        to: "/recipe/$id",
-        params: { id },
-        search: {
-          from: "settings",
-          settingsGroup: "favorites",
-          settingsView: "recipes",
-        },
-      });
+      if (isMobile) {
+        // Mobile: Navigate from FavoriteRecipesPage
+        navigate({
+          to: "/recipe/$id",
+          params: { id },
+          search: {
+            from: "favorite-recipes",
+          },
+        });
+      } else {
+        // Desktop: Navigate from profile settings panel
+        navigate({
+          to: "/recipe/$id",
+          params: { id },
+          search: {
+            from: "settings",
+            settingsGroup: "favorites",
+            settingsView: "recipes",
+          },
+        });
+      }
     }
   };
 
@@ -302,7 +326,11 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
       // 退出选择模式时，清空选中状态
       setSelectedRecipes(new Set());
     }
-    setIsSelectionMode(!isSelectionMode);
+    if (externalOnToggleSelectionMode) {
+      externalOnToggleSelectionMode();
+    } else {
+      setInternalIsSelectionMode(!isSelectionMode);
+    }
   };
 
   const handleBatchDelete = () => {
@@ -373,38 +401,12 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
     <>
       <Card className={cn("border", className)}>
         <CardHeader>
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="w-full sm:w-auto">
-                <RecipeSortFilter
-                  sort={sort}
-                  onSortChange={setSort}
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                />
-              </div>
-
-              {/* 批量选择按钮 */}
-              <Button
-                variant={isSelectionMode ? "default" : "outline"}
-                size="sm"
-                onClick={handleToggleSelectionMode}
-                className="h-9 w-full sm:w-auto"
-              >
-                {isSelectionMode ? (
-                  <>
-                    <span className="hidden sm:inline">退出选择</span>
-                    <span className="sm:hidden">退出</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">批量操作</span>
-                    <span className="sm:hidden">批量操作</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
+          <RecipeSortFilter
+            sort={sort}
+            onSortChange={setSort}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
         </CardHeader>
         <CardContent>
           {isLoading && (
@@ -443,7 +445,7 @@ const FavoriteRecipes = ({ className }: FavoriteRecipesProps) => {
             </div>
           )}
           {!isLoading && visibleRecipes.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-1">
               {visibleRecipes.map((rec) => (
                 <RecipeCard
                   key={`${rec.id ?? `recipe-${rec.name}`}`}
