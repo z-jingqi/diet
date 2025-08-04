@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
-import { Typography } from "@/components/ui/typography";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatMessage, MessageStatus } from "@/lib/gql/graphql";
@@ -30,23 +29,23 @@ const HealthAdviceMessageBubble = ({
   };
 
   return (
-    <div className="flex w-full justify-start">
-      <div className="bg-white rounded-lg p-4">
+    <div className="flex w-full justify-start mb-4">
+      <div className="bg-background rounded-lg w-full">
         {/* 健康建议内容 */}
-        <div className="mb-4">
-          <Markdown content={content} className="max-w-none" />
+        <div className="mb-3">
+          <Markdown content={content} className="max-w-none prose-sm" />
         </div>
 
         {/* 操作按钮 - 只在生成完成后显示 */}
         {message.status === MessageStatus.Done && (
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-2 pt-3 border-t border-border/30">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSave}
               disabled={saved}
               className={cn(
-                "flex items-center gap-1",
+                "flex items-center gap-1 h-8 px-2 font-normal",
                 saved && "text-green-600",
               )}
             >
@@ -55,9 +54,9 @@ const HealthAdviceMessageBubble = ({
               ) : (
                 <Bookmark className="w-4 h-4" />
               )}
-              <Typography variant="span" className="text-sm">
+              <span className="text-sm">
                 {saved ? "已保存" : "保存建议"}
-              </Typography>
+              </span>
             </Button>
           </div>
         )}

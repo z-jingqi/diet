@@ -8,9 +8,9 @@ const UserMessageBubble = ({
 }: {
   content: string | null | undefined;
 }) => (
-  <div className="flex w-full justify-end">
-    <div className="bg-[#e9e9e9]/80 rounded-lg p-2">
-      <Markdown content={content || ""} className="max-w-none" />
+  <div className="flex w-full justify-end mb-4">
+    <div className="bg-muted/40 rounded-lg px-3 py-2 max-w-[80%]">
+      <Markdown content={content || ""} className="max-w-none prose-sm" />
     </div>
   </div>
 );

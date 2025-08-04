@@ -169,10 +169,10 @@ const ChatPage = ({ sessionId }: ChatPageProps) => {
         </div>
 
         {/* Input area - fixed at bottom */}
-        <div className="flex-shrink-0 w-full max-w-3xl mx-auto p-4 bg-background relative">
+        <div className="flex-shrink-0 w-full max-w-4xl mx-auto px-6 py-4 bg-background relative">
           {/* 浮动菜谱按钮 */}
           {allRecipes.length > 0 && (
-            <div className="absolute -top-9 right-4 z-50">
+            <div className="absolute -top-9 right-6 z-50">
               <FloatingRecipeButton recipes={allRecipes} />
             </div>
           )}

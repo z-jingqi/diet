@@ -68,7 +68,7 @@ const ChatInput = ({
   const isEmpty = !content.trim();
 
   return (
-    <div className="relative rounded-lg border bg-background p-2">
+    <div className="relative rounded-lg border border-border/40 bg-background p-3">
       <form onSubmit={handleSubmit}>
         {/* Message Input - Top Section */}
         <Textarea
@@ -79,14 +79,14 @@ const ChatInput = ({
           }
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="min-h-[40px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-sm"
           disabled={disabled}
           enterKeyHint="enter"
           rows={1}
         />
 
         {/* Bottom Section - Tags and Action Button */}
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between items-center mt-3">
           <TagSelector
             selectedTagIds={selectedTagIds}
             onTagsChange={handleTagsChange}
@@ -97,13 +97,14 @@ const ChatInput = ({
             type={canAbort ? "button" : "submit"}
             onClick={canAbort ? onAbort : undefined}
             disabled={canAbort ? false : disabled || isEmpty}
+            variant={canAbort ? "destructive" : "default"}
             size="icon"
             className={canAbort ? "h-8 w-8 relative" : "h-8 w-8"}
           >
             {canAbort && (
               <div className="absolute top-0.5 left-0.5 w-7 h-7 rounded-full border-2 border-transparent border-r-white/70 animate-spin"></div>
             )}
-            {canAbort ? <Square size={18} /> : <Send size={18} />}
+            {canAbort ? <Square size={16} /> : <Send size={16} />}
           </Button>
         </div>
       </form>
