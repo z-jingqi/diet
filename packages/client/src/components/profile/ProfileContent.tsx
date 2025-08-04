@@ -47,23 +47,13 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
     }
     
     if (isMobile) {
-      // On mobile, don't preselect
-      setActiveGroup(null);
-    } else if (!activeGroup) {
-      // Check if we need to restore settings state from URL
-      const urlSearch = search as any;
-      if (
-        urlSearch?.settingsGroup === "favorites" &&
-        urlSearch?.from === "settings"
-      ) {
-        const favoritesGroup = settingsGroups.find(
-          (g) => g.title === SettingGroupTitle.Favorites
-        );
-        if (favoritesGroup) {
-          setActiveGroup(favoritesGroup);
-          return;
-        }
+      // On mobile, don't preselect unless returning from settings
+      if (!urlSearch?.from) {
+        setActiveGroup(null);
       }
+    } else if (!activeGroup) {
+      // Desktop default selection
+      setActiveGroup(settingsGroups[0]);
     }
     // Desktop default selection
     setActiveGroup(settingsGroups[0]);
@@ -108,7 +98,13 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
                 <button
                   key={group.title}
                   className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-left group"
-                  onClick={() => setActiveGroup(group)}
+                  onClick={() => {
+                    if (group.title === SettingGroupTitle.Favorites && isMobile) {
+                      authNavigate({ to: "/favorite-recipes" });
+                    } else {
+                      setActiveGroup(group);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center w-7 h-7">
                     <span className="text-muted-foreground h-3.5 w-3.5 flex items-center justify-center">
