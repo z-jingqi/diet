@@ -1,7 +1,6 @@
 import ProfileContent from "@/components/profile/ProfileContent";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MutedText } from "@/components/ui/typography";
 import { User, LogIn, ChevronLeft } from "lucide-react";
 import { useAuthNavigate } from "@/hooks/useAuthNavigate";
@@ -55,7 +54,7 @@ const ProfilePage = () => {
   return (
     <div className="flex flex-col h-dvh min-h-0 bg-background">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-border/40 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-border/40 flex items-center gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -65,12 +64,6 @@ const ProfilePage = () => {
           <ChevronLeft className="h-4 w-4" />
           个人中心
         </Button>
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.avatarUrl || undefined} alt={user?.nickname || user?.username || "访客"} />
-          <AvatarFallback className="text-xs font-medium bg-muted text-muted-foreground">
-            {(user?.nickname || user?.username || "访客").charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
       </div>
 
       <ProfileContent className="flex-1" />
