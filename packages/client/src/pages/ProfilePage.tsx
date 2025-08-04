@@ -66,9 +66,14 @@ const ProfilePage = () => {
           个人中心
         </Button>
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.avatarUrl || undefined} alt={user?.nickname || user?.username || "访客"} />
+          <AvatarImage
+            src={user?.avatarUrl || undefined}
+            alt={user?.nickname || user?.username || "访客"}
+          />
           <AvatarFallback className="text-xs font-medium bg-muted text-muted-foreground">
-            {(user?.nickname || user?.username || "访客").charAt(0).toUpperCase()}
+            {(user?.nickname || user?.username || "访客")
+              .charAt(0)
+              .toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </div>
