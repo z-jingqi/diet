@@ -55,6 +55,8 @@ const ProfileContent = ({ className }: ProfileContentProps) => {
       // Desktop default selection
       setActiveGroup(settingsGroups[0]);
     }
+    // Desktop default selection
+    setActiveGroup(settingsGroups[0]);
   }, [isMobile, search]);
 
   // Click handler for settings item keys

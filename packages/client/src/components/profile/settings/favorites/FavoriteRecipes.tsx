@@ -10,6 +10,7 @@ import {
   PreferenceType,
 } from "@/lib/gql/graphql";
 import { graphqlClient } from "@/lib/gql/client";
+import { CACHE_FIRST_QUERY_OPTIONS } from "@/lib/gql/query-config";
 import { Skeleton } from "@/components/ui/skeleton";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeSortFilter, {
@@ -70,12 +71,14 @@ const FavoriteRecipes = ({
   const { data, isLoading, error, refetch } = useMyRecipesQuery(
     graphqlClient,
     {},
+    CACHE_FIRST_QUERY_OPTIONS
   );
 
   // 获取菜谱喜好列表
-  const { data: preferencesData } = useGetRecipePreferencesQuery(
+  const { data: preferencesData, error: preferencesError } = useGetRecipePreferencesQuery(
     graphqlClient,
     {},
+    CACHE_FIRST_QUERY_OPTIONS
   );
 
   // 创建喜好映射
@@ -157,8 +160,8 @@ const FavoriteRecipes = ({
   const effectiveStarredStatus = React.useMemo(() => {
     const result = new Map<string, boolean>();
 
-    // 首先添加后端数据
-    if (preferencesData?.myRecipePreferences) {
+    // 首先添加后端数据（如果查询成功）
+    if (preferencesData?.myRecipePreferences && !preferencesError) {
       preferencesData.myRecipePreferences.forEach((pref) => {
         if (pref.recipeId) {
           result.set(pref.recipeId, pref.preference === PreferenceType.Like);
@@ -172,7 +175,7 @@ const FavoriteRecipes = ({
     });
 
     return result;
-  }, [preferencesData, optimisticStars]);
+  }, [preferencesData, preferencesError, optimisticStars]);
 
   const sortedAndFilteredRecipes = React.useMemo(() => {
     if (!data?.myRecipes) return [];
@@ -193,7 +196,7 @@ const FavoriteRecipes = ({
         (recipe) =>
           recipe.id &&
           (effectiveStarredStatus.get(recipe.id) === true ||
-            recipePreferences.get(recipe.id) === PreferenceType.Like),
+            (recipePreferences.get(recipe.id) === PreferenceType.Like && !preferencesError)),
       );
     }
 
@@ -409,7 +412,7 @@ const FavoriteRecipes = ({
           />
         </CardHeader>
         <CardContent>
-          {isLoading && (
+          {isLoading && !data && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="space-y-2">
