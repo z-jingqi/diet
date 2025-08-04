@@ -7,6 +7,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 
 // 新拆分的组件
 import RecipeHeader from "@/components/recipe/RecipeHeader";
+import RecipeDescription from "@/components/recipe/RecipeDescription";
 import RecipeBasicInfo from "@/components/recipe/RecipeBasicInfo";
 import RecipeIngredients from "@/components/recipe/RecipeIngredients";
 import RecipeSteps from "@/components/recipe/RecipeSteps";
@@ -39,17 +40,17 @@ const RecipePage = () => {
 
   const handleBack = () => {
     const urlSearch = search as any;
-    if (
-      urlSearch?.from === "settings" &&
-      urlSearch?.settingsGroup &&
-      urlSearch?.settingsView
-    ) {
-      // Navigate back to profile with settings state
+    
+    // Check if we came from favorite recipes page
+    if (urlSearch?.from === "favorite-recipes") {
+      navigate({ to: "/favorite-recipes" });
+    } else if (urlSearch?.from === "settings") {
+      // Legacy support for old settings navigation
       navigate({
         to: "/profile",
         search: {
-          settingsGroup: urlSearch.settingsGroup,
-          settingsView: urlSearch.settingsView,
+          settingsGroup: urlSearch.settingsGroup || "favorites",
+          settingsView: urlSearch.settingsView || "recipes", 
           from: "settings",
         },
       });
@@ -76,11 +77,17 @@ const RecipePage = () => {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4 flex flex-col h-full">
-      {/* 头部 */}
-      <RecipeHeader isLoading={isLoading} recipe={recipe} onBack={handleBack} />
+    <div className="flex flex-col h-dvh min-h-0 bg-background">
+      <div className="max-w-4xl mx-auto w-full px-6 py-6 flex flex-col h-full">
+        {/* 头部 */}
+        <RecipeHeader isLoading={isLoading} recipe={recipe} onBack={handleBack} />
 
-      <ScrollArea className="flex-1 overflow-y-auto pr-2 mt-4">
+        <ScrollArea className="flex-1 overflow-y-auto pr-2">
+        <RecipeDescription 
+          description={recipe?.description}
+          isLoading={isLoading}
+        />
+
         <RecipeBasicInfo
           isLoading={isLoading}
           recipe={recipe}
@@ -97,6 +104,7 @@ const RecipePage = () => {
 
         {/* ScrollArea 结束 */}
       </ScrollArea>
+      </div>
     </div>
   );
 };

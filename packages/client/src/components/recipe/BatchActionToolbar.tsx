@@ -1,16 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  CheckSquare,
-  Square,
-  X,
-  Trash2,
-  ListPlus,
-  Loader2,
-} from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface BatchActionToolbarProps {
   selectedCount: number;
@@ -43,9 +35,6 @@ const BatchActionToolbar: React.FC<BatchActionToolbarProps> = ({
 
   const isAllSelected = selectedCount === totalCount && totalCount > 0;
 
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  };
 
   const handleDeleteConfirm = () => {
     if (onDelete) {
@@ -57,67 +46,55 @@ const BatchActionToolbar: React.FC<BatchActionToolbarProps> = ({
     <>
       <div
         className={cn(
-          "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-background border rounded-lg shadow-lg p-3 sm:p-4 max-w-[calc(100vw-2rem)]",
+          "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-background border border-border/60 rounded-lg shadow-sm p-3 w-[calc(100vw-2rem)] sm:w-auto sm:min-w-96",
           className,
         )}
       >
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-          {/* 全选按钮 */}
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onSelectAll}
-              className="h-7 sm:h-8 px-2 text-xs"
-            >
-              {isAllSelected ? (
-                <CheckSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              ) : (
-                <Square className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              )}
-              {isAllSelected ? "取消全选" : "全选"}
-            </Button>
-          </div>
+        <div className="flex items-center justify-between w-full">
+          {/* 左侧：全选按钮 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onSelectAll}
+            className="h-8 px-3 text-xs shrink-0"
+          >
+            {isAllSelected ? "取消全选" : "全选"}
+          </Button>
 
-          {/* 批量操作按钮 */}
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+          {/* 中间：主要操作按钮 */}
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={onGenerateShoppingList}
-              className="h-7 sm:h-8 text-xs flex-1 sm:flex-none"
+              className="h-8 px-3 text-xs shrink-0"
               disabled={!onGenerateShoppingList || selectedCount === 0}
             >
               <span className="hidden sm:inline">生成购物清单</span>
               <span className="sm:hidden">购物清单</span>
             </Button>
+
             <Button
               variant="destructive"
               size="sm"
               onClick={onDelete}
               disabled={selectedCount === 0 || isDeleting}
-              className="flex-1 sm:flex-none"
+              className="h-8 px-3 text-xs shrink-0 !text-white"
             >
-              {isDeleting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4 mr-2" />
-              )}
-              删除 {selectedCount > 0 ? `(${selectedCount})` : ""}
+              {isDeleting && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+              {isDeleting ? "删除中..." : `删除${selectedCount > 0 ? ` (${selectedCount})` : ""}`}
             </Button>
           </div>
 
-          {/* 关闭按钮 */}
-          <div className="flex items-center w-full sm:w-auto justify-center sm:justify-start">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClearSelection}
-              className="h-7 sm:h-8 px-2 text-xs"
-            >
-              <X className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          </div>
+          {/* 右侧：关闭按钮 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearSelection}
+            className="h-8 px-2 text-xs shrink-0"
+          >
+            <X className="h-3 w-3" />
+          </Button>
         </div>
       </div>
 

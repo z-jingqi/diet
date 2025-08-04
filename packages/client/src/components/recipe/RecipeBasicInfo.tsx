@@ -1,6 +1,5 @@
 import { Utensils, Clock, Calendar, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Typography } from "@/components/ui/typography";
 
 interface RecipeBasicInfoProps {
   isLoading: boolean;
@@ -32,59 +31,59 @@ const RecipeBasicInfo = ({
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="flex flex-wrap gap-6 mb-6 pb-4 border-b border-border/40">
       {/* 份量 */}
-      <div className="flex flex-col items-center p-3 bg-muted/40 rounded-lg">
-        <Utensils className="h-5 w-5 text-primary mb-1" />
-        <Typography variant="span" className="text-xs text-muted-foreground">
-          份量
-        </Typography>
-        <Typography variant="span" className="text-sm font-medium">
-          {isLoading ? (
-            <Skeleton className="h-4 w-16" />
-          ) : (
-            `${recipe?.servings ?? 2}人份`
-          )}
-        </Typography>
+      <div className="flex items-center gap-2">
+        <Utensils className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-0.5">
+          <div className="text-xs text-muted-foreground">份量</div>
+          <div className="text-sm font-medium">
+            {isLoading ? (
+              <Skeleton className="h-4 w-12" />
+            ) : (
+              `${recipe?.servings ?? 2}人份`
+            )}
+          </div>
+        </div>
       </div>
 
       {/* 时间 */}
-      <div className="flex flex-col items-center p-3 bg-muted/40 rounded-lg">
-        <Clock className="h-5 w-5 text-primary mb-1" />
-        <Typography variant="span" className="text-xs text-muted-foreground">
-          烹饪时间
-        </Typography>
-        <Typography variant="span" className="text-sm font-medium">
-          {isLoading ? <Skeleton className="h-4 w-16" /> : totalTime}
-        </Typography>
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-0.5">
+          <div className="text-xs text-muted-foreground">烹饪时间</div>
+          <div className="text-sm font-medium">
+            {isLoading ? <Skeleton className="h-4 w-16" /> : totalTime}
+          </div>
+        </div>
       </div>
 
       {/* 难度 */}
-      <div className="flex flex-col items-center p-3 bg-muted/40 rounded-lg">
-        <Calendar className="h-5 w-5 text-primary mb-1" />
-        <Typography variant="span" className="text-xs text-muted-foreground">
-          难度
-        </Typography>
-        <Typography variant="span" className="text-sm font-medium">
-          {isLoading ? <Skeleton className="h-4 w-16" /> : difficultyLabel()}
-        </Typography>
+      <div className="flex items-center gap-2">
+        <Calendar className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-0.5">
+          <div className="text-xs text-muted-foreground">难度</div>
+          <div className="text-sm font-medium">
+            {isLoading ? <Skeleton className="h-4 w-12" /> : difficultyLabel()}
+          </div>
+        </div>
       </div>
 
       {/* 费用 */}
-      <div className="flex flex-col items-center p-3 bg-muted/40 rounded-lg">
-        <DollarSign className="h-5 w-5 text-primary mb-1" />
-        <Typography variant="span" className="text-xs text-muted-foreground">
-          预估成本
-        </Typography>
-        <Typography variant="span" className="text-sm font-medium">
-          {isLoading ? (
-            <Skeleton className="h-4 w-16" />
-          ) : recipe?.costApprox ? (
-            `¥${recipe.costApprox}`
-          ) : (
-            "未知"
-          )}
-        </Typography>
+      <div className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-0.5">
+          <div className="text-xs text-muted-foreground">预估成本</div>
+          <div className="text-sm font-medium">
+            {isLoading ? (
+              <Skeleton className="h-4 w-12" />
+            ) : recipe?.costApprox ? (
+              `¥${recipe.costApprox}`
+            ) : (
+              "未知"
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

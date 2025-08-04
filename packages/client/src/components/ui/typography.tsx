@@ -11,15 +11,15 @@ const Typography = React.forwardRef<HTMLElement, TypographyProps>(
     const Component = as || variant;
 
     const variantStyles = {
-      h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl",
-      h2: "scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0",
-      h3: "scroll-m-20 text-2xl font-semibold tracking-tight",
-      h4: "scroll-m-20 text-xl font-semibold tracking-tight",
-      h5: "scroll-m-20 text-lg font-semibold tracking-tight",
-      h6: "scroll-m-20 text-base font-semibold tracking-tight",
-      p: "leading-7 [&:not(:first-child)]:mt-6",
-      span: "leading-7",
-      div: "leading-7",
+      h1: "scroll-m-20 text-3xl font-bold tracking-tight lg:text-4xl",
+      h2: "scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0",
+      h3: "scroll-m-20 text-xl font-semibold tracking-tight",
+      h4: "scroll-m-20 text-lg font-medium tracking-tight",
+      h5: "scroll-m-20 text-base font-medium tracking-tight",
+      h6: "scroll-m-20 text-sm font-medium tracking-tight",
+      p: "leading-relaxed text-sm [&:not(:first-child)]:mt-3",
+      span: "leading-relaxed text-sm",
+      div: "leading-relaxed text-sm",
     };
 
     return (
@@ -41,7 +41,7 @@ const Text = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}
+    className={cn("leading-relaxed text-sm [&:not(:first-child)]:mt-3", className)}
     {...props}
   />
 ));
@@ -53,7 +53,7 @@ const MutedText = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-xs text-muted-foreground leading-relaxed", className)}
     {...props}
   />
 ));

@@ -6,9 +6,9 @@ import { ChatMessage } from "@/lib/gql/graphql";
  */
 const ChatMessageBubble = ({ message }: { message: ChatMessage }) => {
   return (
-    <div className="flex w-full justify-start">
-      <div className="bg-white rounded-lg">
-        <Markdown content={message.content || ""} className="max-w-none" />
+    <div className="flex w-full justify-start mb-4">
+      <div className="bg-background rounded-lg w-full">
+        <Markdown content={message.content || ""} className="max-w-none prose-sm" />
       </div>
     </div>
   );

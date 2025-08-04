@@ -110,20 +110,21 @@ const ChatMessages = ({
         WebkitOverflowScrolling: "touch",
       }}
     >
-      <div className="py-6 space-y-6 max-w-3xl mx-auto w-full px-4">
+      <div className="py-6 max-w-4xl mx-auto w-full px-6">
         {messages.map((message) => {
           return <MessageBubble key={message.id} message={message} />;
         })}
 
         {/* Getting Intent 状态显示 */}
         {gettingIntent && (
-          <div className="flex w-full justify-start">
-            <div className="max-w-[80%]">
-              <div className="bg-white rounded-lg p-4 flex items-center justify-center">
+          <div className="flex w-full justify-start mb-4">
+            <div className="bg-background rounded-lg w-full">
+              <div className="flex items-center gap-2">
                 <div className="relative">
-                  <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></div>
-                  <div className="absolute inset-0 w-3 h-3 bg-gray-400 rounded-full animate-ping opacity-75"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-muted-foreground rounded-full animate-ping opacity-50"></div>
                 </div>
+                <span className="text-sm text-muted-foreground">正在思考...</span>
               </div>
             </div>
           </div>

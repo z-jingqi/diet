@@ -1,7 +1,5 @@
 import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Typography, MutedText } from "@/components/ui/typography";
 import { Recipe } from "@/lib/gql/graphql";
 import {
   cuisineTypeLabels,
@@ -9,8 +7,9 @@ import {
   difficultyLabels,
 } from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
-import { Star, Trash2 } from "lucide-react";
+import { Star, Trash2, Clock, Users, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -61,117 +60,119 @@ const RecipeCard = ({
     }
   };
 
-  // 计算显示的badge数量
-  const hasDifficulty = !!recipe.difficulty;
-  const hasTime = !!recipe.totalTimeApproxMin;
-  const hasServings = !!recipe.servings;
-  const hasCost = !!recipe.costApprox;
-
   return (
-    <Card
+    <div
       className={cn(
-        "cursor-pointer hover:shadow-md transition-shadow relative",
-        isSelected && "ring-2 ring-primary",
-        className,
+        "group relative flex items-center gap-4 p-4 rounded-lg border transition-colors cursor-pointer",
+        selectable
+          ? "border-border/60 hover:border-accent/60"
+          : "border-border/40 hover:bg-muted/30",
+        isSelected && "border-primary",
+        className
       )}
       onClick={handleClick}
     >
-      {/* Action buttons */}
-      {(onDelete || onStar) && (
-        <div className="absolute top-2 right-2 flex gap-1 z-10">
-          {onStar && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background",
-                isStarred && "text-yellow-500 hover:text-yellow-600",
-              )}
-              onClick={handleStar}
-            >
-              <Star
-                className="h-4 w-4"
-                fill={isStarred ? "currentColor" : "none"}
-              />
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      )}
-
-      <CardHeader className="p-3 sm:p-4 pb-1">
-        <Typography
-          variant="h4"
-          className="text-base sm:text-lg font-semibold truncate"
-        >
-          {recipe.name}
-        </Typography>
-      </CardHeader>
-      <CardContent className="p-3 sm:p-4 pt-0">
-        <div className="space-y-3 sm:space-y-4">
-          {/* 主要标签：菜系和餐次 */}
-          <div className="flex flex-wrap gap-1">
+      {/* Recipe name and main info */}
+      <div className="flex-1 min-w-0 space-y-2 pr-16">
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-sm truncate min-w-0 flex-1">
+            {recipe.name}
+          </h3>
+          {/* Primary badges inline with title */}
+          <div className="flex gap-1 shrink-0">
             {recipe.cuisineType && (
-              <Badge variant="default" className="text-xs">
+              <Badge variant="secondary" className="text-xs">
                 {cuisineTypeLabels[recipe.cuisineType]}
               </Badge>
             )}
             {recipe.mealType && (
-              <Badge variant="default" className="text-xs">
+              <Badge variant="secondary" className="text-xs">
                 {mealTypeLabels[recipe.mealType]}
               </Badge>
             )}
           </div>
+        </div>
 
-          {/* 次要信息：难度、时间、份量、成本 */}
-          {(hasDifficulty || hasTime || hasServings || hasCost) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-              {recipe.difficulty && (
-                <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">难度</MutedText>
-                  <Badge variant="outline" className="text-xs">
-                    {difficultyLabels[recipe.difficulty]}
-                  </Badge>
-                </span>
-              )}
-              {recipe.totalTimeApproxMin && (
-                <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">时间</MutedText>
-                  <Badge variant="outline" className="text-xs">
-                    {recipe.totalTimeApproxMin}分钟
-                  </Badge>
-                </span>
-              )}
-              {recipe.servings && (
-                <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">份量</MutedText>
-                  <Badge variant="outline" className="text-xs">
-                    {recipe.servings}人份
-                  </Badge>
-                </span>
-              )}
-              {recipe.costApprox && (
-                <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">成本</MutedText>
-                  <Badge variant="outline" className="text-xs">
-                    ¥{recipe.costApprox}
-                  </Badge>
-                </span>
-              )}
-            </div>
+        {/* Secondary info with icons */}
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          {recipe.difficulty && (
+            <span className="flex items-center gap-1 shrink-0">
+              <span className="opacity-60">难度</span>
+              <Badge variant="outline" className="text-xs">
+                {difficultyLabels[recipe.difficulty]}
+              </Badge>
+            </span>
+          )}
+          {recipe.totalTimeApproxMin && (
+            <span className="flex items-center gap-1 shrink-0">
+              <Clock className="h-3 w-3 opacity-60" />
+              <span>{recipe.totalTimeApproxMin}分钟</span>
+            </span>
+          )}
+          {recipe.servings && (
+            <span className="flex items-center gap-1 shrink-0">
+              <Users className="h-3 w-3 opacity-60" />
+              <span>{recipe.servings}人份</span>
+            </span>
+          )}
+          {recipe.costApprox && (
+            <span className="flex items-center gap-1 shrink-0">
+              <DollarSign className="h-3 w-3 opacity-60" />
+              <span>¥{recipe.costApprox}</span>
+            </span>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Action area - top right */}
+      <div className="absolute top-3 right-3 flex items-center gap-1">
+        {selectable ? (
+          /* Checkbox in selection mode */
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => {
+              if (recipe.id && onSelectionChange) {
+                onSelectionChange(recipe.id, !!checked);
+              }
+            }}
+            className="h-4 w-4"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          /* Action buttons - show on hover (desktop) or always (mobile) */
+          (onDelete || onStar) && (
+            <div className="flex gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              {onStar && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-6 w-6 bg-background/80 backdrop-blur-sm hover:bg-background",
+                    isStarred && "text-yellow-500 hover:text-yellow-600"
+                  )}
+                  onClick={handleStar}
+                >
+                  <Star
+                    className="h-3 w-3"
+                    fill={isStarred ? "currentColor" : "none"}
+                  />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 bg-background/80 backdrop-blur-sm hover:bg-background hover:text-destructive"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )
+        )}
+      </div>
+    </div>
   );
 };
 
