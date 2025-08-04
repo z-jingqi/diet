@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 
 const AppContent = () => {
   const { checkAuth, isAuthenticated, isGuestMode, requireAuth } = useAuth();
-  const { wechatAutoLoginLoading, wechatAutoLoginError, retryWechatLogin } = useWeChatAutoLogin();
+  const { wechatAutoLoginLoading, wechatAutoLoginError, retryWechatLogin } =
+    useWeChatAutoLogin();
   const showRetry = !!wechatAutoLoginError && !isAuthenticated;
 
   useEffect(() => {

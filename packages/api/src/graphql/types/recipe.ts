@@ -34,7 +34,9 @@ export const RecipeRef = builder.objectRef<RecipeModel>("Recipe").implement({
     }),
     prepTimeApproxMin: t.exposeInt("prep_time_approx_min", { nullable: true }),
     cookTimeApproxMin: t.exposeInt("cook_time_approx_min", { nullable: true }),
-    totalTimeApproxMin: t.exposeInt("total_time_approx_min", { nullable: true }),
+    totalTimeApproxMin: t.exposeInt("total_time_approx_min", {
+      nullable: true,
+    }),
     costApprox: t.exposeInt("cost_approx", { nullable: true }),
     currency: t.exposeString("currency", { nullable: true }),
     tips: t.exposeString("tips", { nullable: true }),
@@ -86,19 +88,24 @@ export const PreferenceEnum = builder.enumType("PreferenceType", {
   },
 });
 
-export const RecipePreferenceRef = builder.objectRef<RecipePreferenceModel>("RecipePreference").implement({
-  fields: (t) => ({
-    id: t.exposeID("id"),
-    recipeId: t.exposeString("recipe_id", { nullable: true }),
-    recipeName: t.exposeString("recipe_name"),
-    preference: t.field({
-      type: PreferenceEnum,
-      resolve: (parent) => parent.preference as any,
+export const RecipePreferenceRef = builder
+  .objectRef<RecipePreferenceModel>("RecipePreference")
+  .implement({
+    fields: (t) => ({
+      id: t.exposeID("id"),
+      recipeId: t.exposeString("recipe_id", { nullable: true }),
+      recipeName: t.exposeString("recipe_name"),
+      preference: t.field({
+        type: PreferenceEnum,
+        resolve: (parent) => parent.preference as any,
+      }),
+      recipeBasicInfo: t.exposeString("recipe_basic_info", { nullable: true }),
+      createdAt: t.expose("created_at", {
+        type: DateTimeScalar,
+        nullable: true,
+      }),
     }),
-    recipeBasicInfo: t.exposeString("recipe_basic_info", { nullable: true }),
-    createdAt: t.expose("created_at", { type: DateTimeScalar, nullable: true }),
-  }),
-});
+  });
 
 // ----------------------
 // Input type
@@ -163,6 +170,15 @@ builder.queryFields((t) => ({
     },
   }),
 
+  recipesByIds: t.field({
+    type: [RecipeRef],
+    args: { ids: t.arg.idList({ required: true }) },
+    resolve: (_r, { ids }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.getRecipesByIds(ids as string[], auth.user.id);
+    },
+  }),
+
   recipe: t.field({
     type: RecipeRef,
     args: { id: t.arg.id({ required: true }) },
@@ -216,6 +232,15 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  deleteRecipes: t.field({
+    type: "Boolean",
+    args: { ids: t.arg.idList({ required: true }) },
+    resolve: (_r, { ids }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.deleteRecipes(ids as string[], auth.user.id);
+    },
+  }),
+
   // 添加设置菜谱喜好的变更操作
   setRecipePreference: t.field({
     type: RecipePreferenceRef,
@@ -229,6 +254,21 @@ builder.mutationFields((t) => ({
         recipeId: input.recipeId ?? undefined,
         recipeBasicInfo: input.recipeBasicInfo ?? undefined,
       });
+    },
+  }),
+
+  // 添加删除菜谱喜好的变更操作
+  removeRecipePreference: t.field({
+    type: "Boolean",
+    args: {
+      recipeId: t.arg.id({ required: true }),
+    },
+    resolve: (_r, { recipeId }, ctx) => {
+      const auth = requireAuth(ctx);
+      return ctx.services.recipe.removeRecipePreference(
+        auth.user.id,
+        recipeId as string,
+      );
     },
   }),
 
@@ -292,4 +332,4 @@ export const CuisineTypeEnum = builder.enumType("CuisineType", {
     WESTERN: { description: "西餐（泛指欧美等西方菜系）" },
     OTHER: { description: "其他或未分类" },
   },
-}); 
+});

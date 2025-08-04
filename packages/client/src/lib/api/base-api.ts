@@ -28,7 +28,7 @@ const isLoggedIn = (): boolean => {
 export const fetchWithRefresh = async (
   input: string,
   init?: RequestInit,
-  retry = true
+  retry = true,
 ): Promise<Response> => {
   // 如果是游客模式，不添加认证相关的头
   // 这里需要从调用处传入游客状态，因为base-api不应该直接依赖store

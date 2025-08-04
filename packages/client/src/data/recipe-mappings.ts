@@ -30,4 +30,4 @@ export const difficultyLabels: Record<Difficulty, string> = {
   [Difficulty.Easy]: "简单",
   [Difficulty.Medium]: "中等",
   [Difficulty.Hard]: "困难",
-}; 
+};

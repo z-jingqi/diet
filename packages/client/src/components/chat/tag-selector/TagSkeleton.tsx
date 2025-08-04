@@ -8,7 +8,7 @@ const TagSkeleton = () => {
         <div key={categoryIndex} className="space-y-2">
           {/* 分类标题骨架 */}
           <Skeleton className="h-4 w-20" />
-          
+
           {/* 标签骨架 */}
           <div className="flex flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((tagIndex) => (
@@ -21,4 +21,4 @@ const TagSkeleton = () => {
   );
 };
 
-export default TagSkeleton; 
+export default TagSkeleton;

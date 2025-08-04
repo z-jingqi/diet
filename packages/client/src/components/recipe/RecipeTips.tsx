@@ -19,4 +19,4 @@ const RecipeTips = ({ tips }: RecipeTipsProps) => {
   );
 };
 
-export default RecipeTips; 
+export default RecipeTips;

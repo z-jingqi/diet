@@ -54,7 +54,7 @@ const RegisterPage = () => {
   const validateForm = () => {
     const { errors: newErrors, isValid } = validateFormData(
       formData,
-      isAvailable
+      isAvailable,
     );
     setErrors(newErrors);
     return isValid;

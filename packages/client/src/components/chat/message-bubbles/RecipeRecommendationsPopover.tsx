@@ -62,15 +62,18 @@ const RecipeRecommendationsPopover = ({
         )}
       </PopoverTrigger>
       <PopoverContent className="p-3 w-96 max-h-[60vh] flex flex-col">
-        <Typography variant="h4" className="mb-2 text-base font-semibold flex-shrink-0">
+        <Typography
+          variant="h4"
+          className="mb-2 text-base font-semibold flex-shrink-0"
+        >
           菜谱推荐
         </Typography>
-        
+
         {/* 排序工具栏 */}
         <div className="flex-shrink-0">
           <RecipeSortToolbar onSortChange={setSortConfig} />
         </div>
-        
+
         <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-2">
             {sortedRecipes.map((recipe) => (

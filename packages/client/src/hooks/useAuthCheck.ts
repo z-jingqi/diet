@@ -12,7 +12,7 @@ export const useAuthCheck = () => {
       showToast?: boolean;
       toastMessage?: string;
       toastDescription?: string;
-    }
+    },
   ) => {
     const {
       showToast = true,

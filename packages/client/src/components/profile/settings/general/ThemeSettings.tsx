@@ -29,21 +29,30 @@ const ThemeSettings = ({ className }: ThemeSettingsProps) => {
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="light" id="light" />
-            <label htmlFor="light" className="flex items-center gap-2 cursor-pointer">
+            <label
+              htmlFor="light"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Sun className="h-4 w-4" />
               <span>浅色</span>
             </label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="dark" id="dark" />
-            <label htmlFor="dark" className="flex items-center gap-2 cursor-pointer">
+            <label
+              htmlFor="dark"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Moon className="h-4 w-4" />
               <span>深色</span>
             </label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="system" id="system" />
-            <label htmlFor="system" className="flex items-center gap-2 cursor-pointer">
+            <label
+              htmlFor="system"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Monitor className="h-4 w-4" />
               <span>跟随系统</span>
             </label>

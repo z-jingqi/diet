@@ -1,5 +1,5 @@
-import * as React from "react"
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import * as React from "react";
+import { Toaster as Sonner, ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
@@ -15,7 +15,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

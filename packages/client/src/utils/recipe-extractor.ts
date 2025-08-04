@@ -19,9 +19,7 @@ export const containsRecipeRecommendations = (content: string): boolean => {
  * 主食材：鸡肉, 花生, 干辣椒
  * 特点：酸甜微辣，口感鲜嫩
  */
-export const extractBasicRecipeInfos = (
-  content: string
-): BasicRecipeInfo[] => {
+export const extractBasicRecipeInfos = (content: string): BasicRecipeInfo[] => {
   const results: BasicRecipeInfo[] = [];
 
   if (!content) {
@@ -32,7 +30,8 @@ export const extractBasicRecipeInfos = (
   const normalizedContent = content.replace(/<br\s*\/?\s*>/gi, "\n");
 
   // 使用多行正则一次性提取一个菜品块（新版，去掉人数，新增人均花费、预计耗时、主食材）
-  const recipeBlockRegex = /\*\*\s*(?:\d+\.)?\s*([^*]+?)\s*\*\*\s*\n\s*人均花费：([^\n]+?)\n\s*预计耗时：([^\n]+?)\n\s*难度：([^\n]+?)\n\s*主食材：([^\n]+?)\n/gu;
+  const recipeBlockRegex =
+    /\*\*\s*(?:\d+\.)?\s*([^*]+?)\s*\*\*\s*\n\s*人均花费：([^\n]+?)\n\s*预计耗时：([^\n]+?)\n\s*难度：([^\n]+?)\n\s*主食材：([^\n]+?)\n/gu;
 
   let match: RegExpExecArray | null;
   while ((match = recipeBlockRegex.exec(normalizedContent)) !== null) {
@@ -48,4 +47,4 @@ export const extractBasicRecipeInfos = (
   }
 
   return results;
-}; 
+};

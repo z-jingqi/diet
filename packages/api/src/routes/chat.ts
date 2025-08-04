@@ -14,7 +14,7 @@ chat.post("/guest", async (c) => {
     if (!body.messages || !Array.isArray(body.messages)) {
       return c.json(
         { error: "Missing or invalid messages in request body" },
-        400
+        400,
       );
     }
 
@@ -23,7 +23,7 @@ chat.post("/guest", async (c) => {
       {
         type: c.env.AI_SERVICE || "qwen",
       },
-      c.env
+      c.env,
     );
 
     const result = await aiService.chat(body.messages, body.format);
@@ -59,7 +59,7 @@ chat.post("/authenticated", async (c) => {
     if (!body.messages || !Array.isArray(body.messages)) {
       return c.json(
         { error: "Missing or invalid messages in request body" },
-        400
+        400,
       );
     }
 
@@ -68,7 +68,7 @@ chat.post("/authenticated", async (c) => {
       {
         type: c.env.AI_SERVICE || "qwen",
       },
-      c.env
+      c.env,
     );
 
     const result = await aiService.chat(body.messages, body.format);
@@ -113,7 +113,7 @@ chat.post("/", async (c) => {
     if (!body.messages || !Array.isArray(body.messages)) {
       return c.json(
         { error: "Missing or invalid messages in request body" },
-        400
+        400,
       );
     }
 
@@ -122,7 +122,7 @@ chat.post("/", async (c) => {
       {
         type: c.env.AI_SERVICE || "qwen",
       },
-      c.env
+      c.env,
     );
 
     const result = await aiService.chat(body.messages, body.format);

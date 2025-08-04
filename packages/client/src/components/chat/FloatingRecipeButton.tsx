@@ -36,4 +36,4 @@ const FloatingRecipeButton = ({ recipes }: FloatingRecipeButtonProps) => {
   );
 };
 
-export default FloatingRecipeButton; 
+export default FloatingRecipeButton;

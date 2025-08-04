@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { CuisineType, MealType } from "@/lib/gql/graphql";
 import { cuisineTypeLabels, mealTypeLabels } from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ export enum SortOption {
 export interface RecipeFilters {
   cuisineType?: CuisineType;
   mealType?: MealType;
+  starred?: boolean;
 }
 
 interface RecipeSortFilterProps {
@@ -58,14 +59,27 @@ const RecipeSortFilter = ({
     onFiltersChange({});
   };
 
-  const hasActiveFilters = filters.cuisineType || filters.mealType;
+  const toggleStarredFilter = () => {
+    onFiltersChange({
+      ...filters,
+      starred: !filters.starred,
+    });
+  };
+
+  const hasActiveFilters =
+    filters.cuisineType || filters.mealType || filters.starred;
 
   return (
     <div className={cn("space-y-4", className)}>
       {/* 排序选择 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">排序:</span>
-        <Select value={sort} onValueChange={(v) => onSortChange(v as SortOption)}>
+        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
+          排序:
+        </span>
+        <Select
+          value={sort}
+          onValueChange={(v) => onSortChange(v as SortOption)}
+        >
           <SelectTrigger className="w-full sm:w-48 h-9 text-xs sm:text-sm">
             <SelectValue placeholder="选择排序方式" />
           </SelectTrigger>
@@ -74,8 +88,12 @@ const RecipeSortFilter = ({
             <SelectItem value={SortOption.Oldest}>最早创建</SelectItem>
             <SelectItem value={SortOption.NameAsc}>名称 A→Z</SelectItem>
             <SelectItem value={SortOption.NameDesc}>名称 Z→A</SelectItem>
-            <SelectItem value={SortOption.DifficultyAsc}>难度 简单→困难</SelectItem>
-            <SelectItem value={SortOption.DifficultyDesc}>难度 困难→简单</SelectItem>
+            <SelectItem value={SortOption.DifficultyAsc}>
+              难度 简单→困难
+            </SelectItem>
+            <SelectItem value={SortOption.DifficultyDesc}>
+              难度 困难→简单
+            </SelectItem>
             <SelectItem value={SortOption.TimeAsc}>时间 短→长</SelectItem>
             <SelectItem value={SortOption.TimeDesc}>时间 长→短</SelectItem>
             <SelectItem value={SortOption.CostAsc}>预估成本 低→高</SelectItem>
@@ -86,8 +104,10 @@ const RecipeSortFilter = ({
 
       {/* 筛选选项 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">筛选:</span>
-        
+        <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
+          筛选:
+        </span>
+
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           {/* 菜系筛选 */}
           <Select
@@ -124,6 +144,20 @@ const RecipeSortFilter = ({
               ))}
             </SelectContent>
           </Select>
+
+          {/* 星标筛选按钮 */}
+          <Button
+            variant={filters.starred ? "default" : "outline"}
+            size="sm"
+            onClick={toggleStarredFilter}
+            className="h-9 px-3 text-xs w-full sm:w-auto flex items-center gap-1"
+          >
+            <Star
+              className="h-4 w-4"
+              fill={filters.starred ? "currentColor" : "none"}
+            />
+            <span>{filters.starred ? "已收藏" : "收藏"}</span>
+          </Button>
 
           {/* 清除筛选按钮 */}
           {hasActiveFilters && (
@@ -165,10 +199,24 @@ const RecipeSortFilter = ({
               </button>
             </Badge>
           )}
+          {filters.starred && (
+            <Badge
+              variant="secondary"
+              className="text-xs text-yellow-600 border-yellow-300"
+            >
+              仅显示收藏
+              <button
+                onClick={() => handleFilterChange("starred", undefined)}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default RecipeSortFilter; 
+export default RecipeSortFilter;

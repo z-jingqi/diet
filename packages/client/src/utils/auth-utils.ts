@@ -6,7 +6,7 @@ export const showAuthPrompt = (
   options?: {
     message?: string;
     description?: string;
-  }
+  },
 ) => {
   const {
     message = "需要登录才能访问此功能",
@@ -25,7 +25,7 @@ export const showAuthPrompt = (
 
 export const createAuthCheck = (
   navigateToLogin: () => void,
-  requireAuth: () => boolean
+  requireAuth: () => boolean,
 ) => {
   return {
     checkAuth: (
@@ -34,7 +34,7 @@ export const createAuthCheck = (
         showToast?: boolean;
         toastMessage?: string;
         toastDescription?: string;
-      }
+      },
     ) => {
       const {
         showToast = true,

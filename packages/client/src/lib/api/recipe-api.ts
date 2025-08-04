@@ -10,13 +10,13 @@ import { RecipeInput } from "@/lib/gql/graphql";
  */
 export const generateRecipeDetail = async (
   basicInfo: BasicRecipeInfo,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<RecipeInput> => {
   // 准备 system prompt
-  const prompt = RECIPE_PROMPT.replace("{{RECIPE_NAME}}", basicInfo.name).replace(
-    "{{SERVINGS}}",
-    "2人份"
-  );
+  const prompt = RECIPE_PROMPT.replace(
+    "{{RECIPE_NAME}}",
+    basicInfo.name,
+  ).replace("{{SERVINGS}}", "2人份");
 
   const messages: ChatCompletionMessageParam[] = [
     {
@@ -40,7 +40,9 @@ export const generateRecipeDetail = async (
     cuisineType: recipeDetail.cuisineType ?? undefined,
     mealType: recipeDetail.mealType ?? undefined,
     servings: recipeDetail.servings ?? 2,
-    difficulty: (recipeDetail.difficulty ? recipeDetail.difficulty.toUpperCase() : undefined) as any,
+    difficulty: (recipeDetail.difficulty
+      ? recipeDetail.difficulty.toUpperCase()
+      : undefined) as any,
     prepTimeApproxMin: recipeDetail.prepTimeApproxMin ?? null,
     cookTimeApproxMin: recipeDetail.cookTimeApproxMin ?? null,
     totalTimeApproxMin: recipeDetail.totalTimeApproxMin ?? null,

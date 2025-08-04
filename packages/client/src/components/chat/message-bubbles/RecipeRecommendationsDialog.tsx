@@ -67,12 +67,12 @@ const RecipeRecommendationsDialog = ({
         <DialogHeader className="pb-2 flex-shrink-0">
           <DialogTitle>菜谱推荐</DialogTitle>
         </DialogHeader>
-        
+
         {/* 排序工具栏 */}
         <div className="flex-shrink-0">
           <RecipeSortToolbar onSortChange={setSortConfig} />
         </div>
-        
+
         <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-2">
             {sortedRecipes.map((recipe) => (

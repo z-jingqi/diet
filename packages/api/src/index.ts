@@ -33,7 +33,7 @@ app.use(
     exposeHeaders: ["Set-Cookie"],
     credentials: true,
     maxAge: 86400, // 24h
-  })
+  }),
 );
 
 // 基础速率限制
@@ -42,7 +42,7 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15分钟
     maxRequests: 100, // 每15分钟最多100个请求
-  })
+  }),
 );
 
 // 启用压缩，但跳过 GraphQL 端点（防止 introspection 无法被工具解析）
@@ -99,7 +99,7 @@ app.all("/graphql", async (c) => {
   const response = (await yoga.fetch(
     c.req.raw,
     {},
-    context
+    context,
   )) as unknown as Response;
 
   // Append cookies set during resolvers

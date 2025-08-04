@@ -1,9 +1,16 @@
+import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Typography, MutedText } from "@/components/ui/typography";
 import { Recipe } from "@/lib/gql/graphql";
-import { cuisineTypeLabels, mealTypeLabels, difficultyLabels } from "@/data/recipe-mappings";
+import {
+  cuisineTypeLabels,
+  mealTypeLabels,
+  difficultyLabels,
+} from "@/data/recipe-mappings";
 import { cn } from "@/lib/utils";
+import { Star, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -12,15 +19,21 @@ interface RecipeCardProps {
   isSelected?: boolean;
   onSelectionChange?: (id: string, selected: boolean) => void;
   selectable?: boolean;
+  onDelete?: (id: string) => void;
+  onStar?: (id: string, isStarred: boolean) => void;
+  isStarred?: boolean;
 }
 
-const RecipeCard = ({ 
-  recipe, 
-  className, 
-  onClick, 
-  isSelected = false, 
+const RecipeCard = ({
+  recipe,
+  className,
+  onClick,
+  isSelected = false,
   onSelectionChange,
-  selectable = false 
+  selectable = false,
+  onDelete,
+  onStar,
+  isStarred = false,
 }: RecipeCardProps) => {
   const handleClick = () => {
     if (recipe.id) {
@@ -34,27 +47,72 @@ const RecipeCard = ({
     }
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (recipe.id && onDelete) {
+      onDelete(recipe.id);
+    }
+  };
+
+  const handleStar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (recipe.id && onStar) {
+      onStar(recipe.id, !isStarred);
+    }
+  };
+
   // 计算显示的badge数量
-  const hasCuisine = !!recipe.cuisineType;
-  const hasMealType = !!recipe.mealType;
   const hasDifficulty = !!recipe.difficulty;
   const hasTime = !!recipe.totalTimeApproxMin;
   const hasServings = !!recipe.servings;
   const hasCost = !!recipe.costApprox;
-
-  const badgeCount = [hasCuisine, hasMealType, hasDifficulty, hasTime, hasServings, hasCost].filter(Boolean).length;
 
   return (
     <Card
       className={cn(
         "cursor-pointer hover:shadow-md transition-shadow relative",
         isSelected && "ring-2 ring-primary",
-        className
+        className,
       )}
       onClick={handleClick}
     >
+      {/* Action buttons */}
+      {(onDelete || onStar) && (
+        <div className="absolute top-2 right-2 flex gap-1 z-10">
+          {onStar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background",
+                isStarred && "text-yellow-500 hover:text-yellow-600",
+              )}
+              onClick={handleStar}
+            >
+              <Star
+                className="h-4 w-4"
+                fill={isStarred ? "currentColor" : "none"}
+              />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background hover:text-destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
+
       <CardHeader className="p-3 sm:p-4 pb-1">
-        <Typography variant="h4" className="text-base sm:text-lg font-semibold truncate">
+        <Typography
+          variant="h4"
+          className="text-base sm:text-lg font-semibold truncate"
+        >
           {recipe.name}
         </Typography>
       </CardHeader>
@@ -79,9 +137,7 @@ const RecipeCard = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
               {recipe.difficulty && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    难度:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">难度</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {difficultyLabels[recipe.difficulty]}
                   </Badge>
@@ -89,9 +145,7 @@ const RecipeCard = ({
               )}
               {recipe.totalTimeApproxMin && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    时间:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">时间</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {recipe.totalTimeApproxMin}分钟
                   </Badge>
@@ -99,9 +153,7 @@ const RecipeCard = ({
               )}
               {recipe.servings && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    份量:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">份量</MutedText>
                   <Badge variant="outline" className="text-xs">
                     {recipe.servings}人份
                   </Badge>
@@ -109,9 +161,7 @@ const RecipeCard = ({
               )}
               {recipe.costApprox && (
                 <span className="inline-flex items-center">
-                  <MutedText className="mr-2 text-xs">
-                    预估成本:
-                  </MutedText>
+                  <MutedText className="mr-2 text-xs">成本</MutedText>
                   <Badge variant="outline" className="text-xs">
                     ¥{recipe.costApprox}
                   </Badge>
@@ -125,4 +175,4 @@ const RecipeCard = ({
   );
 };
 
-export default RecipeCard; 
+export default RecipeCard;

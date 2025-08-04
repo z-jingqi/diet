@@ -10,4 +10,4 @@ export interface BasicRecipeInfo {
   difficulty: string;
   /** 主食材列表（逗号分隔） */
   mainIngredients: string;
-} 
+}

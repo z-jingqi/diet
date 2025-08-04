@@ -1,8 +1,16 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, X } from "lucide-react";
+import {
+  CheckSquare,
+  Square,
+  X,
+  Trash2,
+  ListPlus,
+  Loader2,
+} from "lucide-react";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface BatchActionToolbarProps {
   selectedCount: number;
@@ -10,12 +18,13 @@ interface BatchActionToolbarProps {
   isSelectionMode: boolean;
   onClearSelection: () => void;
   onSelectAll: () => void;
-  onDelete?: () => void;
-  onGenerateShoppingList?: () => void;
+  onDelete: () => void;
+  onGenerateShoppingList: () => void;
+  isDeleting?: boolean;
   className?: string;
 }
 
-const BatchActionToolbar = ({
+const BatchActionToolbar: React.FC<BatchActionToolbarProps> = ({
   selectedCount,
   totalCount,
   isSelectionMode,
@@ -23,8 +32,9 @@ const BatchActionToolbar = ({
   onSelectAll,
   onDelete,
   onGenerateShoppingList,
+  isDeleting = false,
   className,
-}: BatchActionToolbarProps) => {
+}) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
 
   if (!isSelectionMode) {
@@ -48,7 +58,7 @@ const BatchActionToolbar = ({
       <div
         className={cn(
           "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-background border rounded-lg shadow-lg p-3 sm:p-4 max-w-[calc(100vw-2rem)]",
-          className
+          className,
         )}
       >
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
@@ -84,12 +94,16 @@ const BatchActionToolbar = ({
             <Button
               variant="destructive"
               size="sm"
-              onClick={handleDeleteClick}
-              className="h-7 sm:h-8 text-xs flex-1 sm:flex-none"
-              disabled={!onDelete || selectedCount === 0}
+              onClick={onDelete}
+              disabled={selectedCount === 0 || isDeleting}
+              className="flex-1 sm:flex-none"
             >
-              <span className="hidden sm:inline">删除</span>
-              <span className="sm:hidden">删除</span>
+              {isDeleting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4 mr-2" />
+              )}
+              删除 {selectedCount > 0 ? `(${selectedCount})` : ""}
             </Button>
           </div>
 
@@ -122,4 +136,4 @@ const BatchActionToolbar = ({
   );
 };
 
-export default BatchActionToolbar; 
+export default BatchActionToolbar;

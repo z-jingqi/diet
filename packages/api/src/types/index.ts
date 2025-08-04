@@ -109,4 +109,4 @@ export interface UpdateChatSessionRequest {
   title?: string;
   messages?: string;
   tagIds?: string[] | null;
-} 
+}

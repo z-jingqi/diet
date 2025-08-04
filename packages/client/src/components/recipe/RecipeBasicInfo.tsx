@@ -12,7 +12,11 @@ interface RecipeBasicInfoProps {
   totalTime: string;
 }
 
-const RecipeBasicInfo = ({ isLoading, recipe, totalTime }: RecipeBasicInfoProps) => {
+const RecipeBasicInfo = ({
+  isLoading,
+  recipe,
+  totalTime,
+}: RecipeBasicInfoProps) => {
   const difficultyLabel = () => {
     if (!recipe?.difficulty) return "未知";
     switch (recipe.difficulty) {
@@ -36,7 +40,11 @@ const RecipeBasicInfo = ({ isLoading, recipe, totalTime }: RecipeBasicInfoProps)
           份量
         </Typography>
         <Typography variant="span" className="text-sm font-medium">
-          {isLoading ? <Skeleton className="h-4 w-16" /> : `${recipe?.servings ?? 2}人份`}
+          {isLoading ? (
+            <Skeleton className="h-4 w-16" />
+          ) : (
+            `${recipe?.servings ?? 2}人份`
+          )}
         </Typography>
       </div>
 
@@ -82,4 +90,4 @@ const RecipeBasicInfo = ({ isLoading, recipe, totalTime }: RecipeBasicInfoProps)
   );
 };
 
-export default RecipeBasicInfo; 
+export default RecipeBasicInfo;

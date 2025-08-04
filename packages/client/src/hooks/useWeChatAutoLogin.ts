@@ -54,7 +54,11 @@ const useWeChatAutoLogin = () => {
     setAttempted(false);
   };
 
-  return { wechatAutoLoginLoading: loading, wechatAutoLoginError: error, retryWechatLogin: retryLogin };
+  return {
+    wechatAutoLoginLoading: loading,
+    wechatAutoLoginError: error,
+    retryWechatLogin: retryLogin,
+  };
 };
 
-export default useWeChatAutoLogin; 
+export default useWeChatAutoLogin;

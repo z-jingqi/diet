@@ -10,7 +10,7 @@ export type ConfirmOptions = Omit<
 
 // context类型：传递confirm方法
 export type ConfirmDialogContextType = (
-  options: ConfirmOptions
+  options: ConfirmOptions,
 ) => Promise<boolean>;
 
 const ConfirmDialogContext = createContext<
@@ -67,7 +67,7 @@ export const useConfirmDialog = () => {
   const ctx = useContext(ConfirmDialogContext);
   if (!ctx)
     throw new Error(
-      "useConfirmDialog must be used within ConfirmDialogProvider"
+      "useConfirmDialog must be used within ConfirmDialogProvider",
     );
   return ctx;
 };

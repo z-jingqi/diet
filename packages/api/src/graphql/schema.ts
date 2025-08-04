@@ -1,14 +1,14 @@
-import { builder } from './builder';
-import './types/tags';
-import './types/chat';
-import './types/auth';
-import './types/recipe';
+import { builder } from "./builder";
+import "./types/tags";
+import "./types/chat";
+import "./types/auth";
+import "./types/recipe";
 
 // 定义根查询类型
 builder.queryType({
   fields: (t) => ({
     hello: t.string({
-      resolve: () => 'Hello GraphQL from Pothos!',
+      resolve: () => "Hello GraphQL from Pothos!",
     }),
   }),
 });
@@ -21,4 +21,4 @@ builder.mutationType({
 });
 
 // 导出 GraphQL Schema
-export const schema = builder.toSchema(); 
+export const schema = builder.toSchema();

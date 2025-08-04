@@ -50,4 +50,4 @@ export const HEALTH_ADVICE_CHAT_PROMPT = `
 - 注意建议的可行性和实用性
 - 如果有禁忌或注意事项，要明确说明
 - 直接返回markdown内容，不要用代码块包装
-`; 
+`;

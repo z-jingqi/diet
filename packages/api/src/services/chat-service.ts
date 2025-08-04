@@ -17,7 +17,10 @@ export class ChatService {
       .select()
       .from(chat_sessions)
       .where(
-        and(eq(chat_sessions.user_id, userId), isNull(chat_sessions.deleted_at))
+        and(
+          eq(chat_sessions.user_id, userId),
+          isNull(chat_sessions.deleted_at),
+        ),
       )
       .orderBy(chat_sessions.updated_at);
   }
@@ -36,13 +39,16 @@ export class ChatService {
       .select()
       .from(chat_sessions)
       .where(
-        and(eq(chat_sessions.user_id, userId), isNull(chat_sessions.deleted_at))
+        and(
+          eq(chat_sessions.user_id, userId),
+          isNull(chat_sessions.deleted_at),
+        ),
       )
       .orderBy(chat_sessions.updated_at);
   }
 
   async createChatSession(
-    data: CreateChatSessionRequest
+    data: CreateChatSessionRequest,
   ): Promise<ChatSessionModel> {
     const { generateId } = await import("../utils/id");
     const id = generateId();
@@ -66,7 +72,7 @@ export class ChatService {
 
   async updateChatSession(
     id: string,
-    data: UpdateChatSessionRequest
+    data: UpdateChatSessionRequest,
   ): Promise<ChatSessionModel | null> {
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;

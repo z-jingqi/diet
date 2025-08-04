@@ -29,7 +29,7 @@ export const graphqlClient = new GraphQLClient(GRAPHQL_ENDPOINT, {
 // 类型安全的查询函数
 export async function query<T extends keyof Query>(
   query: string,
-  variables?: any
+  variables?: any,
 ): Promise<Query[T]> {
   return graphqlClient.request<Query[T]>(query, variables);
 }
@@ -37,7 +37,7 @@ export async function query<T extends keyof Query>(
 // 类型安全的变更函数
 export async function mutate<T extends keyof Mutation>(
   mutation: string,
-  variables?: any
+  variables?: any,
 ): Promise<Mutation[T]> {
   return graphqlClient.request<Mutation[T]>(mutation, variables);
 }

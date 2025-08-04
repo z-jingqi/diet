@@ -81,7 +81,7 @@ builder.objectField(TagCategoryRef, "tags", (t) =>
         .where(eq(tags.category_id, parent.id))
         .orderBy(asc(tags.sort_order), asc(tags.name));
     },
-  })
+  }),
 );
 
 // ----------------------
@@ -115,7 +115,7 @@ builder.objectField(TagConflictRef, "tag1", (t) =>
         .limit(1);
       return tag ?? null;
     },
-  })
+  }),
 );
 
 builder.objectField(TagConflictRef, "tag2", (t) =>
@@ -129,7 +129,7 @@ builder.objectField(TagConflictRef, "tag2", (t) =>
         .limit(1);
       return tag ?? null;
     },
-  })
+  }),
 );
 
 // ----------------------

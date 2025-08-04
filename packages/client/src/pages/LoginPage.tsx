@@ -27,7 +27,8 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { login, enableGuest, isLoading, clearError, isAuthenticated } = useAuth();
+  const { login, enableGuest, isLoading, clearError, isAuthenticated } =
+    useAuth();
 
   // 若在小程序且已登录，则直接跳转首页
   useEffect(() => {

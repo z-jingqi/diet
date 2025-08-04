@@ -27,17 +27,25 @@ const RecipeNutrients = ({ nutrients }: RecipeNutrientsProps) => {
 
       <div className="bg-muted/20 rounded-lg p-3 flex flex-wrap gap-2 sm:gap-3">
         {Object.entries(nutrients).map(([key, value]) => {
-          const meta = nutrientMeta[key] ?? { label: key } as any;
-          const displayLabel = meta.unit ? `${meta.label} (${meta.unit})` : meta.label;
+          const meta = nutrientMeta[key] ?? ({ label: key } as any);
+          const displayLabel = meta.unit
+            ? `${meta.label} (${meta.unit})`
+            : meta.label;
           return (
             <div
               key={key}
               className="flex flex-col items-center justify-center px-3 py-2 sm:px-4 sm:py-3 bg-background rounded-lg border border-muted/30 min-w-[72px]"
             >
-              <Typography variant="span" className="text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap">
+              <Typography
+                variant="span"
+                className="text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap"
+              >
                 {displayLabel}
               </Typography>
-              <Typography variant="p" className="text-base sm:text-lg font-bold leading-none">
+              <Typography
+                variant="p"
+                className="text-base sm:text-lg font-bold leading-none"
+              >
                 {String(value)}
               </Typography>
             </div>
@@ -48,4 +56,4 @@ const RecipeNutrients = ({ nutrients }: RecipeNutrientsProps) => {
   );
 };
 
-export default RecipeNutrients; 
+export default RecipeNutrients;

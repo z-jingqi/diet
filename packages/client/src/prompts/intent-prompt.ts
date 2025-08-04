@@ -34,4 +34,4 @@ export const INTENT_PROMPT = `
 {
   "intent": "chat|recipe|health_advice"
 }
-`; 
+`;

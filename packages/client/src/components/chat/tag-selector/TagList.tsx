@@ -32,18 +32,18 @@ const TagList = memo(
     // 使用 useMemo 优化 selectedTagIds 的计算，过滤掉空值
     const selectedTagIds = useMemo(
       () => new Set(selectedTags.map((tag) => tag.id).filter(Boolean)),
-      [selectedTags]
+      [selectedTags],
     );
 
     // 使用 useMemo 优化 disabledTagIds 和 warningTagIds 的 Set，过滤掉空值
     const disabledTagIdsSet = useMemo(
       () => new Set(disabledTagIds.filter(Boolean)),
-      [disabledTagIds]
+      [disabledTagIds],
     );
 
     const warningTagIdsSet = useMemo(
       () => new Set(warningTagIds.filter(Boolean)),
-      [warningTagIds]
+      [warningTagIds],
     );
 
     // For debugging - remove after fix
@@ -85,7 +85,7 @@ const TagList = memo(
                         isWarning &&
                           !isSelected &&
                           "border-orange-300 text-orange-700",
-                        !isSelected && !isDisabled && "hover:bg-muted"
+                        !isSelected && !isDisabled && "hover:bg-muted",
                       )}
                       onClick={() => {
                         if (isDisabled) {
@@ -111,7 +111,7 @@ const TagList = memo(
         ))}
       </>
     );
-  }
+  },
 );
 
 TagList.displayName = "TagList";

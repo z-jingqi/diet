@@ -21,13 +21,13 @@ const SelectedTagsDisplay = memo(
     // 使用 useMemo 优化 warningTagIds 的 Set，并过滤掉空值
     const warningTagIdsSet = useMemo(
       () => new Set(warningTagIds.filter(Boolean)),
-      [warningTagIds]
+      [warningTagIds],
     );
 
     // 过滤掉没有ID的标签
-    const validTags = useMemo(() => 
-      selectedTags.filter(tag => Boolean(tag.id)),
-      [selectedTags]
+    const validTags = useMemo(
+      () => selectedTags.filter((tag) => Boolean(tag.id)),
+      [selectedTags],
     );
 
     if (validTags.length === 0) {
@@ -46,7 +46,7 @@ const SelectedTagsDisplay = memo(
               variant={isWarning ? "destructive" : "secondary"}
               className={cn(
                 "flex items-center gap-1 px-2 py-1",
-                isWarning && "bg-orange-100 text-orange-800 border-orange-200"
+                isWarning && "bg-orange-100 text-orange-800 border-orange-200",
               )}
             >
               {isWarning && <AlertTriangle className="w-3 h-3" />}
@@ -56,7 +56,7 @@ const SelectedTagsDisplay = memo(
                 onClick={() => onRemoveTag(tagId)}
                 className={cn(
                   "ml-1 transition-colors",
-                  !disabled && "hover:text-red-500"
+                  !disabled && "hover:text-red-500",
                 )}
               >
                 <X className="w-3 h-3" />
@@ -66,7 +66,7 @@ const SelectedTagsDisplay = memo(
         })}
       </div>
     );
-  }
+  },
 );
 
 SelectedTagsDisplay.displayName = "SelectedTagsDisplay";

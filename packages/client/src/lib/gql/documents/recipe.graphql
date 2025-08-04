@@ -102,10 +102,14 @@ mutation DeleteRecipe($id: ID!) {
 mutation SetRecipePreference($input: RecipePreferenceInput!) {
   setRecipePreference(input: $input) {
     id
-    recipeId
     recipeName
     preference
   }
+}
+
+# 移除菜谱喜好
+mutation RemoveRecipePreference($recipeId: ID!) {
+  removeRecipePreference(recipeId: $recipeId)
 }
 
 # 生成菜谱详情
@@ -113,4 +117,14 @@ mutation GenerateRecipe($input: RecipeGenerateInput!) {
   generateRecipe(input: $input) {
     ...RecipeFields
   }
+}
+
+query RecipesByIds($ids: [ID!]!) {
+  recipesByIds(ids: $ids) {
+    ...RecipeFields
+  }
+}
+
+mutation DeleteRecipes($ids: [ID!]!) {
+  deleteRecipes(ids: $ids)
 } 

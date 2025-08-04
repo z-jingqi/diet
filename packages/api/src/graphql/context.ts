@@ -30,7 +30,7 @@ function extractSessionToken(headers: Headers): string | null {
 
 async function validateSessionToken(
   db: DB,
-  sessionToken: string
+  sessionToken: string,
 ): Promise<AuthContext | null> {
   try {
     const [session] = await db
@@ -82,7 +82,7 @@ async function validateSessionToken(
 export async function createGraphQLContext(
   db: DB,
   headers: Headers,
-  env: Bindings
+  env: Bindings,
 ): Promise<GraphQLContext> {
   const sessionToken = extractSessionToken(headers);
 

@@ -42,7 +42,7 @@ export const createUserMessageV2 = (content: string): ChatMessage => {
  * Create a new AI message
  */
 export const createAIMessageV2 = (
-  type: MessageType = MessageType.Chat
+  type: MessageType = MessageType.Chat,
 ): ChatMessage => {
   return {
     id: nanoid(),
@@ -58,7 +58,7 @@ export const createAIMessageV2 = (
  * Convert chat messages to OpenAI format
  */
 export const toAIMessagesV2 = (
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ): ChatCompletionMessageParam[] => {
   return messages.map((msg) => ({
     role: msg.role as MessageRole,
@@ -70,7 +70,7 @@ export const toAIMessagesV2 = (
  * Create a new empty chat session
  */
 export const createEmptyChatSessionV2 = (
-  id: string = nanoid()
+  id: string = nanoid(),
 ): ChatSession => {
   const now = new Date().toISOString();
   return {
@@ -95,7 +95,7 @@ export const isMessageStreamingV2 = (message: ChatMessage): boolean => {
  */
 export const canSendMessageV2 = (
   messages: ChatMessage[],
-  gettingIntent: boolean
+  gettingIntent: boolean,
 ): boolean => {
   if (gettingIntent) {
     return false;

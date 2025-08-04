@@ -48,7 +48,7 @@ const RecipeSortButton = ({
       className={cn(
         "flex items-center gap-1 px-2 py-1 h-7 text-xs font-medium transition-all duration-200 flex-shrink-0",
         direction !== "default" && "bg-primary text-primary-foreground",
-        className
+        className,
       )}
     >
       <Icon className="h-3 w-3" />
@@ -60,4 +60,4 @@ const RecipeSortButton = ({
   );
 };
 
-export default RecipeSortButton; 
+export default RecipeSortButton;
