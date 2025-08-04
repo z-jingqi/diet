@@ -213,7 +213,8 @@ const ShoppingListPage = () => {
             window.history.back();
           }}
         >
-          <ChevronLeft className="w-4 h-4 mr-1" /> 返回
+          <ChevronLeft className="h-4 w-4" />
+          购物清单
         </Button>
 
         <Button
