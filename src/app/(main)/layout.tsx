@@ -1,8 +1,12 @@
 import Link from "next/link";
 
-export default function Home() {
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-between p-4 border-b">
         <Link href="/" className="text-2xl font-bold">
           DietAI
@@ -19,13 +23,8 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center text-center p-4">
-        <h1 className="text-5xl font-extrabold tracking-tight mb-4">
-          Your Personal AI Chef
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Tell us what ingredients you have, and we'll generate a delicious recipe for you in seconds.
-        </p>
+      <main className="flex-1 flex flex-col">
+        {children}
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 md:hidden bg-background border-t">
