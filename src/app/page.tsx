@@ -24,7 +24,7 @@ export default function Home() {
           Your Personal AI Chef
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Tell us what ingredients you have, and we'll generate a delicious recipe for you in seconds.
+          Tell us what ingredients you have, and we&apos;ll generate a delicious recipe for you in seconds.
         </p>
       </main>
 
