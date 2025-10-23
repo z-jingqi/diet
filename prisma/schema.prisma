@@ -45,27 +45,34 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?          @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   conversations Conversation[]
+  favorites     RecipeFavorite[]
 }
 
 // ================================================= //
 //                 APPLICATION MODELS                //
 // ================================================= //
 
+enum RecipeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model Conversation {
-  id        String     @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
 }
 
@@ -74,6 +81,39 @@ model Message {
   content        String
   role           String // "user" or "assistant"
   createdAt      DateTime     @default(now())
+  metadata       Json?
   conversationId String
+  recipeId       String?      @unique
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  recipe         Recipe?      @relation("MessageRecipe", fields: [recipeId], references: [id], onDelete: SetNull)
+}
+
+model Recipe {
+  id              String            @id @default(cuid())
+  title           String
+  description     String?
+  ingredients     Json?
+  steps           Json?
+  prepTimeMinutes Int?
+  cookTimeMinutes Int?
+  servings        Int?
+  difficulty      RecipeDifficulty?
+  tags            Json?
+  sourceUrl       String?
+  favoriteCount   Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  message         Message?          @relation("MessageRecipe")
+  favorites       RecipeFavorite[]
+}
+
+model RecipeFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
 }

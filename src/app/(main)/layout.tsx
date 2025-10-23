@@ -8,12 +8,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between p-4 border-b">
+    <div className="flex min-h-screen flex-col">
+      <header className="flex items-center justify-between border-b p-4">
         <Link href="/" className="text-2xl font-bold">
           DietAI
         </Link>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden items-center gap-6 md:flex">
           <Link href="/chat">Chat</Link>
           <Link href="/cookbook">Cookbook</Link>
           <UserButton />
@@ -23,9 +23,9 @@ export default function MainLayout({
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col pb-16 md:pb-0">{children}</main>
+      <main className="flex flex-1 flex-col pb-16 md:pb-0">{children}</main>
 
-      <footer className="fixed bottom-0 left-0 right-0 md:hidden bg-background border-t">
+      <footer className="fixed bottom-0 left-0 right-0 border-t bg-background md:hidden">
         <nav className="flex items-center justify-around p-2">
           <Link href="/chat" className="flex flex-col items-center gap-1">
             <MessageSquare size={20} />
