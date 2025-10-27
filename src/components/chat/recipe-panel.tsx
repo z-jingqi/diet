@@ -12,10 +12,12 @@ export type RecipePanelProps = {
 
 export function RecipePanel({ recipe, onClose }: RecipePanelProps) {
   return (
-    <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden border-l bg-muted/20 p-4">
+    <section className="flex flex-1 flex-col overflow-hidden border-l bg-muted/20 p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <TypographyP className="text-lg font-semibold">{recipe.title}</TypographyP>
+          <TypographyP className="text-lg font-semibold">
+            {recipe.title}
+          </TypographyP>
           {recipe.description && (
             <TypographyMuted className="mt-2 text-sm leading-relaxed">
               {recipe.description}
@@ -45,9 +47,7 @@ export function RecipePanel({ recipe, onClose }: RecipePanelProps) {
         {typeof recipe.cookTimeMinutes === "number" && (
           <span>Cook: {recipe.cookTimeMinutes} min</span>
         )}
-        {recipe.difficulty && (
-          <span>Difficulty: {recipe.difficulty}</span>
-        )}
+        {recipe.difficulty && <span>Difficulty: {recipe.difficulty}</span>}
       </div>
 
       <div className="mt-6 flex-1 space-y-6 overflow-y-auto">
@@ -64,7 +64,9 @@ export function RecipePanel({ recipe, onClose }: RecipePanelProps) {
                     {item.unit ? `${item.unit} ` : ""}
                     {item.name}
                   </span>
-                  {item.notes && <span className="text-xs italic">{item.notes}</span>}
+                  {item.notes && (
+                    <span className="text-xs italic">{item.notes}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -83,13 +85,16 @@ export function RecipePanel({ recipe, onClose }: RecipePanelProps) {
                 .map((step) => (
                   <li key={step.order} className="space-y-1">
                     <div>
-                      <span className="font-semibold">Step {step.order}:</span> {step.instruction}
+                      <span className="font-semibold">Step {step.order}:</span>{" "}
+                      {step.instruction}
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs">
                       {typeof step.durationMinutes === "number" && (
                         <span>~{step.durationMinutes} min</span>
                       )}
-                      {step.temperature && <span>Heat: {step.temperature}</span>}
+                      {step.temperature && (
+                        <span>Heat: {step.temperature}</span>
+                      )}
                       {step.tools && step.tools.length > 0 && (
                         <span>Tools: {step.tools.join(", ")}</span>
                       )}

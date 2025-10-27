@@ -2,6 +2,14 @@ import type { Recipe } from "./recipe";
 
 export type ChatRole = "user" | "assistant";
 
+export type ChatMessageMetadata = {
+  intent?: "generate_recipe" | "follow_up" | "unknown";
+  hasRecipe?: boolean;
+  modelName?: string;
+  responseTimeMs?: number;
+  [key: string]: unknown;
+};
+
 export type ChatMessage = {
   id: string;
   conversationId?: string;
@@ -11,7 +19,7 @@ export type ChatMessage = {
   recipe?: Recipe;
   createdAt?: Date;
   updatedAt?: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: ChatMessageMetadata;
 };
 
 export type ChatHistoryItem = {
