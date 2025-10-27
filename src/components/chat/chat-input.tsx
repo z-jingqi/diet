@@ -1,34 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import type { FormEvent, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 
 export type ChatInputProps = {
-  onSend: (value: string) => void;
-  placeholder?: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   disabled?: boolean;
 };
 
-export function ChatInput({ onSend, placeholder = "Type your ingredients or ask a question...", disabled }: ChatInputProps) {
-  const [value, setValue] = useState("");
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!value.trim()) {
-      return;
-    }
-    onSend(value.trim());
-    setValue("");
-  };
-
+export function ChatInput({ value, onChange, onSubmit, disabled }: ChatInputProps) {
   return (
-    <form onSubmit={handleSubmit} className="relative mx-auto flex w-full max-w-3xl items-center">
+    <form onSubmit={onSubmit} className="relative mx-auto flex w-full max-w-3xl items-center">
       <Textarea
         value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder={placeholder}
+        onChange={onChange}
+        placeholder="Type your ingredients or ask a question..."
         disabled={disabled}
         className="min-h-[3rem] resize-none pr-14"
       />

@@ -1,14 +1,19 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ChatMessage } from "@/types/chat";
+import { useChat } from "@ai-sdk/react";
+import type { ChatMessageMetadata } from "@/types/chat";
 import type { Recipe } from "@/types/recipe";
-import { TypographyH1, TypographyMuted, TypographyP } from "@/components/ui/typography";
+import {
+  TypographyH1,
+  TypographyMuted,
+  TypographyP,
+} from "@/components/ui/typography";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
-import { mockChatMessages } from "@/mocks/chat";
+import type { UIMessage } from "ai";
 
 export type ChatInterfaceProps = {
   onRecipeSelect?: (recipe: Recipe | undefined) => void;
@@ -17,38 +22,55 @@ export type ChatInterfaceProps = {
 export function ChatInterface({ onRecipeSelect }: ChatInterfaceProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+
+  const { messages, status, error, sendMessage, clearError } = useChat({});
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  const welcomeMessages = useMemo(
+    () => [
+      "Suggest a high-protein vegan meal",
+      "What can I make with chicken and rice?",
+      "Quick 15-minute dinner ideas",
+    ],
+    []
   );
 
-  const messages = useMemo<ChatMessage[]>(() => mockChatMessages, []);
+  const handleMessageSelect = (message: UIMessage) => {
+    const metadata =
+      (message.metadata as ChatMessageMetadata | undefined) ?? {};
+    const recipe = metadata.recipe as Recipe | undefined;
 
-  const welcomeMessages = [
-    "Suggest a high-protein vegan meal",
-    "What can I make with chicken and rice?",
-    "Quick 15-minute dinner ideas",
-  ];
+    if (!recipe) {
+      return;
+    }
 
-  const handleMessageSelect = useCallback(
-    (message: ChatMessage) => {
-      if (!message.recipe) {
-        return;
-      }
+    if (isMobile) {
+      router.push("/chat/recipe");
+      return;
+    }
 
-      if (isMobile) {
-        router.push("/chat/recipe");
-        return;
-      }
+    setActiveMessageId(message.id);
+    onRecipeSelect?.(recipe);
+  };
 
-      setSelectedMessageId(message.id);
-      onRecipeSelect?.(message.recipe);
-    },
-    [isMobile, onRecipeSelect, router]
-  );
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = input.trim();
 
-  const handleSendMessage = useCallback((value: string) => {
-    console.log("Send message", value);
-  }, []);
+    if (!trimmed) {
+      return;
+    }
+
+    if (error) {
+      clearError();
+    }
+
+    sendMessage({ text: trimmed });
+    setInput("");
+  };
 
   const hasMessages = messages.length > 0;
 
@@ -56,8 +78,9 @@ export function ChatInterface({ onRecipeSelect }: ChatInterfaceProps) {
     <div className="flex w-full flex-col">
       {hasMessages ? (
         <ChatMessageList
+          chatStatus={status}
           messages={messages}
-          activeMessageId={selectedMessageId}
+          activeMessageId={activeMessageId}
           onSelectMessage={handleMessageSelect}
         />
       ) : (
@@ -86,7 +109,12 @@ export function ChatInterface({ onRecipeSelect }: ChatInterfaceProps) {
       )}
 
       <footer className="border-t bg-background p-4">
-        <ChatInput onSend={handleSendMessage} />
+        <ChatInput
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          onSubmit={handleSubmit}
+          disabled={isLoading}
+        />
       </footer>
     </div>
   );

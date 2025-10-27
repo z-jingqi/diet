@@ -29,7 +29,8 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          geistSans.variable
+          geistSans.variable,
+          geistMono.variable
         )}
       >
         <AuthProvider>{children}</AuthProvider>

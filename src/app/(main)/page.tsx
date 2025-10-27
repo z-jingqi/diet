@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { TypographyH1, TypographyLead } from "@/components/ui/typography";
 
 export default function Home() {

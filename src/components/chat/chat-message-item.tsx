@@ -1,18 +1,26 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { TypographyMuted, TypographyP } from "@/components/ui/typography";
-import type { ChatMessage } from "@/types/chat";
+import { TypographyMuted } from "@/components/ui/typography";
+import type { ChatStatus, UIMessage } from "ai";
+import type { ChatMessageMetadata } from "@/types/chat";
+import { Streamdown } from "streamdown";
 
 export type ChatMessageItemProps = {
-  message: ChatMessage;
+  message: UIMessage;
   isActive?: boolean;
-  onSelect?: (message: ChatMessage) => void;
+  chatStatus: ChatStatus;
+  onSelect?: (message: UIMessage) => void;
 };
 
-export function ChatMessageItem({ message, isActive, onSelect }: ChatMessageItemProps) {
+export function ChatMessageItem({
+  message,
+  isActive,
+  onSelect,
+}: ChatMessageItemProps) {
   const isUser = message.role === "user";
-  const hasRecipe = Boolean(message.recipeId || message.recipe || message.metadata?.hasRecipe);
+  const metadata = (message.metadata as ChatMessageMetadata | undefined) ?? {};
+  const hasRecipe = Boolean(metadata.hasRecipe || metadata.recipe);
 
   return (
     <div
@@ -31,9 +39,13 @@ export function ChatMessageItem({ message, isActive, onSelect }: ChatMessageItem
           isActive ? "ring-2 ring-primary" : "ring-0"
         )}
       >
-        <TypographyP className="text-sm leading-relaxed md:text-base">
-          {message.content}
-        </TypographyP>
+        {message.parts
+          .filter((part) => part.type === "text")
+          .map((part, index) => (
+            <Streamdown isAnimating={status === "streaming"} key={index}>
+              {part.text}
+            </Streamdown>
+          ))}
         {hasRecipe && (
           <TypographyMuted className="mt-2 text-xs">
             Tap to view recipe details
