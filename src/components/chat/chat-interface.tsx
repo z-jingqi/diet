@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useChat } from "@ai-sdk/react";
 import type { ChatMessageMetadata } from "@/types/chat";
 import type { Recipe } from "@/types/recipe";
@@ -14,20 +15,74 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatInput } from "./chat-input";
 import type { UIMessage } from "ai";
+import { useConversation } from "@/hooks/use-conversations";
+import { prismaMessageToUIMessage } from "@/lib/db/message-converter";
 
 export type ChatInterfaceProps = {
+  conversationId?: string;
   onRecipeSelect?: (recipe: Recipe | undefined) => void;
 };
 
-export function ChatInterface({ onRecipeSelect }: ChatInterfaceProps) {
+export function ChatInterface({ conversationId, onRecipeSelect }: ChatInterfaceProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [input, setInput] = useState("");
 
-  const { messages, status, error, sendMessage, clearError } = useChat({});
+  const isAuthenticated = sessionStatus === "authenticated";
+
+  // Only use conversation hooks if user is authenticated
+  const { conversation, saveMessages } = useConversation(
+    isAuthenticated ? (conversationId ?? null) : null
+  );
+
+  const { messages, status, error, sendMessage, clearError, setMessages } = useChat({});
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  // Load conversation messages when conversation changes (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // If not authenticated, don't load from DB
+      return;
+    }
+
+    if (conversation?.messages) {
+      const uiMessages = conversation.messages.map((msg) =>
+        prismaMessageToUIMessage(msg)
+      );
+      setMessages(uiMessages as UIMessage[]);
+    } else {
+      // Only clear messages if we explicitly have no conversation
+      if (conversationId === undefined) {
+        setMessages([]);
+      }
+    }
+  }, [conversation, conversationId, setMessages, isAuthenticated]);
+
+  // Auto-save messages when AI finishes streaming (only if authenticated)
+  useEffect(() => {
+    // Only save if user is authenticated and has a conversation ID
+    if (!isAuthenticated || !conversationId) {
+      return;
+    }
+
+    if (status === "ready" && messages.length > 0) {
+      // Get the new messages that need to be saved (not in DB yet)
+      const dbMessageIds = new Set(
+        conversation?.messages.map((m) => m.id) ?? []
+      );
+      const newMessages = messages.filter((m) => !dbMessageIds.has(m.id));
+
+      if (newMessages.length > 0) {
+        // Save messages (type is compatible with ChatMessage via UIMessage)
+        saveMessages(conversationId, newMessages).catch((err) => {
+          console.error("Failed to save messages:", err);
+        });
+      }
+    }
+  }, [status, conversationId, messages, conversation, saveMessages, isAuthenticated]);
 
   const welcomeMessages = useMemo(
     () => [

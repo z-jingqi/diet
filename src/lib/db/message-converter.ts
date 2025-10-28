@@ -8,9 +8,10 @@ import type { ChatMessageMetadata } from "@/types/chat";
 
 /**
  * Convert Prisma Message to UIMessage
+ * Accepts either a PrismaMessage or a message-like object from API
  */
 export function prismaMessageToUIMessage(
-  message: PrismaMessage
+  message: Pick<PrismaMessage, "id" | "role" | "parts" | "metadata">
 ): UIMessage<ChatMessageMetadata> {
   return {
     id: message.id,
