@@ -26,7 +26,7 @@ export type ChatInterfaceProps = {
 export function ChatInterface({ conversationId, onRecipeSelect }: ChatInterfaceProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [input, setInput] = useState("");
 

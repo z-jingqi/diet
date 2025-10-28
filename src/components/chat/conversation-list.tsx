@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Loader2, LogIn } from "lucide-react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,7 +22,7 @@ export function ConversationList({
   onSelectConversation,
   className,
 }: ConversationListProps) {
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
   const isAuthenticated = sessionStatus === "authenticated";
 
   const {
@@ -83,10 +83,10 @@ export function ConversationList({
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => signIn("github")}
+              onClick={() => (window.location.href = "/login")}
             >
               <LogIn className="mr-2 h-4 w-4" />
-              使用 GitHub 登录
+              登录
             </Button>
           </div>
         ) : (
