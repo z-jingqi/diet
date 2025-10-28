@@ -49,14 +49,19 @@ export const mockChatMessages: ChatMessage[] = [
     id: "assistant-1",
     conversationId: "conversation-1",
     role: "assistant",
-    content: "Hello! What ingredients do you have today?",
+    parts: [{ type: "text", text: "Hello! What ingredients do you have today?" }],
     createdAt: new Date("2025-01-01T10:00:00Z"),
   },
   {
     id: "user-1",
     conversationId: "conversation-1",
     role: "user",
-    content: "I have some chicken breast, broccoli, and soy sauce.",
+    parts: [
+      {
+        type: "text",
+        text: "I have some chicken breast, broccoli, and soy sauce.",
+      },
+    ],
     createdAt: new Date("2025-01-01T10:00:15Z"),
     metadata: { intent: "generate_recipe" },
   },
@@ -64,7 +69,9 @@ export const mockChatMessages: ChatMessage[] = [
     id: "assistant-2",
     conversationId: "conversation-1",
     role: "assistant",
-    content: "Great! Here's a quick stir-fry recipe you can try.",
+    parts: [
+      { type: "text", text: "Great! Here's a quick stir-fry recipe you can try." },
+    ],
     recipeId: "recipe-1",
     recipe: mockRecipe,
     createdAt: new Date("2025-01-01T10:00:20Z"),

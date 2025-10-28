@@ -1,0 +1,13 @@
+name = "dietai-chat"
+main = "workers/chat.ts"
+compatibility_date = "2025-10-28"
+
+[vars]
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_DEFAULT_MODEL = "openai/gpt-oss-20b:free"
+OPENROUTER_RECIPE_MODEL = "minimax/minimax-m2:free"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dietai"
+database_id = ""

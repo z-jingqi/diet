@@ -1,6 +1,7 @@
 import type { Recipe } from "./recipe";
+import type { UIMessage } from "ai";
 
-export type ChatRole = "user" | "assistant";
+export type ChatRole = "system" | "user" | "assistant";
 
 export type ChatMessageMetadata = {
   intent?: "generate_recipe" | "follow_up" | "unknown";
@@ -10,16 +11,12 @@ export type ChatMessageMetadata = {
   [key: string]: unknown;
 };
 
-export type ChatMessage = {
-  id: string;
+// This type now aligns with Vercel AI SDK's UIMessage structure
+export type ChatMessage = UIMessage<ChatMessageMetadata> & {
   conversationId?: string;
-  role: ChatRole;
-  content: string;
   recipeId?: string;
   recipe?: Recipe;
   createdAt?: Date;
-  updatedAt?: Date;
-  metadata?: ChatMessageMetadata;
 };
 
 export type ChatHistoryItem = {

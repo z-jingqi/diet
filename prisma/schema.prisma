@@ -78,10 +78,10 @@ model Conversation {
 
 model Message {
   id             String       @id @default(cuid())
-  content        String
-  role           String // "user" or "assistant"
+  role           String       // "system", "user", or "assistant"
+  parts          Json         // Array of UIMessagePart (text, reasoning, tool, file, etc.)
+  metadata       Json?        // Optional metadata (intent, hasRecipe, modelName, etc.)
   createdAt      DateTime     @default(now())
-  metadata       Json?
   conversationId String
   recipeId       String?      @unique
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
